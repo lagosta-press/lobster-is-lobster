@@ -1,0 +1,2904 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Language Game</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #ffffff;
+    color: #171a21;
+    min-height: 100vh;
+  }
+  @media (max-width: 700px) {
+    /* desktop-only: o mobile usa .mobile-game em tela cheia no lugar disso */
+    .wrap, #scrollSpacer, .bottom-panel {
+      display: none !important;
+    }
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 40px 100px;
+    transition: padding-top 0.2s ease;
+  }
+  body.playing .wrap {
+    padding-top: 130px;
+  }
+  @media (max-width: 700px) {
+    body.playing .wrap {
+      padding-top: 190px; /* clock + rótulo de nível precisam de mais respiro numa tela estreita */
+    }
+  }
+  .flow {
+    font-size: clamp(2.1rem, 5.2vw, 4.37rem);
+    line-height: 1.05;
+    font-weight: 100;
+  }
+  @media (max-width: 700px) {
+    .flow {
+      font-size: 1.55rem;
+      line-height: 1.25;
+    }
+  }
+  .line {
+    margin-bottom: 6px;
+  }
+  .word {
+    font-weight: 100;
+  }
+  /* peso 100 fica ilegível em scripts não-latinos (CJK, árabe, devanágari...)
+     a esse tamanho — sobe um pouco só pra esses casos, sem mudar a
+     aparência do texto em alfabeto latino. Classe aplicada via JS. */
+  .word.non-latin {
+    font-weight: 400;
+  }
+  .lang-correct.non-latin {
+    font-weight: 500;
+  }
+  .lang-correct {
+    font-weight: 400;
+  }
+  .skip-hint {
+    font-size: 0.9rem;
+    color: #c7cbd1;
+    font-weight: 400;
+    margin-left: 0.3em;
+  }
+  .geo-hint {
+    font-size: 0.9rem;
+    color: #3474D3;
+    font-weight: 400;
+    margin-left: 0.3em;
+  }
+  .lang-wrong {
+    text-decoration: line-through;
+    color: #9aa1ac;
+    margin-right: 0.3em;
+    transition: opacity 0.45s ease, margin 0.45s ease, max-width 0.45s ease;
+    display: inline-block;
+  }
+  .lang-wrong.fade-out {
+    opacity: 0;
+  }
+  .blank-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .blank {
+    outline: none;
+    display: inline-block;
+  }
+  .cursor {
+    color: #000000;
+    animation: blink 1s step-start infinite;
+  }
+  .hidden-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    border: none;
+    padding: 0;
+    margin: 0;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  .done-msg {
+    margin-top: 40px;
+    font-size: 1.3rem;
+    color: #9aa1ac;
+    font-weight: 400;
+  }
+  .mobile-hidden-input {
+    position: fixed;
+    opacity: 0;
+    height: 1px;
+    width: 1px;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    border: none;
+  }
+  .mobile-game {
+    display: none;
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    background: #ffffff;
+    z-index: 30;
+  }
+  .mobile-game.active {
+    display: flex;
+  }
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+  }
+  .mobile-clock {
+    font-size: 1.7rem;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    color: #171a21;
+    line-height: 1;
+    opacity: 0;
+    transition: color 0.3s ease;
+  }
+  .mobile-clock.visible { opacity: 1; }
+  .mobile-clock.urgent {
+    color: #B44B69;
+    animation: clockPulse 1s ease-in-out infinite;
+  }
+  .mobile-menu-btn {
+    font-size: 1.5rem;
+    line-height: 1;
+    color: #171a21;
+    background: none;
+    border: none;
+    padding: 6px 8px;
+    cursor: pointer;
+  }
+  .about-close {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    font-size: 2rem;
+    line-height: 1;
+    color: #171a21;
+    background: none;
+    border: none;
+    padding: 6px 8px;
+    cursor: pointer;
+    z-index: 70;
+  }
+  .about-close.visible {
+    display: block;
+  }
+  .mobile-stage {
+    padding: 32px 28px 0;
+    text-align: center;
+  }
+  .mobile-card {
+    text-align: center;
+    font-size: 1.9rem;
+    line-height: 1.35;
+    font-weight: 100;
+    color: #171a21;
+  }
+  .mobile-card-prompt.non-latin { font-weight: 400; }
+  .mobile-card-blank {
+    font-weight: 100;
+  }
+  .mobile-card-blank .cursor {
+    animation: blink 1s step-start infinite;
+  }
+  .mobile-card-blank.lang-correct {
+    font-weight: 400;
+  }
+  .mobile-card-blank.lang-wrong {
+    color: #c7cbd1;
+    text-decoration: line-through;
+    text-decoration-color: #d1d5db;
+  }
+  .mobile-card-feedback {
+    margin-top: 18px;
+    font-size: 1.8rem;
+    line-height: 1;
+    min-height: 1.4em;
+  }
+  .mobile-tap-hint {
+    display: none;
+    margin-top: 24px;
+    font-size: 1rem;
+    font-weight: 300;
+    color: #9aa1ac;
+  }
+  .mobile-geo-hint {
+    margin-top: 18px;
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: #3474D3;
+    min-height: 1.3em;
+  }
+  .mobile-tap-hint.visible {
+    display: block;
+  }
+  .mobile-footer {
+    margin-top: 28px;
+    padding: 0 24px 28px;
+    text-align: center;
+  }
+  .mobile-counter {
+    font-size: 1rem;
+    color: #9aa1ac;
+    margin-bottom: 10px;
+  }
+  .mobile-skip-btn {
+    font-size: 0.95rem;
+    color: #6b7280;
+    background: none;
+    border: none;
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 1px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mobile-skip-btn:hover { color: #171a21; border-bottom-color: #171a21; }
+  .mobile-skip-btn.hidden { visibility: hidden; }
+
+  .mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(23,26,33,0.4);
+    z-index: 60;
+  }
+  .mobile-menu-overlay.visible { display: block; }
+  .mobile-menu-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(320px, 82vw);
+    background: #ffffff;
+    padding: 24px 28px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .mobile-menu-close {
+    align-self: flex-end;
+    font-size: 1.6rem;
+    line-height: 1;
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .mobile-menu-line {
+    font-size: 0.95rem;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+  .mobile-menu-link {
+    font-size: 1rem;
+    color: #171a21;
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 1px;
+    width: fit-content;
+  }
+  .mobile-menu-levels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .mobile-level-end, .mobile-results {
+    display: none;
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 40px;
+    background: #ffffff;
+    z-index: 30;
+    text-align: center;
+  }
+  .mobile-level-end.active, .mobile-results.active {
+    display: flex;
+  }
+  .mobile-level-end-text {
+    font-size: 1.7rem;
+    font-weight: 100;
+    line-height: 1.4;
+    color: #171a21;
+  }
+  .mobile-level-end-buttons, .mobile-results-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .mobile-level-end-btn {
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: #171a21;
+    background: #f1f2f4;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mobile-level-end-btn:hover { background: #e5e7eb; }
+
+  .mobile-results-eval {
+    font-size: 2.3rem;
+    font-weight: 100;
+    line-height: 1.2;
+  }
+  .mobile-results-meaning {
+    color: #9aa1ac;
+    font-weight: 300;
+  }
+  .mobile-results-sentence {
+    font-size: 1.2rem;
+    font-weight: 100;
+    line-height: 1.4;
+    color: #171a21;
+  }
+  .mobile-results-sentence b { font-weight: 400; }
+  .mobile-results-rarest {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: #6b7280;
+  }
+  .mobile-results-rarest b { color: #171a21; font-weight: 400; }
+  .mobile-results-btn-primary {
+    font-size: 1rem;
+    color: #ffffff;
+    background: #171a21;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mobile-results-btn-secondary {
+    font-size: 1rem;
+    color: #171a21;
+    background: none;
+    border: 1.5px solid #d1d5db;
+    border-radius: 999px;
+    padding: 14px 20px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mobile-results-about-link {
+    margin-top: 6px;
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 1px;
+    align-self: center;
+  }
+
+  .bottom-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 40px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  @media (max-width: 700px) {
+    /* levantado por padrão (assume barra de digitação ativa); a classe abaixo
+       cancela isso quando a barra some (tela de resultado, por exemplo) */
+    .bottom-panel {
+      bottom: 78px;
+      padding: 0 20px;
+    }
+    .bottom-panel.no-mobile-bar {
+      bottom: 24px;
+    }
+  }
+  .bottom-panel.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .bottom-panel-line {
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  @media (max-width: 700px) {
+    .bottom-panel-line {
+      white-space: normal; /* sem isso, a linha de info (nível/rounds/idiomas) estourava a largura da tela */
+      text-align: center;
+    }
+  }
+  .bottom-panel-sep {
+    font-size: 0.9rem;
+    color: #d1d5db;
+  }
+  .new-word-link {
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 1px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .new-word-link:hover {
+    color: #171a21;
+    border-bottom-color: #171a21;
+  }
+  .level-mini-group {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .level-mini-btn {
+    font-size: 0.8rem;
+    color: #6b7280;
+    background: none;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    padding: 3px 10px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .level-mini-btn:hover {
+    color: #171a21;
+    border-color: #171a21;
+  }
+  .level-mini-btn.active {
+    color: #171a21;
+    border-color: #171a21;
+    font-weight: 600;
+  }
+  .game-clock-wrap {
+    position: fixed;
+    top: 20px;
+    left: 40px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 40;
+  }
+  .game-clock-wrap.visible {
+    opacity: 1;
+  }
+  @media (max-width: 700px) {
+    /* no mobile o relógio mora dentro do card cheio (.mobile-topbar) */
+    .game-clock-wrap {
+      display: none;
+    }
+  }
+  .game-clock {
+    font-size: 2.85rem;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    color: #171a21;
+    line-height: 1;
+    transition: color 0.3s ease;
+  }
+  .game-clock.flash {
+    animation: clockFlash 1s ease-out;
+  }
+  @keyframes clockFlash {
+    0% { color: #3B5BA5; transform: scale(1.08); }
+    100% { color: #171a21; transform: scale(1); }
+  }
+  .game-clock.urgent {
+    color: #B44B69;
+    animation: clockPulse 1s ease-in-out infinite;
+  }
+  @keyframes clockPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .game-clock-stats {
+    font-size: 0.9rem;
+    color: #6b7280;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    margin-top: 6px;
+  }
+  .top-right-block {
+    position: fixed;
+    top: 20px;
+    right: 40px;
+    z-index: 40;
+  }
+  @media (max-width: 700px) {
+    /* no mobile o About só é acessível pelo hamburger — esse link solo some */
+    .top-right-block {
+      display: none;
+    }
+  }
+  .about-link {
+    font-size: 0.9rem;
+    color: #6b7280;
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 1px;
+    cursor: pointer;
+  }
+  .about-link:hover {
+    color: #171a21;
+    border-bottom-color: #171a21;
+  }
+  .about-page {
+    display: none;
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 130px 40px 100px;
+  }
+  .about-page.visible {
+    display: block;
+  }
+  .about-intro {
+    font-size: clamp(1.79rem, 4.42vw, 3.71rem);
+    font-weight: 100;
+    line-height: 1.15;
+    color: #171a21;
+    margin-bottom: 30px;
+  }
+  .about-intro a {
+    color: #3474D3;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+  }
+  .about-curious-label {
+    margin-top: 50px;
+  }
+  .about-para {
+    font-size: 1rem;
+    font-weight: 300;
+    line-height: 1.7;
+    color: #171a21;
+    margin-bottom: 26px;
+  }
+  .about-para.muted {
+    color: #6b7280;
+  }
+  .about-para a {
+    color: #171a21;
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 1px;
+  }
+  .about-para a:hover {
+    border-bottom-color: #171a21;
+  }
+  .about-back {
+    display: inline-block;
+    margin-top: 10px;
+    margin-bottom: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: #6b7280;
+    text-decoration: none;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 1px;
+    cursor: pointer;
+  }
+  .about-back:hover {
+    color: #171a21;
+    border-bottom-color: #171a21;
+  }
+  .about-email-row-big {
+    display: flex;
+    gap: 10px;
+    max-width: 480px;
+    margin-bottom: 30px;
+  }
+  .about-email-input-big {
+    flex: 1;
+    min-width: 0;
+    font-family: inherit;
+    font-size: 1.3rem;
+    font-weight: 300;
+    padding: 14px 20px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 999px;
+    outline: none;
+  }
+  .about-email-input-big:focus {
+    border-color: #3474D3;
+  }
+  .about-email-submit-big {
+    font-family: inherit;
+    font-size: 1.3rem;
+    color: #ffffff;
+    background: #171a21;
+    border: none;
+    border-radius: 999px;
+    padding: 14px 24px;
+    cursor: pointer;
+  }
+  .about-email-submit-big:hover {
+    background: #3474D3;
+  }
+  .level-word {
+    cursor: pointer;
+    color: #171a21;
+    border-bottom: 2px dotted #9aa1ac;
+    padding-bottom: 2px;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .level-word:hover {
+    color: #3B5BA5;
+    border-bottom: 2px solid currentColor;
+  }
+  .level-desc-card {
+    position: fixed;
+    display: none;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: 260px;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .level-desc-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .level-desc-text {
+    color: #6b7280;
+  }
+  .results-block {
+    margin-top: 56px;
+  }
+  .eval-word {
+    font-size: clamp(3.2rem, 9vw, 6rem);
+    font-weight: 100;
+    line-height: 1.15;
+    margin-bottom: 26px;
+  }
+  .eval-meaning-inline {
+    color: #9aa1ac;
+  }
+  .results-sentence {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height: 1.3;
+    font-weight: 100;
+    color: #171a21;
+    margin-bottom: 20px;
+  }
+  .results-sentence b { font-weight: 400; }
+  .results-rarest {
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: #6b7280;
+    margin-bottom: 30px;
+  }
+  .results-rarest b {
+    color: #171a21;
+    font-weight: 400;
+  }
+  .results-actions {
+    display: flex;
+    flex-direction: column;
+  }
+  .results-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .share-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .share-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid #d1d5db;
+    background: none;
+    color: #171a21;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .share-icon-btn:hover {
+    border-color: #171a21;
+    background: #f1f2f4;
+  }
+  .btn-share-result {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #ffffff;
+    background: #171a21;
+    border: none;
+    border-radius: 999px;
+    padding: 13px 26px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-share-result:hover {
+    background: #3474D3;
+  }
+  .btn-play-again {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #171a21;
+    background: none;
+    border: 1.5px solid #d1d5db;
+    border-radius: 999px;
+    padding: 13px 26px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-play-again:hover {
+    border-color: #171a21;
+  }
+  .reveal-item {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+</style>
+</head>
+<body>
+  <div class="game-clock-wrap" id="gameClockWrap">
+    <div class="game-clock" id="gameClock"></div>
+  </div>
+
+  <div class="top-right-block" id="topRightBlock">
+    <a href="#" class="about-link" id="aboutLink">About</a>
+  </div>
+
+  <div class="wrap" id="gameWrap">
+    <div class="flow" id="flow"></div>
+  </div>
+
+  <div class="bottom-panel" id="bottomPanel">
+    <div class="bottom-panel-line" id="levelPanelDetails"></div>
+    <span class="bottom-panel-sep">·</span>
+    <a href="#" class="new-word-link" id="newWordLink">Try another word →</a>
+    <span class="bottom-panel-sep">·</span>
+    <div class="level-mini-group">
+      <button class="level-mini-btn" data-level="easy">Easy</button>
+      <button class="level-mini-btn" data-level="medium">Medium</button>
+      <button class="level-mini-btn" data-level="hard">Hard</button>
+      <button class="level-mini-btn" data-level="insane">Insane</button>
+    </div>
+  </div>
+
+  <div id="scrollSpacer" style="height: 35vh;"></div>
+
+  <div class="mobile-game" id="mobileGame">
+    <div class="mobile-topbar">
+      <div class="mobile-clock" id="mobileClock"></div>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">&#9776;</button>
+    </div>
+
+    <div class="mobile-stage">
+      <div class="mobile-card" id="mobileCard">
+        <span class="mobile-card-prompt" id="mobileCardPrompt"></span>
+        <span class="mobile-card-connector" id="mobileCardConnector"></span>
+        <span class="mobile-card-blank" id="mobileCardBlank"></span>
+        <div class="mobile-card-feedback" id="mobileCardFeedback"></div>
+        <div class="mobile-geo-hint" id="mobileGeoHint"></div>
+        <div class="mobile-tap-hint" id="mobileTapHint">tap anywhere to type your answer →</div>
+      </div>
+    </div>
+
+    <div class="mobile-footer">
+      <div class="mobile-counter" id="mobileCounter"></div>
+      <button class="mobile-skip-btn" id="mobileSkipBtn">skip →</button>
+    </div>
+  </div>
+
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+    <div class="mobile-menu-panel">
+      <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close">&times;</button>
+      <div class="mobile-menu-line" id="mobileMenuLevelInfo"></div>
+      <a href="#" class="mobile-menu-link" id="mobileMenuNewWord">Try another word →</a>
+      <div class="mobile-menu-levels">
+        <button class="level-mini-btn" data-level="easy">Easy</button>
+        <button class="level-mini-btn" data-level="medium">Medium</button>
+        <button class="level-mini-btn" data-level="hard">Hard</button>
+        <button class="level-mini-btn" data-level="insane">Insane</button>
+      </div>
+      <a href="#" class="mobile-menu-link" id="mobileMenuAbout">About</a>
+    </div>
+  </div>
+
+  <div class="mobile-level-end" id="mobileLevelEnd">
+    <div class="mobile-level-end-text" id="mobileLevelEndText"></div>
+    <div class="mobile-level-end-buttons">
+      <button class="mobile-level-end-btn" data-level="easy">Easy</button>
+      <button class="mobile-level-end-btn" data-level="medium">Medium</button>
+      <button class="mobile-level-end-btn" data-level="hard">Hard</button>
+      <button class="mobile-level-end-btn" data-level="insane">Insane</button>
+    </div>
+  </div>
+
+  <div class="mobile-results" id="mobileResults"></div>
+
+  <input
+    type="text"
+    id="mobileCardInput"
+    class="mobile-hidden-input"
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    enterkeyhint="go"
+  />
+
+  <button class="about-close" id="aboutCloseBtn" aria-label="Close">&times;</button>
+
+  <div class="about-page" id="aboutPage">
+    <div class="about-intro">
+      Lobster is lobster is a project by Lagosta Press.
+    </div>
+    <div class="about-intro">
+      <a href="mailto:hello@lagosta.press" style="color:#3474D3">hello@lagosta.press</a>
+    </div>
+    <div class="about-intro">
+      <a href="https://www.instagram.com/lagosta.press" target="_blank" rel="noopener" style="color:#542E75">instagram</a>
+    </div>
+    <div class="about-intro">
+      <a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener" style="color:#B44B69">Buy us a Coffee</a>
+    </div>
+    <div class="about-intro">
+      Want to know more about Lagosta's projects? Leave your email here.
+    </div>
+    <div class="about-email-row-big">
+      <input type="email" class="about-email-input-big" id="newsletterEmail" placeholder="you@email.com" />
+      <button class="about-email-submit-big" id="newsletterSubmit">→</button>
+    </div>
+
+    <a href="#" class="about-back" id="backToGameLink">BACK TO THE GAME</a>
+
+    <div class="about-para muted about-curious-label">
+      now, for the really curious
+    </div>
+
+    <div class="about-para muted">
+      It started as an idea for the publishing house's own website — and ended up too fun to leave there, so we gave it a home of its own. The plan is to keep building it and making it better. It's a work by Eduardo Menezes with a huge collaboration from Joel Souza, as well as a handful of friends who tested the mechanics. Thanks to all of them.
+    </div>
+
+    <div class="about-para muted" style="text-align:center; margin-bottom:6px;">
+      Lagosta is <span style="color:#D98CA0">lobster</span> in Portuguese, by the way.
+    </div>
+
+    <div class="about-para muted" style="text-align:center;">
+      <a href="https://www.lobsterislobster.online" target="_blank" rel="noopener" style="color:#3f8a68">www.lobsterislobster.online</a>
+    </div>
+  </div>
+
+  <div class="level-desc-card" id="levelDescCard">
+    <div class="level-desc-title" id="levelDescTitle"></div>
+    <div class="level-desc-text" id="levelDescText"></div>
+  </div>
+
+<script>
+  // ---------- dados ----------
+
+  const LANG_META = [
+    { name: "Mandarin Chinese", aliases: ["mandarin","chinese","mandarin chinese"] },
+    { name: "Hindi", aliases: ["hindi"] },
+    { name: "Spanish", aliases: ["spanish","español"] },
+    { name: "French", aliases: ["french"] },
+    { name: "Standard Arabic", aliases: ["arabic","standard arabic"] },
+    { name: "Bengali", aliases: ["bengali","bangla"] },
+    { name: "Portuguese", aliases: ["portuguese"] },
+    { name: "Russian", aliases: ["russian"] },
+    { name: "Urdu", aliases: ["urdu"] },
+    { name: "Indonesian", aliases: ["indonesian"] },
+    { name: "German", aliases: ["german"] },
+    { name: "Japanese", aliases: ["japanese"] },
+    { name: "Swahili", aliases: ["swahili"] },
+    { name: "Marathi", aliases: ["marathi"] },
+    { name: "Telugu", aliases: ["telugu"] },
+    { name: "Turkish", aliases: ["turkish"] },
+    { name: "Tamil", aliases: ["tamil"] },
+    { name: "Cantonese", aliases: ["cantonese","yue","yue chinese"] },
+    { name: "Vietnamese", aliases: ["vietnamese"] },
+    { name: "Filipino", aliases: ["filipino","tagalog"] },
+    { name: "Korean", aliases: ["korean"] },
+    { name: "Persian", aliases: ["persian","farsi"] },
+    { name: "Hausa", aliases: ["hausa"] },
+    { name: "Javanese", aliases: ["javanese"] },
+    { name: "Italian", aliases: ["italian"] },
+    { name: "Punjabi", aliases: ["punjabi"] },
+    { name: "Gujarati", aliases: ["gujarati"] },
+    { name: "Amharic", aliases: ["amharic"] },
+    { name: "Yoruba", aliases: ["yoruba"] },
+    { name: "Igbo", aliases: ["igbo"] },
+    { name: "Sindhi", aliases: ["sindhi"] },
+    { name: "Nepali", aliases: ["nepali","nepalese"] },
+    { name: "Burmese", aliases: ["burmese","myanmar"] },
+    { name: "Thai", aliases: ["thai"] },
+    { name: "Polish", aliases: ["polish"] },
+    { name: "Ukrainian", aliases: ["ukrainian"] },
+    { name: "Romanian", aliases: ["romanian"] },
+    { name: "Dutch", aliases: ["dutch"] },
+    { name: "Greek", aliases: ["greek"] },
+    { name: "Zulu", aliases: ["zulu"] },
+    { name: "Xhosa", aliases: ["xhosa"] },
+    { name: "Malay", aliases: ["malay","malaysian"] },
+    { name: "Sinhala", aliases: ["sinhala","sinhalese"] },
+    { name: "Khmer", aliases: ["khmer","cambodian"] },
+    { name: "Lao", aliases: ["lao","laotian"] },
+    { name: "Somali", aliases: ["somali"] },
+    { name: "Uzbek", aliases: ["uzbek"] },
+    { name: "Azerbaijani", aliases: ["azerbaijani","azeri"] },
+    { name: "Kazakh", aliases: ["kazakh"] }
+  ];
+
+  const TOP10_NAMES = ["Mandarin Chinese","Hindi","Spanish","French","Standard Arabic","Bengali","Portuguese","Russian","Urdu","Indonesian"];
+
+  // 50 línguas extras do nível insano
+  const INSANE_META = [
+    { name: "Albanian", aliases: ["albanian"] },
+    { name: "Armenian", aliases: ["armenian"] },
+    { name: "Basque", aliases: ["basque"] },
+    { name: "Belarusian", aliases: ["belarusian","belorussian"] },
+    { name: "Bosnian", aliases: ["bosnian"] },
+    { name: "Bulgarian", aliases: ["bulgarian"] },
+    { name: "Catalan", aliases: ["catalan"] },
+    { name: "Cebuano", aliases: ["cebuano"] },
+    { name: "Chichewa", aliases: ["chichewa","nyanja"] },
+    { name: "Corsican", aliases: ["corsican"] },
+    { name: "Croatian", aliases: ["croatian"] },
+    { name: "Czech", aliases: ["czech"] },
+    { name: "Danish", aliases: ["danish"] },
+    { name: "Esperanto", aliases: ["esperanto"] },
+    { name: "Estonian", aliases: ["estonian"] },
+    { name: "Finnish", aliases: ["finnish"] },
+    { name: "Frisian", aliases: ["frisian"] },
+    { name: "Galician", aliases: ["galician"] },
+    { name: "Georgian", aliases: ["georgian"] },
+    { name: "Haitian Creole", aliases: ["haitian creole","haitian"] },
+    { name: "Hawaiian", aliases: ["hawaiian"] },
+    { name: "Hebrew", aliases: ["hebrew"] },
+    { name: "Hmong", aliases: ["hmong"] },
+    { name: "Hungarian", aliases: ["hungarian"] },
+    { name: "Icelandic", aliases: ["icelandic"] },
+    { name: "Kannada", aliases: ["kannada"] },
+    { name: "Kinyarwanda", aliases: ["kinyarwanda","rwandan"] },
+    { name: "Kurdish", aliases: ["kurdish"] },
+    { name: "Kyrgyz", aliases: ["kyrgyz"] },
+    { name: "Latin", aliases: ["latin"] },
+    { name: "Latvian", aliases: ["latvian"] },
+    { name: "Lithuanian", aliases: ["lithuanian"] },
+    { name: "Luxembourgish", aliases: ["luxembourgish"] },
+    { name: "Macedonian", aliases: ["macedonian"] },
+    { name: "Malagasy", aliases: ["malagasy"] },
+    { name: "Malayalam", aliases: ["malayalam"] },
+    { name: "Maltese", aliases: ["maltese"] },
+    { name: "Maori", aliases: ["maori"] },
+    { name: "Mongolian", aliases: ["mongolian"] },
+    { name: "Norwegian", aliases: ["norwegian"] },
+    { name: "Oriya", aliases: ["oriya","odia"] },
+    { name: "Pashto", aliases: ["pashto"] },
+    { name: "Samoan", aliases: ["samoan"] },
+    { name: "Scottish Gaelic", aliases: ["scottish gaelic","scots gaelic","gaelic"] },
+    { name: "Serbian", aliases: ["serbian"] },
+    { name: "Sesotho", aliases: ["sesotho","sotho"] },
+    { name: "Shona", aliases: ["shona"] },
+    { name: "Slovak", aliases: ["slovak"] },
+    { name: "Slovenian", aliases: ["slovenian","slovene"] },
+    { name: "Sundanese", aliases: ["sundanese"] }
+  ];
+
+  const WORDS = {
+    dog: { "Mandarin Chinese":"狗","Hindi":"कुत्ता","Spanish":"perro","French":"chien","Standard Arabic":"كلب","Bengali":"কুকুর","Portuguese":"cachorro","Russian":"собака","Urdu":"کتا","Indonesian":"anjing","German":"hund","Japanese":"犬","Swahili":"mbwa","Marathi":"कुत्रा","Telugu":"కుక్క","Turkish":"köpek","Tamil":"நாய்","Cantonese":"狗","Vietnamese":"con chó","Filipino":"aso","Korean":"개","Persian":"سگ","Hausa":"kare","Javanese":"asu","Italian":"cane","Punjabi":"ਕੁੱਤਾ","Gujarati":"કૂતરો","Amharic":"ውሻ","Yoruba":"ajá","Igbo":"nkịta","Sindhi":"ڪتو","Nepali":"कुकुर","Burmese":"ခွေး","Thai":"หมา","Polish":"pies","Ukrainian":"собака","Romanian":"câine","Dutch":"hond","Greek":"σκύλος","Zulu":"inja","Xhosa":"inja","Malay":"anjing","Sinhala":"බල්ලා","Khmer":"ឆ្កែ","Lao":"ໝາ","Somali":"eey","Uzbek":"it","Azerbaijani":"it","Kazakh":"ит","Albanian":"qen","Armenian":"շուն","Basque":"txakurra","Belarusian":"сабака","Bosnian":"pas","Bulgarian":"куче","Catalan":"gos","Cebuano":"iro","Chichewa":"galu","Corsican":"cane","Croatian":"pas","Czech":"pes","Danish":"hund","Esperanto":"hundo","Estonian":"koer","Finnish":"koira","Frisian":"hûn","Galician":"can","Georgian":"ძაღლი","Haitian Creole":"chen","Hawaiian":"ʻīlio","Hebrew":"כלב","Hmong":"dev","Hungarian":"kutya","Icelandic":"hundur","Kannada":"ನಾಯಿ","Kinyarwanda":"imbwa","Kurdish":"kûçik","Kyrgyz":"ит","Latin":"canis","Latvian":"suns","Lithuanian":"šuo","Luxembourgish":"hond","Macedonian":"куче","Malagasy":"alika","Malayalam":"നായ","Maltese":"kelb","Maori":"kurī","Mongolian":"нохой","Norwegian":"hund","Oriya":"କୁକୁର","Pashto":"سپی","Samoan":"taifau","Scottish Gaelic":"cù","Serbian":"пас","Sesotho":"ntja","Shona":"imbwa","Slovak":"pes","Slovenian":"pes","Sundanese":"anjing" },
+    cat: { "Mandarin Chinese":"猫","Hindi":"बिल्ली","Spanish":"gato","French":"chat","Standard Arabic":"قطة","Bengali":"বিড়াল","Portuguese":"gato","Russian":"кот","Urdu":"بلی","Indonesian":"kucing","German":"katze","Japanese":"猫","Swahili":"paka","Marathi":"मांजर","Telugu":"పిల్లి","Turkish":"kedi","Tamil":"பூனை","Cantonese":"猫","Vietnamese":"con mèo","Filipino":"pusa","Korean":"고양이","Persian":"گربه","Hausa":"kyanwa","Javanese":"kucing","Italian":"gatto","Punjabi":"ਬਿੱਲੀ","Gujarati":"બિલાડી","Amharic":"ድመት","Yoruba":"ológbò","Igbo":"pusi","Sindhi":"ٻلي","Nepali":"बिरालो","Burmese":"ကြောင်","Thai":"แมว","Polish":"kot","Ukrainian":"кіт","Romanian":"pisică","Dutch":"kat","Greek":"γάτα","Zulu":"ikati","Xhosa":"ikati","Malay":"kucing","Sinhala":"පූසා","Khmer":"ឆ្មា","Lao":"ແມວ","Somali":"bisad","Uzbek":"mushuk","Azerbaijani":"pişik","Kazakh":"мысық","Albanian":"mace","Armenian":"կատու","Basque":"katua","Belarusian":"кот","Bosnian":"mačka","Bulgarian":"котка","Catalan":"gat","Cebuano":"iring","Chichewa":"mphaka","Corsican":"gattu","Croatian":"mačka","Czech":"kočka","Danish":"kat","Esperanto":"kato","Estonian":"kass","Finnish":"kissa","Frisian":"kat","Galician":"gato","Georgian":"კატა","Haitian Creole":"chat","Hawaiian":"pōpoki","Hebrew":"חתול","Hmong":"miv","Hungarian":"macska","Icelandic":"köttur","Kannada":"ಬೆಕ್ಕು","Kinyarwanda":"injangwe","Kurdish":"pisîk","Kyrgyz":"мышык","Latin":"feles","Latvian":"kaķis","Lithuanian":"katė","Luxembourgish":"kaz","Macedonian":"мачка","Malagasy":"saka","Malayalam":"പൂച്ച","Maltese":"qattus","Maori":"ngeru","Mongolian":"муур","Norwegian":"katt","Oriya":"ବିଲେଇ","Pashto":"پیشو","Samoan":"pusi","Scottish Gaelic":"cat","Serbian":"мачка","Sesotho":"katse","Shona":"katsi","Slovak":"mačka","Slovenian":"mačka","Sundanese":"ucing" },
+    water: { "Mandarin Chinese":"水","Hindi":"पानी","Spanish":"agua","French":"eau","Standard Arabic":"ماء","Bengali":"জল","Portuguese":"água","Russian":"вода","Urdu":"پانی","Indonesian":"air","German":"wasser","Japanese":"水","Swahili":"maji","Marathi":"पाणी","Telugu":"నీరు","Turkish":"su","Tamil":"தண்ணீர்","Cantonese":"水","Vietnamese":"nước","Filipino":"tubig","Korean":"물","Persian":"آب","Hausa":"ruwa","Javanese":"banyu","Italian":"acqua","Punjabi":"ਪਾਣੀ","Gujarati":"પાણી","Amharic":"ውሃ","Yoruba":"omi","Igbo":"mmiri","Sindhi":"پاڻي","Nepali":"पानी","Burmese":"ရေ","Thai":"น้ำ","Polish":"woda","Ukrainian":"вода","Romanian":"apă","Dutch":"water","Greek":"νερό","Zulu":"amanzi","Xhosa":"amanzi","Malay":"air","Sinhala":"වතුර","Khmer":"ទឹក","Lao":"ນ້ຳ","Somali":"biyo","Uzbek":"suv","Azerbaijani":"su","Kazakh":"су","Albanian":"ujë","Armenian":"ջուր","Basque":"ura","Belarusian":"вада","Bosnian":"voda","Bulgarian":"вода","Catalan":"aigua","Cebuano":"tubig","Chichewa":"madzi","Corsican":"acqua","Croatian":"voda","Czech":"voda","Danish":"vand","Esperanto":"akvo","Estonian":"vesi","Finnish":"vesi","Frisian":"wetter","Galician":"auga","Georgian":"წყალი","Haitian Creole":"dlo","Hawaiian":"wai","Hebrew":"מים","Hmong":"dej","Hungarian":"víz","Icelandic":"vatn","Kannada":"ನೀರು","Kinyarwanda":"amazi","Kurdish":"av","Kyrgyz":"суу","Latin":"aqua","Latvian":"ūdens","Lithuanian":"vanduo","Luxembourgish":"waasser","Macedonian":"вода","Malagasy":"rano","Malayalam":"വെള്ളം","Maltese":"ilma","Maori":"wai","Mongolian":"ус","Norwegian":"vann","Oriya":"ପାଣି","Pashto":"اوبه","Samoan":"vai","Scottish Gaelic":"uisge","Serbian":"вода","Sesotho":"metsi","Shona":"mvura","Slovak":"voda","Slovenian":"voda","Sundanese":"cai" },
+    love: { "Mandarin Chinese":"爱","Hindi":"प्यार","Spanish":"amor","French":"amour","Standard Arabic":"حب","Bengali":"ভালোবাসা","Portuguese":"amor","Russian":"любовь","Urdu":"محبت","Indonesian":"cinta","German":"liebe","Japanese":"愛","Swahili":"upendo","Marathi":"प्रेम","Telugu":"ప్రేమ","Turkish":"aşk","Tamil":"அன்பு","Cantonese":"愛","Vietnamese":"tình yêu","Filipino":"pag-ibig","Korean":"사랑","Persian":"عشق","Hausa":"ƙauna","Javanese":"tresna","Italian":"amore","Punjabi":"ਪਿਆਰ","Gujarati":"પ્રેમ","Amharic":"ፍቅር","Yoruba":"ìfẹ́","Igbo":"ịhụnanya","Sindhi":"پيار","Nepali":"माया","Burmese":"မေတ္တာ","Thai":"ความรัก","Polish":"miłość","Ukrainian":"любов","Romanian":"dragoste","Dutch":"liefde","Greek":"αγάπη","Zulu":"uthando","Xhosa":"uthando","Malay":"cinta","Sinhala":"ආදරය","Khmer":"សេចក្ដីស្រឡាញ់","Lao":"ຄວາມຮັກ","Somali":"jacayl","Uzbek":"sevgi","Azerbaijani":"sevgi","Kazakh":"махаббат","Albanian":"dashuri","Armenian":"սեր","Basque":"maitasuna","Belarusian":"каханне","Bosnian":"ljubav","Bulgarian":"любов","Catalan":"amor","Cebuano":"gugma","Chichewa":"chikondi","Corsican":"amore","Croatian":"ljubav","Czech":"láska","Danish":"kærlighed","Esperanto":"amo","Estonian":"armastus","Finnish":"rakkaus","Frisian":"leafde","Galician":"amor","Georgian":"სიყვარული","Haitian Creole":"lanmou","Hawaiian":"aloha","Hebrew":"אהבה","Hmong":"hlub","Hungarian":"szerelem","Icelandic":"ást","Kannada":"ಪ್ರೀತಿ","Kinyarwanda":"urukundo","Kurdish":"evîn","Kyrgyz":"сүйүү","Latin":"amor","Latvian":"mīlestība","Lithuanian":"meilė","Luxembourgish":"léift","Macedonian":"љубов","Malagasy":"fitiavana","Malayalam":"സ്നേഹം","Maltese":"imħabba","Maori":"aroha","Mongolian":"хайр","Norwegian":"kjærlighet","Oriya":"ପ୍ରେମ","Pashto":"مینه","Samoan":"alofa","Scottish Gaelic":"gaol","Serbian":"љубав","Sesotho":"lerato","Shona":"rudo","Slovak":"láska","Slovenian":"ljubezen","Sundanese":"cinta" },
+    house: { "Mandarin Chinese":"房子","Hindi":"घर","Spanish":"casa","French":"maison","Standard Arabic":"منزل","Bengali":"বাড়ি","Portuguese":"casa","Russian":"дом","Urdu":"گھر","Indonesian":"rumah","German":"haus","Japanese":"家","Swahili":"nyumba","Marathi":"घर","Telugu":"ఇల్లు","Turkish":"ev","Tamil":"வீடு","Cantonese":"屋","Vietnamese":"ngôi nhà","Filipino":"bahay","Korean":"집","Persian":"خانه","Hausa":"gida","Javanese":"omah","Italian":"casa","Punjabi":"ਘਰ","Gujarati":"ઘર","Amharic":"ቤት","Yoruba":"ilé","Igbo":"ụlọ","Sindhi":"گهر","Nepali":"घर","Burmese":"အိမ်","Thai":"บ้าน","Polish":"dom","Ukrainian":"будинок","Romanian":"casă","Dutch":"huis","Greek":"σπίτι","Zulu":"indlu","Xhosa":"indlu","Malay":"rumah","Sinhala":"ගෙදර","Khmer":"ផ្ទះ","Lao":"ເຮືອນ","Somali":"guri","Uzbek":"uy","Azerbaijani":"ev","Kazakh":"үй","Albanian":"shtëpi","Armenian":"տուն","Basque":"etxea","Belarusian":"дом","Bosnian":"kuća","Bulgarian":"къща","Catalan":"casa","Cebuano":"balay","Chichewa":"nyumba","Corsican":"casa","Croatian":"kuća","Czech":"dům","Danish":"hus","Esperanto":"domo","Estonian":"maja","Finnish":"talo","Frisian":"hûs","Galician":"casa","Georgian":"სახლი","Haitian Creole":"kay","Hawaiian":"hale","Hebrew":"בית","Hmong":"tsev","Hungarian":"ház","Icelandic":"hús","Kannada":"ಮನೆ","Kinyarwanda":"inzu","Kurdish":"mal","Kyrgyz":"үй","Latin":"domus","Latvian":"māja","Lithuanian":"namas","Luxembourgish":"haus","Macedonian":"куќа","Malagasy":"trano","Malayalam":"വീട്","Maltese":"dar","Maori":"whare","Mongolian":"байшин","Norwegian":"hus","Oriya":"ଘର","Pashto":"کور","Samoan":"fale","Scottish Gaelic":"taigh","Serbian":"кућа","Sesotho":"ntlo","Shona":"imba","Slovak":"dom","Slovenian":"hiša","Sundanese":"imah" },
+    sun: { "Mandarin Chinese":"太阳","Hindi":"सूरज","Spanish":"sol","French":"soleil","Standard Arabic":"شمس","Bengali":"সূর্য","Portuguese":"sol","Russian":"солнце","Urdu":"سورج","Indonesian":"matahari","German":"sonne","Japanese":"太陽","Swahili":"jua","Marathi":"सूर्य","Telugu":"సూర్యుడు","Turkish":"güneş","Tamil":"சூரியன்","Cantonese":"太陽","Vietnamese":"mặt trời","Filipino":"araw","Korean":"태양","Persian":"خورشید","Hausa":"rana","Javanese":"srengenge","Italian":"sole","Punjabi":"ਸੂਰਜ","Gujarati":"સૂર્ય","Amharic":"ፀሐይ","Yoruba":"oòrùn","Igbo":"anyanwụ","Sindhi":"سج","Nepali":"सूर्य","Burmese":"နေ","Thai":"ดวงอาทิตย์","Polish":"słońce","Ukrainian":"сонце","Romanian":"soare","Dutch":"zon","Greek":"ήλιος","Zulu":"ilanga","Xhosa":"ilanga","Malay":"matahari","Sinhala":"ඉර","Khmer":"ព្រះអាទិត្យ","Lao":"ຕາເວັນ","Somali":"qorrax","Uzbek":"quyosh","Azerbaijani":"günəş","Kazakh":"күн","Albanian":"diell","Armenian":"արև","Basque":"eguzkia","Belarusian":"сонца","Bosnian":"sunce","Bulgarian":"слънце","Catalan":"sol","Cebuano":"adlaw","Chichewa":"dzuwa","Corsican":"sole","Croatian":"sunce","Czech":"slunce","Danish":"sol","Esperanto":"suno","Estonian":"päike","Finnish":"aurinko","Frisian":"sinne","Galician":"sol","Georgian":"მზე","Haitian Creole":"solèy","Hawaiian":"lā","Hebrew":"שמש","Hmong":"hnub","Hungarian":"nap","Icelandic":"sól","Kannada":"ಸೂರ್ಯ","Kinyarwanda":"izuba","Kurdish":"roj","Kyrgyz":"күн","Latin":"sol","Latvian":"saule","Lithuanian":"saulė","Luxembourgish":"sonn","Macedonian":"сонце","Malagasy":"masoandro","Malayalam":"സൂര്യൻ","Maltese":"xemx","Maori":"rā","Mongolian":"нар","Norwegian":"sol","Oriya":"ସୂର୍ଯ୍ୟ","Pashto":"لمر","Samoan":"la","Scottish Gaelic":"grian","Serbian":"сунце","Sesotho":"letsatsi","Shona":"zuva","Slovak":"slnko","Slovenian":"sonce","Sundanese":"panonpoe" },
+    book: { "Mandarin Chinese":"书","Hindi":"किताब","Spanish":"libro","French":"livre","Standard Arabic":"كتاب","Bengali":"বই","Portuguese":"livro","Russian":"книга","Urdu":"کتاب","Indonesian":"buku","German":"buch","Japanese":"本","Swahili":"kitabu","Marathi":"पुस्तक","Telugu":"పుస్తకం","Turkish":"kitap","Tamil":"புத்தகம்","Cantonese":"書","Vietnamese":"quyển sách","Filipino":"libro","Korean":"책","Persian":"کتاب","Hausa":"littafi","Javanese":"buku","Italian":"libro","Punjabi":"ਕਿਤਾਬ","Gujarati":"પુસ્તક","Amharic":"መጽሐፍ","Yoruba":"ìwé","Igbo":"akwụkwọ","Sindhi":"ڪتاب","Nepali":"किताब","Burmese":"စာအုပ်","Thai":"หนังสือ","Polish":"książka","Ukrainian":"книга","Romanian":"carte","Dutch":"boek","Greek":"βιβλίο","Zulu":"incwadi","Xhosa":"incwadi","Malay":"buku","Sinhala":"පොත","Khmer":"សៀវភៅ","Lao":"ປຶ້ມ","Somali":"buug","Uzbek":"kitob","Azerbaijani":"kitab","Kazakh":"кітап","Albanian":"libër","Armenian":"գիրք","Basque":"liburua","Belarusian":"кніга","Bosnian":"knjiga","Bulgarian":"книга","Catalan":"llibre","Cebuano":"libro","Chichewa":"buku","Corsican":"libru","Croatian":"knjiga","Czech":"kniha","Danish":"bog","Esperanto":"libro","Estonian":"raamat","Finnish":"kirja","Frisian":"boek","Galician":"libro","Georgian":"წიგნი","Haitian Creole":"liv","Hawaiian":"puke","Hebrew":"ספר","Hmong":"phau ntawv","Hungarian":"könyv","Icelandic":"bók","Kannada":"ಪುಸ್ತಕ","Kinyarwanda":"igitabo","Kurdish":"pirtûk","Kyrgyz":"китеп","Latin":"liber","Latvian":"grāmata","Lithuanian":"knyga","Luxembourgish":"buch","Macedonian":"книга","Malagasy":"boky","Malayalam":"പുസ്തകം","Maltese":"ktieb","Maori":"pukapuka","Mongolian":"ном","Norwegian":"bok","Oriya":"ବହି","Pashto":"کتاب","Samoan":"tusi","Scottish Gaelic":"leabhar","Serbian":"књига","Sesotho":"buka","Shona":"bhuku","Slovak":"kniha","Slovenian":"knjiga","Sundanese":"buku" },
+    friend: { "Mandarin Chinese":"朋友","Hindi":"दोस्त","Spanish":"amigo","French":"ami","Standard Arabic":"صديق","Bengali":"বন্ধু","Portuguese":"amigo","Russian":"друг","Urdu":"دوست","Indonesian":"teman","German":"freund","Japanese":"友達","Swahili":"rafiki","Marathi":"मित्र","Telugu":"స్నేహితుడు","Turkish":"arkadaş","Tamil":"நண்பன்","Cantonese":"朋友","Vietnamese":"bạn bè","Filipino":"kaibigan","Korean":"친구","Persian":"دوست","Hausa":"aboki","Javanese":"kanca","Italian":"amico","Punjabi":"ਦੋਸਤ","Gujarati":"મિત્ર","Amharic":"ጓደኛ","Yoruba":"ọ̀rẹ́","Igbo":"enyi","Sindhi":"دوست","Nepali":"साथी","Burmese":"သူငယ်ချင်း","Thai":"เพื่อน","Polish":"przyjaciel","Ukrainian":"друг","Romanian":"prieten","Dutch":"vriend","Greek":"φίλος","Zulu":"umngane","Xhosa":"umhlobo","Malay":"kawan","Sinhala":"යාළුවා","Khmer":"មិត្តភក្តិ","Lao":"ໝູ່","Somali":"saaxiib","Uzbek":"do'st","Azerbaijani":"dost","Kazakh":"дос","Albanian":"mik","Armenian":"ընկեր","Basque":"laguna","Belarusian":"сябар","Bosnian":"prijatelj","Bulgarian":"приятел","Catalan":"amic","Cebuano":"higala","Chichewa":"bwenzi","Corsican":"amicu","Croatian":"prijatelj","Czech":"přítel","Danish":"ven","Esperanto":"amiko","Estonian":"sõber","Finnish":"ystävä","Frisian":"freon","Galician":"amigo","Georgian":"მეგობარი","Haitian Creole":"zanmi","Hawaiian":"hoaaloha","Hebrew":"חבר","Hmong":"phooj ywg","Hungarian":"barát","Icelandic":"vinur","Kannada":"ಸ್ನೇಹಿತ","Kinyarwanda":"inshuti","Kurdish":"heval","Kyrgyz":"дос","Latin":"amicus","Latvian":"draugs","Lithuanian":"draugas","Luxembourgish":"frënd","Macedonian":"пријател","Malagasy":"namana","Malayalam":"സുഹൃത്ത്","Maltese":"ħabib","Maori":"hoa","Mongolian":"найз","Norwegian":"venn","Oriya":"ବନ୍ଧୁ","Pashto":"ملګری","Samoan":"uo","Scottish Gaelic":"caraid","Serbian":"пријатељ","Sesotho":"motsoalle","Shona":"shamwari","Slovak":"priateľ","Slovenian":"prijatelj","Sundanese":"babaturan" },
+    coffee: { "Mandarin Chinese":"咖啡","Hindi":"कॉफ़ी","Spanish":"café","French":"café","Standard Arabic":"قهوة","Bengali":"কফি","Portuguese":"café","Russian":"кофе","Urdu":"کافی","Indonesian":"kopi","German":"kaffee","Japanese":"コーヒー","Swahili":"kahawa","Marathi":"कॉफी","Telugu":"కాఫీ","Turkish":"kahve","Tamil":"காபி","Cantonese":"咖啡","Vietnamese":"cà phê","Filipino":"kape","Korean":"커피","Persian":"قهوه","Hausa":"kofi","Javanese":"kopi","Italian":"caffè","Punjabi":"ਕੌਫੀ","Gujarati":"કોફી","Amharic":"ቡና","Yoruba":"kọfí","Igbo":"kọfị","Sindhi":"ڪافي","Nepali":"कफी","Burmese":"ကော်ဖီ","Thai":"กาแฟ","Polish":"kawa","Ukrainian":"кава","Romanian":"cafea","Dutch":"koffie","Greek":"καφές","Zulu":"ikhofi","Xhosa":"ikofu","Malay":"kopi","Sinhala":"කෝපි","Khmer":"កាហ្វេ","Lao":"ກາເຟ","Somali":"qaxwo","Uzbek":"qahva","Azerbaijani":"qəhvə","Kazakh":"кофе","Albanian":"kafe","Armenian":"սուրճ","Basque":"kafea","Belarusian":"кава","Bosnian":"kafa","Bulgarian":"кафе","Catalan":"cafè","Cebuano":"kape","Chichewa":"khofi","Corsican":"caffè","Croatian":"kava","Czech":"káva","Danish":"kaffe","Esperanto":"kafo","Estonian":"kohv","Finnish":"kahvi","Frisian":"kofje","Galician":"café","Georgian":"ყავა","Haitian Creole":"kafe","Hawaiian":"kope","Hebrew":"קפה","Hmong":"kas fes","Hungarian":"kávé","Icelandic":"kaffi","Kannada":"ಕಾಫಿ","Kinyarwanda":"ikawa","Kurdish":"qehwe","Kyrgyz":"кофе","Latin":"coffea","Latvian":"kafija","Lithuanian":"kava","Luxembourgish":"kaffi","Macedonian":"кафе","Malagasy":"kafe","Malayalam":"കാപ്പി","Maltese":"kafè","Maori":"kawhe","Mongolian":"кофе","Norwegian":"kaffe","Oriya":"କଫି","Pashto":"قهوه","Samoan":"kofe","Scottish Gaelic":"cofaidh","Serbian":"кафа","Sesotho":"kofi","Shona":"kofi","Slovak":"káva","Slovenian":"kava","Sundanese":"kopi" },
+    lobster: { "Mandarin Chinese":"龙虾","Hindi":"झींगा मछली","Spanish":"langosta","French":"homard","Standard Arabic":"كركند","Bengali":"লবস্টার","Portuguese":"lagosta","Russian":"омар","Urdu":"لابسٹر","Indonesian":"lobster","German":"hummer","Japanese":"ロブスター","Swahili":"kamba mawe","Marathi":"लॉबस्टर","Telugu":"లాబ్‌స్టర్","Turkish":"ıstakoz","Tamil":"இலாப்ஸ்டர்","Cantonese":"龍蝦","Vietnamese":"tôm hùm","Filipino":"lobster","Korean":"랍스터","Persian":"خرچنگ دریایی","Hausa":"lobster","Javanese":"lobster","Italian":"aragosta","Punjabi":"ਲੌਬਸਟਰ","Gujarati":"લોબસ્ટર","Amharic":"ሎብስተር","Yoruba":"lobster","Igbo":"lobster","Sindhi":"لوبسٽر","Nepali":"लबस्टर","Burmese":"ပုဇွန်ကြီး","Thai":"กุ้งมังกร","Polish":"homar","Ukrainian":"омар","Romanian":"homar","Dutch":"kreeft","Greek":"αστακός","Zulu":"lobster","Xhosa":"lobster","Malay":"udang karang","Sinhala":"ලොබ්ස්ටර්","Khmer":"បង្កងសមុទ្រ","Lao":"ກຸ້ງມັງກອນ","Somali":"lobster","Uzbek":"omar","Azerbaijani":"omar","Kazakh":"омар","Albanian":"karavidhe deti","Armenian":"օմար","Basque":"otarraina","Belarusian":"амар","Bosnian":"jastog","Bulgarian":"омар","Catalan":"llagosta","Cebuano":"lobster","Chichewa":"lobster","Corsican":"aragosta","Croatian":"jastog","Czech":"humr","Danish":"hummer","Esperanto":"omaro","Estonian":"homaar","Finnish":"hummeri","Frisian":"kreeft","Galician":"lagosta","Georgian":"ომარი","Haitian Creole":"woma","Hawaiian":"ula","Hebrew":"לובסטר","Hmong":"lobster","Hungarian":"homár","Icelandic":"humar","Kannada":"ಲಾಬ್‌ಸ್ಟರ್","Kinyarwanda":"lobster","Kurdish":"lobster","Kyrgyz":"омар","Latin":"cammarus","Latvian":"omārs","Lithuanian":"omaras","Luxembourgish":"hummer","Macedonian":"јастог","Malagasy":"orana","Malayalam":"ലോബ്സ്റ്റർ","Maltese":"awwista","Maori":"kōura","Mongolian":"ломбстер","Norwegian":"hummer","Oriya":"ଲବଷ୍ଟର","Pashto":"لوبستر","Samoan":"ula","Scottish Gaelic":"giomach","Serbian":"јастог","Sesotho":"lobster","Shona":"lobster","Slovak":"homár","Slovenian":"jastog","Sundanese":"lobster" },
+    tree: { "Mandarin Chinese":"树","Hindi":"पेड़","Spanish":"árbol","French":"arbre","Standard Arabic":"شجرة","Bengali":"গাছ","Portuguese":"árvore","Russian":"дерево","Urdu":"درخت","Indonesian":"pohon","German":"baum","Japanese":"木","Swahili":"mti","Marathi":"झाड","Telugu":"చెట్టు","Turkish":"ağaç","Tamil":"மரம்","Cantonese":"樹","Vietnamese":"cây","Filipino":"puno","Korean":"나무","Persian":"درخت","Hausa":"itace","Javanese":"wit","Italian":"albero","Punjabi":"ਰੁੱਖ","Gujarati":"ઝાડ","Amharic":"ዛፍ","Yoruba":"igi","Igbo":"osisi","Sindhi":"وڻ","Nepali":"रुख","Burmese":"သစ်ပင်","Thai":"ต้นไม้","Polish":"drzewo","Ukrainian":"дерево","Romanian":"copac","Dutch":"boom","Greek":"δέντρο","Zulu":"isihlahla","Xhosa":"umthi","Malay":"pokok","Sinhala":"ගස","Khmer":"ដើមឈើ","Lao":"ຕົ້ນໄມ້","Somali":"geed","Uzbek":"daraxt","Azerbaijani":"ağac","Kazakh":"ағаш","Albanian":"pemë","Armenian":"ծառ","Basque":"zuhaitza","Belarusian":"дрэва","Bosnian":"drvo","Bulgarian":"дърво","Catalan":"arbre","Cebuano":"kahoy","Chichewa":"mtengo","Corsican":"arburu","Croatian":"stablo","Czech":"strom","Danish":"træ","Esperanto":"arbo","Estonian":"puu","Finnish":"puu","Frisian":"beam","Galician":"árbore","Georgian":"ხე","Haitian Creole":"pyebwa","Hawaiian":"kumulāʻau","Hebrew":"עץ","Hmong":"tsob ntoo","Hungarian":"fa","Icelandic":"tré","Kannada":"ಮರ","Kinyarwanda":"igiti","Kurdish":"dar","Kyrgyz":"дарак","Latin":"arbor","Latvian":"koks","Lithuanian":"medis","Luxembourgish":"bam","Macedonian":"дрво","Malagasy":"hazo","Malayalam":"മരം","Maltese":"siġra","Maori":"rākau","Mongolian":"мод","Norwegian":"tre","Oriya":"ଗଛ","Pashto":"ونه","Samoan":"laau","Scottish Gaelic":"craobh","Serbian":"дрво","Sesotho":"sefate","Shona":"muti","Slovak":"strom","Slovenian":"drevo","Sundanese":"tangkal" },
+    fish: { "Mandarin Chinese":"鱼","Hindi":"मछली","Spanish":"pez","French":"poisson","Standard Arabic":"سمك","Bengali":"মাছ","Portuguese":"peixe","Russian":"рыба","Urdu":"مچھلی","Indonesian":"ikan","German":"fisch","Japanese":"魚","Swahili":"samaki","Marathi":"मासा","Telugu":"చేప","Turkish":"balık","Tamil":"மீன்","Cantonese":"魚","Vietnamese":"cá","Filipino":"isda","Korean":"물고기","Persian":"ماهی","Hausa":"kifi","Javanese":"iwak","Italian":"pesce","Punjabi":"ਮੱਛੀ","Gujarati":"માછલી","Amharic":"ዓሳ","Yoruba":"ẹja","Igbo":"azụ","Sindhi":"مڇي","Nepali":"माछा","Burmese":"ငါး","Thai":"ปลา","Polish":"ryba","Ukrainian":"риба","Romanian":"pește","Dutch":"vis","Greek":"ψάρι","Zulu":"inhlanzi","Xhosa":"intlanzi","Malay":"ikan","Sinhala":"මාළු","Khmer":"ត្រី","Lao":"ປາ","Somali":"kalluun","Uzbek":"baliq","Azerbaijani":"balıq","Kazakh":"балық","Albanian":"peshk","Armenian":"ձուկ","Basque":"arraina","Belarusian":"рыба","Bosnian":"riba","Bulgarian":"риба","Catalan":"peix","Cebuano":"isda","Chichewa":"nsomba","Corsican":"pesciu","Croatian":"riba","Czech":"ryba","Danish":"fisk","Esperanto":"fiŝo","Estonian":"kala","Finnish":"kala","Frisian":"fisk","Galician":"peixe","Georgian":"თევზი","Haitian Creole":"pwason","Hawaiian":"iʻa","Hebrew":"דג","Hmong":"ntses","Hungarian":"hal","Icelandic":"fiskur","Kannada":"ಮೀನು","Kinyarwanda":"ifi","Kurdish":"masî","Kyrgyz":"балык","Latin":"piscis","Latvian":"zivs","Lithuanian":"žuvis","Luxembourgish":"fësch","Macedonian":"риба","Malagasy":"trondro","Malayalam":"മീൻ","Maltese":"ħuta","Maori":"ika","Mongolian":"загас","Norwegian":"fisk","Oriya":"ମାଛ","Pashto":"کب","Samoan":"iʻa","Scottish Gaelic":"iasg","Serbian":"риба","Sesotho":"tlhapi","Shona":"hove","Slovak":"ryba","Slovenian":"riba","Sundanese":"lauk" },
+    bird: { "Mandarin Chinese":"鸟","Hindi":"पक्षी","Spanish":"pájaro","French":"oiseau","Standard Arabic":"طائر","Bengali":"পাখি","Portuguese":"pássaro","Russian":"птица","Urdu":"پرندہ","Indonesian":"burung","German":"vogel","Japanese":"鳥","Swahili":"ndege","Marathi":"पक्षी","Telugu":"పక్షి","Turkish":"kuş","Tamil":"பறவை","Cantonese":"雀","Vietnamese":"chim","Filipino":"ibon","Korean":"새","Persian":"پرنده","Hausa":"tsuntsu","Javanese":"manuk","Italian":"uccello","Punjabi":"ਪੰਛੀ","Gujarati":"પક્ષી","Amharic":"ወፍ","Yoruba":"ẹyẹ","Igbo":"nnụnụ","Sindhi":"پکي","Nepali":"चरा","Burmese":"ငှက်","Thai":"นก","Polish":"ptak","Ukrainian":"птах","Romanian":"pasăre","Dutch":"vogel","Greek":"πουλί","Zulu":"inyoni","Xhosa":"intaka","Malay":"burung","Sinhala":"කුරුල්ලා","Khmer":"បក្សី","Lao":"ນົກ","Somali":"shimbir","Uzbek":"qush","Azerbaijani":"quş","Kazakh":"құс","Albanian":"zog","Armenian":"թռչուն","Basque":"txoria","Belarusian":"птушка","Bosnian":"ptica","Bulgarian":"птица","Catalan":"ocell","Cebuano":"langgam","Chichewa":"mbalame","Corsican":"acellu","Croatian":"ptica","Czech":"pták","Danish":"fugl","Esperanto":"birdo","Estonian":"lind","Finnish":"lintu","Frisian":"fûgel","Galician":"paxaro","Georgian":"ჩიტი","Haitian Creole":"zwazo","Hawaiian":"manu","Hebrew":"ציפור","Hmong":"noog","Hungarian":"madár","Icelandic":"fugl","Kannada":"ಹಕ್ಕಿ","Kinyarwanda":"inyoni","Kurdish":"çûk","Kyrgyz":"чымчык","Latin":"avis","Latvian":"putns","Lithuanian":"paukštis","Luxembourgish":"vulle","Macedonian":"птица","Malagasy":"vorona","Malayalam":"പക്ഷി","Maltese":"għasfur","Maori":"manu","Mongolian":"шувуу","Norwegian":"fugl","Oriya":"ପକ୍ଷୀ","Pashto":"مرغه","Samoan":"manu","Scottish Gaelic":"eun","Serbian":"птица","Sesotho":"nonyana","Shona":"shiri","Slovak":"vták","Slovenian":"ptica","Sundanese":"manuk" },
+    milk: { "Mandarin Chinese":"牛奶","Hindi":"दूध","Spanish":"leche","French":"lait","Standard Arabic":"حليب","Bengali":"দুধ","Portuguese":"leite","Russian":"молоко","Urdu":"دودھ","Indonesian":"susu","German":"milch","Japanese":"牛乳","Swahili":"maziwa","Marathi":"दूध","Telugu":"పాలు","Turkish":"süt","Tamil":"பால்","Cantonese":"牛奶","Vietnamese":"sữa","Filipino":"gatas","Korean":"우유","Persian":"شیر","Hausa":"madara","Javanese":"susu","Italian":"latte","Punjabi":"ਦੁੱਧ","Gujarati":"દૂધ","Amharic":"ወተት","Yoruba":"wara","Igbo":"mmiri ara ehi","Sindhi":"کير","Nepali":"दूध","Burmese":"နို့","Thai":"นม","Polish":"mleko","Ukrainian":"молоко","Romanian":"lapte","Dutch":"melk","Greek":"γάλα","Zulu":"ubisi","Xhosa":"ubisi","Malay":"susu","Sinhala":"කිරි","Khmer":"ទឹកដោះគោ","Lao":"ນົມ","Somali":"caano","Uzbek":"sut","Azerbaijani":"süd","Kazakh":"сүт","Albanian":"qumësht","Armenian":"կաթ","Basque":"esnea","Belarusian":"малако","Bosnian":"mlijeko","Bulgarian":"мляко","Catalan":"llet","Cebuano":"gatas","Chichewa":"mkaka","Corsican":"latte","Croatian":"mlijeko","Czech":"mléko","Danish":"mælk","Esperanto":"lakto","Estonian":"piim","Finnish":"maito","Frisian":"molke","Galician":"leite","Georgian":"რძე","Haitian Creole":"lèt","Hawaiian":"waiū","Hebrew":"חלב","Hmong":"kua mis","Hungarian":"tej","Icelandic":"mjólk","Kannada":"ಹಾಲು","Kinyarwanda":"amata","Kurdish":"şîr","Kyrgyz":"сүт","Latin":"lac","Latvian":"piens","Lithuanian":"pienas","Luxembourgish":"mëllech","Macedonian":"млеко","Malagasy":"ronono","Malayalam":"പാൽ","Maltese":"ħalib","Maori":"waiū","Mongolian":"сүү","Norwegian":"melk","Oriya":"କ୍ଷୀର","Pashto":"شيدې","Samoan":"susu","Scottish Gaelic":"bainne","Serbian":"млеко","Sesotho":"lebese","Shona":"mukaka","Slovak":"mlieko","Slovenian":"mleko","Sundanese":"susu" },
+    bread: { "Mandarin Chinese":"面包","Hindi":"ब्रेड","Spanish":"pan","French":"pain","Standard Arabic":"خبز","Bengali":"রুটি","Portuguese":"pão","Russian":"хлеб","Urdu":"روٹی","Indonesian":"roti","German":"brot","Japanese":"パン","Swahili":"mkate","Marathi":"ब्रेड","Telugu":"రొట్టె","Turkish":"ekmek","Tamil":"ரொட்டி","Cantonese":"麵包","Vietnamese":"bánh mì","Filipino":"tinapay","Korean":"빵","Persian":"نان","Hausa":"gurasa","Javanese":"roti","Italian":"pane","Punjabi":"ਰੋਟੀ","Gujarati":"રોટલી","Amharic":"ዳቦ","Yoruba":"búrẹ́dì","Igbo":"achịcha","Sindhi":"ماني","Nepali":"रोटी","Burmese":"ပေါင်မုန့်","Thai":"ขนมปัง","Polish":"chleb","Ukrainian":"хліб","Romanian":"pâine","Dutch":"brood","Greek":"ψωμί","Zulu":"isinkwa","Xhosa":"isonka","Malay":"roti","Sinhala":"පාන්","Khmer":"នំបុ័ង","Lao":"ເຂົ້າຈີ່","Somali":"rooti","Uzbek":"non","Azerbaijani":"çörək","Kazakh":"нан","Albanian":"bukë","Armenian":"հաց","Basque":"ogia","Belarusian":"хлеб","Bosnian":"hljeb","Bulgarian":"хляб","Catalan":"pa","Cebuano":"pan","Chichewa":"mkate","Corsican":"pane","Croatian":"kruh","Czech":"chléb","Danish":"brød","Esperanto":"pano","Estonian":"leib","Finnish":"leipä","Frisian":"brea","Galician":"pan","Georgian":"პური","Haitian Creole":"pen","Hawaiian":"palaoa","Hebrew":"לחם","Hmong":"ncuav","Hungarian":"kenyér","Icelandic":"brauð","Kannada":"ಬ್ರೆಡ್","Kinyarwanda":"umugati","Kurdish":"nan","Kyrgyz":"нан","Latin":"panis","Latvian":"maize","Lithuanian":"duona","Luxembourgish":"brout","Macedonian":"леб","Malagasy":"mofo","Malayalam":"ബ്രെഡ്","Maltese":"ħobż","Maori":"parāoa","Mongolian":"талх","Norwegian":"brød","Oriya":"ରୁଟି","Pashto":"ډوډۍ","Samoan":"falaoa","Scottish Gaelic":"aran","Serbian":"хлеб","Sesotho":"bohobe","Shona":"chingwa","Slovak":"chlieb","Slovenian":"kruh","Sundanese":"roti" },
+    mother: { "Mandarin Chinese":"妈妈","Hindi":"माँ","Spanish":"madre","French":"mère","Standard Arabic":"أم","Bengali":"মা","Portuguese":"mãe","Russian":"мать","Urdu":"ماں","Indonesian":"ibu","German":"mutter","Japanese":"母","Swahili":"mama","Marathi":"आई","Telugu":"అమ్మ","Turkish":"anne","Tamil":"அம்மா","Cantonese":"媽媽","Vietnamese":"mẹ","Filipino":"ina","Korean":"어머니","Persian":"مادر","Hausa":"uwa","Javanese":"ibu","Italian":"madre","Punjabi":"ਮਾਂ","Gujarati":"મા","Amharic":"እናት","Yoruba":"ìyá","Igbo":"nne","Sindhi":"امڙ","Nepali":"आमा","Burmese":"အမေ","Thai":"แม่","Polish":"matka","Ukrainian":"мати","Romanian":"mamă","Dutch":"moeder","Greek":"μητέρα","Zulu":"umama","Xhosa":"umama","Malay":"ibu","Sinhala":"අම්මා","Khmer":"ម្ដាយ","Lao":"ແມ່","Somali":"hooyo","Uzbek":"ona","Azerbaijani":"ana","Kazakh":"ана","Albanian":"nënë","Armenian":"մայր","Basque":"ama","Belarusian":"маці","Bosnian":"majka","Bulgarian":"майка","Catalan":"mare","Cebuano":"inahan","Chichewa":"mayi","Corsican":"mamma","Croatian":"majka","Czech":"matka","Danish":"mor","Esperanto":"patrino","Estonian":"ema","Finnish":"äiti","Frisian":"mem","Galician":"nai","Georgian":"დედა","Haitian Creole":"manman","Hawaiian":"makuahine","Hebrew":"אמא","Hmong":"niam","Hungarian":"anya","Icelandic":"móðir","Kannada":"ತಾಯಿ","Kinyarwanda":"nyina","Kurdish":"dayik","Kyrgyz":"эне","Latin":"mater","Latvian":"māte","Lithuanian":"motina","Luxembourgish":"mamm","Macedonian":"мајка","Malagasy":"reny","Malayalam":"അമ്മ","Maltese":"omm","Maori":"whaea","Mongolian":"ээж","Norwegian":"mor","Oriya":"ମା","Pashto":"مور","Samoan":"tinā","Scottish Gaelic":"màthair","Serbian":"мајка","Sesotho":"mme","Shona":"amai","Slovak":"matka","Slovenian":"mati","Sundanese":"indung" },
+    father: { "Mandarin Chinese":"爸爸","Hindi":"पिता","Spanish":"padre","French":"père","Standard Arabic":"أب","Bengali":"বাবা","Portuguese":"pai","Russian":"отец","Urdu":"باپ","Indonesian":"ayah","German":"vater","Japanese":"父","Swahili":"baba","Marathi":"वडील","Telugu":"నాన్న","Turkish":"baba","Tamil":"அப்பா","Cantonese":"爸爸","Vietnamese":"cha","Filipino":"ama","Korean":"아버지","Persian":"پدر","Hausa":"uba","Javanese":"bapak","Italian":"padre","Punjabi":"ਪਿਤਾ","Gujarati":"પિતા","Amharic":"አባት","Yoruba":"bàbá","Igbo":"nna","Sindhi":"پيءُ","Nepali":"बुबा","Burmese":"အဖေ","Thai":"พ่อ","Polish":"ojciec","Ukrainian":"батько","Romanian":"tată","Dutch":"vader","Greek":"πατέρας","Zulu":"ubaba","Xhosa":"utata","Malay":"ayah","Sinhala":"තාත්තා","Khmer":"ឪពុក","Lao":"ພໍ່","Somali":"aabo","Uzbek":"ota","Azerbaijani":"ata","Kazakh":"әке","Albanian":"baba","Armenian":"հայր","Basque":"aita","Belarusian":"бацька","Bosnian":"otac","Bulgarian":"баща","Catalan":"pare","Cebuano":"amahan","Chichewa":"bambo","Corsican":"babbu","Croatian":"otac","Czech":"otec","Danish":"far","Esperanto":"patro","Estonian":"isa","Finnish":"isä","Frisian":"heit","Galician":"pai","Georgian":"მამა","Haitian Creole":"papa","Hawaiian":"makuakāne","Hebrew":"אבא","Hmong":"txiv","Hungarian":"apa","Icelandic":"faðir","Kannada":"ತಂದೆ","Kinyarwanda":"se","Kurdish":"bav","Kyrgyz":"ата","Latin":"pater","Latvian":"tēvs","Lithuanian":"tėvas","Luxembourgish":"papp","Macedonian":"татко","Malagasy":"ray","Malayalam":"അച്ഛൻ","Maltese":"missier","Maori":"matua tāne","Mongolian":"аав","Norwegian":"far","Oriya":"ବାପା","Pashto":"پلار","Samoan":"tamā","Scottish Gaelic":"athair","Serbian":"отац","Sesotho":"ntate","Shona":"baba","Slovak":"otec","Slovenian":"oče","Sundanese":"bapa" },
+    star: { "Mandarin Chinese":"星星","Hindi":"तारा","Spanish":"estrella","French":"étoile","Standard Arabic":"نجمة","Bengali":"তারা","Portuguese":"estrela","Russian":"звезда","Urdu":"ستارہ","Indonesian":"bintang","German":"stern","Japanese":"星","Swahili":"nyota","Marathi":"तारा","Telugu":"నక్షత్రం","Turkish":"yıldız","Tamil":"நட்சத்திரம்","Cantonese":"星","Vietnamese":"ngôi sao","Filipino":"bituin","Korean":"별","Persian":"ستاره","Hausa":"tauraro","Javanese":"lintang","Italian":"stella","Punjabi":"ਤਾਰਾ","Gujarati":"તારો","Amharic":"ኮከብ","Yoruba":"ìràwọ̀","Igbo":"kpakpando","Sindhi":"تارو","Nepali":"तारा","Burmese":"ကြယ်","Thai":"ดาว","Polish":"gwiazda","Ukrainian":"зірка","Romanian":"stea","Dutch":"ster","Greek":"αστέρι","Zulu":"inkanyezi","Xhosa":"inkwenkwezi","Malay":"bintang","Sinhala":"තරුව","Khmer":"ផ្កាយ","Lao":"ດາວ","Somali":"xiddig","Uzbek":"yulduz","Azerbaijani":"ulduz","Kazakh":"жұлдыз","Albanian":"yll","Armenian":"աստղ","Basque":"izarra","Belarusian":"зорка","Bosnian":"zvijezda","Bulgarian":"звезда","Catalan":"estrella","Cebuano":"bituon","Chichewa":"nyenyezi","Corsican":"stella","Croatian":"zvijezda","Czech":"hvězda","Danish":"stjerne","Esperanto":"stelo","Estonian":"täht","Finnish":"tähti","Frisian":"stjer","Galician":"estrela","Georgian":"ვარსკვლავი","Haitian Creole":"zetwal","Hawaiian":"hōkū","Hebrew":"כוכב","Hmong":"hnub qub","Hungarian":"csillag","Icelandic":"stjarna","Kannada":"ನಕ್ಷತ್ರ","Kinyarwanda":"inyenyeri","Kurdish":"stêrk","Kyrgyz":"жылдыз","Latin":"stella","Latvian":"zvaigzne","Lithuanian":"žvaigždė","Luxembourgish":"stär","Macedonian":"ѕвезда","Malagasy":"kintana","Malayalam":"നക്ഷത്രം","Maltese":"stilla","Maori":"whetū","Mongolian":"од","Norwegian":"stjerne","Oriya":"ତାରା","Pashto":"ستوری","Samoan":"fetu","Scottish Gaelic":"rionnag","Serbian":"звезда","Sesotho":"naleli","Shona":"nyeredzi","Slovak":"hviezda","Slovenian":"zvezda","Sundanese":"bentang" },
+    mountain: { "Mandarin Chinese":"山","Hindi":"पहाड़","Spanish":"montaña","French":"montagne","Standard Arabic":"جبل","Bengali":"পাহাড়","Portuguese":"montanha","Russian":"гора","Urdu":"پہاڑ","Indonesian":"gunung","German":"berg","Japanese":"山","Swahili":"mlima","Marathi":"डोंगर","Telugu":"పర్వతం","Turkish":"dağ","Tamil":"மலை","Cantonese":"山","Vietnamese":"núi","Filipino":"bundok","Korean":"산","Persian":"کوه","Hausa":"dutse","Javanese":"gunung","Italian":"montagna","Punjabi":"ਪਹਾੜ","Gujarati":"પર્વત","Amharic":"ተራራ","Yoruba":"òkè","Igbo":"ugwu","Sindhi":"جبل","Nepali":"पहाड","Burmese":"တောင်","Thai":"ภูเขา","Polish":"góra","Ukrainian":"гора","Romanian":"munte","Dutch":"berg","Greek":"βουνό","Zulu":"intaba","Xhosa":"intaba","Malay":"gunung","Sinhala":"කන්ද","Khmer":"ភ្នំ","Lao":"ພູເຂົາ","Somali":"buur","Uzbek":"tog'","Azerbaijani":"dağ","Kazakh":"тау","Albanian":"mal","Armenian":"լեռ","Basque":"mendia","Belarusian":"гара","Bosnian":"planina","Bulgarian":"планина","Catalan":"muntanya","Cebuano":"bukid","Chichewa":"phiri","Corsican":"monte","Croatian":"planina","Czech":"hora","Danish":"bjerg","Esperanto":"monto","Estonian":"mägi","Finnish":"vuori","Frisian":"berch","Galician":"montaña","Georgian":"მთა","Haitian Creole":"mòn","Hawaiian":"mauna","Hebrew":"הר","Hmong":"roob","Hungarian":"hegy","Icelandic":"fjall","Kannada":"ಬೆಟ್ಟ","Kinyarwanda":"umusozi","Kurdish":"çiya","Kyrgyz":"тоо","Latin":"mons","Latvian":"kalns","Lithuanian":"kalnas","Luxembourgish":"bierg","Macedonian":"планина","Malagasy":"tendrombohitra","Malayalam":"മല","Maltese":"muntanja","Maori":"maunga","Mongolian":"уул","Norwegian":"fjell","Oriya":"ପାହାଡ","Pashto":"غر","Samoan":"mauga","Scottish Gaelic":"beinn","Serbian":"планина","Sesotho":"thaba","Shona":"gomo","Slovak":"hora","Slovenian":"gora","Sundanese":"gunung" },
+    fire: { "Mandarin Chinese":"火","Hindi":"आग","Spanish":"fuego","French":"feu","Standard Arabic":"نار","Bengali":"আগুন","Portuguese":"fogo","Russian":"огонь","Urdu":"آگ","Indonesian":"api","German":"feuer","Japanese":"火","Swahili":"moto","Marathi":"आग","Telugu":"మంట","Turkish":"ateş","Tamil":"நெருப்பு","Cantonese":"火","Vietnamese":"lửa","Filipino":"apoy","Korean":"불","Persian":"آتش","Hausa":"wuta","Javanese":"geni","Italian":"fuoco","Punjabi":"ਅੱਗ","Gujarati":"આગ","Amharic":"እሳት","Yoruba":"iná","Igbo":"ọkụ","Sindhi":"باھ","Nepali":"आगो","Burmese":"မီး","Thai":"ไฟ","Polish":"ogień","Ukrainian":"вогонь","Romanian":"foc","Dutch":"vuur","Greek":"φωτιά","Zulu":"umlilo","Xhosa":"umlilo","Malay":"api","Sinhala":"ගිනි","Khmer":"ភ្លើង","Lao":"ໄຟ","Somali":"dab","Uzbek":"olov","Azerbaijani":"od","Kazakh":"от","Albanian":"zjarr","Armenian":"կրակ","Basque":"sua","Belarusian":"агонь","Bosnian":"vatra","Bulgarian":"огън","Catalan":"foc","Cebuano":"kalayo","Chichewa":"moto","Corsican":"focu","Croatian":"vatra","Czech":"oheň","Danish":"ild","Esperanto":"fajro","Estonian":"tuli","Finnish":"tuli","Frisian":"fjoer","Galician":"lume","Georgian":"ცეცხლი","Haitian Creole":"dife","Hawaiian":"ahi","Hebrew":"אש","Hmong":"taws","Hungarian":"tűz","Icelandic":"eldur","Kannada":"ಬೆಂಕಿ","Kinyarwanda":"umuriro","Kurdish":"agir","Kyrgyz":"от","Latin":"ignis","Latvian":"uguns","Lithuanian":"ugnis","Luxembourgish":"feier","Macedonian":"оган","Malagasy":"afo","Malayalam":"തീ","Maltese":"nar","Maori":"ahi","Mongolian":"гал","Norwegian":"ild","Oriya":"ନିଆଁ","Pashto":"اور","Samoan":"afi","Scottish Gaelic":"teine","Serbian":"ватра","Sesotho":"mollo","Shona":"moto","Slovak":"oheň","Slovenian":"ogenj","Sundanese":"seuneu" }
+  };
+
+  const WORD_LIST = ["dog","cat","water","love","house","sun","book","friend","coffee","lobster","tree","fish","bird","milk","bread","mother","father","star","mountain","fire"];
+  const MAX_WRONG = 3;
+  const ENGLISH_COLOR = "#171a21";
+
+  // "lake" de línguas: pool maior de onde cada partida sorteia seu próprio conjunto
+  const ALL_META = LANG_META.concat(INSANE_META);
+
+  // línguas amplamente reconhecíveis, quase todas em alfabeto latino —
+  // o nível fácil sorteia 9 dessas a cada partida (+ inglês de graça = 10)
+  const EASY_POOL_NAMES = [
+    "Spanish","French","Portuguese","Italian","German","Dutch","Indonesian","Malay","Turkish","Vietnamese","Filipino","Polish","Romanian","Czech","Slovak","Croatian","Slovenian","Hungarian","Finnish","Danish","Norwegian","Icelandic","Estonian","Latvian","Lithuanian","Catalan","Swahili","Kazakh"
+  ];
+  // dentro do pool do Easy, essas são as que a maioria das pessoas realmente
+  // reconhece — "alfabeto latino" não é o mesmo que "idioma familiar", e as
+  // outras 15 do pool (Letão, Cazaque, Esloveno, etc.) são tão obscuras
+  // quanto qualquer coisa do Hard pra quem não estudou línguas
+  const EASY_FAMILIAR_NAMES = [
+    "Spanish","French","Portuguese","Italian","German","Dutch","Indonesian","Malay","Turkish","Vietnamese","Filipino","Polish","Romanian"
+  ];
+
+  // total de rodadas (línguas + inglês) por nível — usado só pro placar mostrar o progresso
+  const LEVEL_TOTALS = { easy: 12, medium: 12, hard: 12, insane: 96 };
+  const TIME_LIMIT_SEC = 150; // countdown fixo pra easy/medium/hard (2:30) — insane não usa isso (cronômetro sobe)
+
+  // línguas usadas nas 3 perguntas de teste antes de escolher a dificuldade
+  const TUTORIAL_NAMES = ["Spanish", "French", "Portuguese", "German", "Italian"];
+  const TUTORIAL_META = LANG_META.filter((l) => TUTORIAL_NAMES.includes(l.name));
+
+  // ---------- estado ----------
+  const COLORS = ["#3f8a68","#B44B69","#3B5BA5","#542E75","#AE90E9","#3474D3","#D98CA0"];
+  let lastColor = null;
+  function pickColor() {
+    const choices = COLORS.filter((c) => c !== lastColor);
+    const picked = choices[Math.floor(Math.random() * choices.length)];
+    lastColor = picked;
+    return picked;
+  }
+  let gamePhase = "tutorial"; // tutorial | playing
+  let currentWord = "dog";
+  let currentLevel = "easy"; // easy | medium | hard | insane
+  let usesCountdown = false; // true pra easy/medium/hard (2 min regressivos); false no insane (sobe, sem limite)
+  let gameEnding = false; // trava contra chamadas duplicadas de fim de jogo (updateProgress roda de novo dentro do próprio fluxo de resolveChallenge)
+  let isResolving = false; // trava contra respostas em sequência rápida demais processando uma rodada já resolvida
+  // tela pequena = barra de digitação fixa embaixo (estilo chat), reaproveitando
+  // sempre o MESMO <input>, em vez de criar um novo por rodada — no celular,
+  // criar+focar um input novo a cada charada não abre o teclado automaticamente
+  // (o navegador só abre teclado com foco síncrono a um toque real da pessoa),
+  // então a pessoa precisava tocar manualmente em toda rodada
+  const IS_MOBILE = window.innerWidth <= 700;
+  let totalRounds = LEVEL_TOTALS.easy;
+  let remaining = [];
+  let currentLineEl = null;
+  let currentGroup = [];
+  // grupo mais amplo, só pra VALIDAR respostas — currentGroup só tem as
+  // línguas que entraram no sorteio desta partida (usado pra saber o que
+  // tirar do "remaining"), mas duas línguas podem ter a mesma palavra
+  // (ex: "berg" é montanha em alemão E holandês) sem as duas terem sido
+  // sorteadas nesta partida. Sem esse grupo à parte, digitar a língua
+  // "certa" que não foi sorteada era rejeitado por engano
+  let currentAcceptableGroup = [];
+  let currentBlankInput = null;
+  let challengeIndex = 0;
+  let wrongCount = 0;
+  let attemptsCount = 0;
+  let correctCount = 0;
+  let missedCount = 0;
+  let roundLog = []; // { name, correct } por rodada — usado pra "rarest catch" no resultado
+  let startTime = Date.now();
+  let timerInterval = null;
+
+  // uma língua que traduz a palavra pro mesmo texto do inglês (empréstimo
+  // direto, tipo "lobster" em indonésio) fica confusa como charada, já que
+  // a resposta em inglês já foi dada de graça lá em cima — essas línguas
+  // nunca entram no sorteio pra essa palavra específica, embora continuem
+  // disponíveis normalmente pras outras palavras
+  function isDuplicateOfWord(word, langName) {
+    const translation = WORDS[word][langName];
+    return translation && translation.toLowerCase().trim() === word.toLowerCase().trim();
+  }
+
+  // "onramp": em quantas das primeiras perguntas o jogo prioriza uma língua
+  // comum (se ela estiver presente no sorteio) antes de soltar tudo aleatório.
+  // easy: 3 primeiras · medium: só a 1ª · hard/insane: nenhuma, aleatório
+  // desde a primeira pergunta
+  const ONRAMP_ROUNDS = { easy: 3, medium: 1, hard: 0, insane: 0 };
+
+  function buildLangsForWord(word, level) {
+    let pool;
+    let drawCount;
+
+    if (level === "easy") {
+      pool = ALL_META.filter((l) => EASY_POOL_NAMES.includes(l.name));
+      drawCount = 11; // + inglês de graça = 12
+    } else if (level === "hard") {
+      pool = ALL_META; // mesmo lake completo do insano, só que com bem menos rounds
+      drawCount = 11; // + inglês de graça = 12
+    } else if (level === "insane") {
+      pool = ALL_META;
+      drawCount = 95; // + inglês de graça = 96 — sobra só 3 línguas de fora do pool de 99 a cada partida
+    } else {
+      pool = LANG_META; // lake do médio = só as 49 línguas mais faladas, não as 50 raras do insano
+      drawCount = 11; // + inglês de graça = 12
+    }
+
+    pool = pool.filter((l) => !isDuplicateOfWord(word, l.name));
+
+    let drawn;
+    if (level === "easy") {
+      // garante um "chão comum" bem maior — de 7 a 9 das línguas realmente
+      // reconhecíveis do pool (não só top10), pra maioria da partida ser
+      // familiar e sobrar só um punhado de rodadas genuinamente desafiadoras
+      const familiarAvailable = shuffle(pool.filter((l) => EASY_FAMILIAR_NAMES.includes(l.name)));
+      const guaranteedCount = Math.min(7 + Math.floor(Math.random() * 3), familiarAvailable.length, drawCount);
+      const guaranteed = familiarAvailable.slice(0, guaranteedCount);
+      const rest = pool.filter((l) => !guaranteed.includes(l));
+      const fillerCount = Math.max(drawCount - guaranteed.length, 0);
+      const filler = shuffle([...rest]).slice(0, fillerCount);
+      drawn = shuffle([...guaranteed, ...filler]);
+    } else if (level === "medium") {
+      // garante de 3 a 5 línguas comuns (top10) no sorteio — evita que o
+      // médio vire "quase um mini-hard" só porque o resto do pool de 49 é
+      // majoritariamente de scripts não-latinos; o resto do sorteio segue aleatório
+      const commonsAvailable = shuffle(pool.filter((l) => TOP10_NAMES.includes(l.name)));
+      const guaranteedCount = Math.min(3 + Math.floor(Math.random() * 3), commonsAvailable.length); // 3, 4 ou 5
+      const guaranteed = commonsAvailable.slice(0, guaranteedCount);
+      const rest = pool.filter((l) => !TOP10_NAMES.includes(l.name));
+      const fillerCount = Math.max(drawCount - guaranteed.length, 0);
+      const filler = shuffle([...rest]).slice(0, fillerCount);
+      drawn = shuffle([...guaranteed, ...filler]);
+    } else {
+      // hard/insane: sorteio 100% aleatório do lake, sem garantir presença
+      // de língua comum nenhuma
+      drawn = shuffle([...pool]).slice(0, drawCount);
+    }
+
+    return drawn.map((l) => ({
+      name: l.name,
+      aliases: l.aliases,
+      word: WORDS[word][l.name],
+      top10: TOP10_NAMES.includes(l.name)
+    }));
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function normalize(s) {
+    return s.trim().toLowerCase();
+  }
+
+  // detecta se a palavra usa um script não-latino, pra dar um pouco mais
+  // de peso de fonte nela (weight 100 fica ilegível fora do alfabeto latino)
+  const NON_LATIN_RE = /[^\u0000-\u024F\u1E00-\u1EFF\s'\-.,!?]/;
+  function isNonLatin(text) {
+    return NON_LATIN_RE.test(text);
+  }
+
+  // normaliza variantes de letra árabe/persa que são a mesma letra na prática
+  // (convenções de teclado diferentes) — ك (árabe) e ک (persa/urdu/pashto) são
+  // a mesma letra, assim como ي/ى/ی e ة/ه — usado só pra decidir se duas
+  // línguas compartilham a mesma palavra, nunca pra alterar o que é exibido
+  function canonicalizeArabicScript(s) {
+    return s.replace(/ك/g, "ک").replace(/[يى]/g, "ی").replace(/ة/g, "ه");
+  }
+
+  // distância de edição (Levenshtein) pra tolerar pequenos erros de digitação
+  function levenshtein(a, b) {
+    const dp = [];
+    for (let i = 0; i <= a.length; i++) dp.push([i]);
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        dp[i][j] =
+          a[i - 1] === b[j - 1]
+            ? dp[i - 1][j - 1]
+            : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
+    return dp[a.length][b.length];
+  }
+
+  function findMatch(guess, langs) {
+    const g = normalize(guess);
+
+    // 1) correspondência exata
+    const exact = langs.find((l) => l.name.toLowerCase() === g || l.aliases.includes(g));
+    if (exact) return exact;
+
+    // 2) correspondência com tolerância a erro de digitação
+    let best = null;
+    let bestDist = Infinity;
+    langs.forEach((l) => {
+      const candidates = [l.name.toLowerCase(), ...l.aliases];
+      candidates.forEach((c) => {
+        const d = levenshtein(g, c);
+        const threshold = c.length <= 4 ? 1 : c.length <= 8 ? 2 : c.length <= 14 ? 3 : 4;
+        if (d <= threshold && d < bestDist) {
+          bestDist = d;
+          best = l;
+        }
+      });
+    });
+    return best;
+  }
+
+  function formatTime(ms) {
+    const totalSec = Math.floor(ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function updateProgress() {
+    const elapsedMs = Date.now() - startTime;
+
+    const clock = document.getElementById("gameClock");
+    const mobileClock = document.getElementById("mobileClock");
+    if (usesCountdown) {
+      const remainingMs = TIME_LIMIT_SEC * 1000 - elapsedMs;
+      if (remainingMs <= 0) {
+        clock.textContent = "0:00";
+        mobileClock.textContent = "0:00";
+        if (!gameEnding) {
+          gameEnding = true;
+          handleTimeUp();
+        }
+        return;
+      }
+      clock.textContent = formatTime(remainingMs);
+      clock.classList.toggle("urgent", remainingMs <= 10000);
+      mobileClock.textContent = formatTime(remainingMs);
+      mobileClock.classList.toggle("urgent", remainingMs <= 10000);
+    } else {
+      clock.textContent = formatTime(elapsedMs);
+      mobileClock.textContent = formatTime(elapsedMs);
+    }
+  }
+
+  function typeInto(el, text, onDone, speed = 19) {
+    const chars = Array.from(text);
+    let i = 0;
+    function typeNext() {
+      if (i >= chars.length) {
+        if (onDone) onDone();
+        return;
+      }
+      el.textContent += chars[i];
+      i++;
+      // swing humanizado: cada tecla varia em torno da velocidade base em vez
+      // de um intervalo fixo — evita a cadência de metrônomo do setInterval
+      const swing = speed * 0.6;
+      const delay = Math.max(4, speed + (Math.random() * swing * 2 - swing));
+      setTimeout(typeNext, delay);
+    }
+    typeNext();
+  }
+
+  function typeSegments(container, segments, onDone) {
+    let idx = 0;
+    function next() {
+      if (idx >= segments.length) {
+        if (onDone) onDone();
+        return;
+      }
+      const seg = segments[idx++];
+      const span = document.createElement("span");
+      if (seg.className) span.className = seg.className;
+      if (seg.style) span.setAttribute("style", seg.style);
+      if (seg.dataLevel) span.dataset.level = seg.dataLevel;
+      container.appendChild(span);
+      // texto de conexão ("is dog in ", "choose a level to start:") roda
+      // mais rápido; palavras-chave (a própria palavra, o nome da língua)
+      // mantêm a cadência mais lenta e "deliberada"
+      const isKeyword = seg.className && /\bword\b|\blang-correct\b/.test(seg.className);
+      typeInto(span, seg.text, next, isKeyword ? 25 : 13);
+    }
+    next();
+  }
+
+  function fadeOutAndClear(container) {
+    if (!container) return; // linha já não tem mais esse elemento (ex: digitação muito rápida em sequência) — nada a fazer
+    const children = Array.from(container.children);
+    if (children.length === 0) return;
+    children.forEach((c) => c.classList.add("fade-out"));
+    setTimeout(() => {
+      container.innerHTML = "";
+    }, 450);
+  }
+
+  // ---------- fluxo do jogo ----------
+
+  // as 3 primeiras charadas, antes de escolher a dificuldade — sempre com "lobster"
+  // "já visitou antes?" — guardado no localStorage do navegador. Sem isso,
+  // toda visita (mesmo a 50ª) mostra o tutorial completo de novo do zero
+  const RETURN_KEY = "lobsterIsLobster_seenTutorial";
+  function hasSeenTutorial() {
+    try {
+      return localStorage.getItem(RETURN_KEY) === "1";
+    } catch (e) {
+      return false; // localStorage bloqueado (modo privado etc.) — trata como primeira visita
+    }
+  }
+  function markTutorialSeen() {
+    try {
+      localStorage.setItem(RETURN_KEY, "1");
+    } catch (e) {
+      /* sem problema, só não vai lembrar na próxima visita */
+    }
+  }
+
+  // pra quem já viu o tutorial antes: pula direto pra escolha de nível,
+  // sem repetir as 3 rodadas de "lobster" nem as dicas de digitação
+  function startReturningFlow() {
+    gamePhase = "tutorial";
+    clearIdleTimer();
+    document.getElementById("gameClockWrap").classList.remove("visible");
+    document.getElementById("gameClock").classList.remove("urgent");
+    document.getElementById("mobileClock").classList.remove("visible", "urgent");
+    document.getElementById("bottomPanel").classList.remove("visible");
+    document.body.classList.remove("playing");
+
+    if (IS_MOBILE) {
+      mobileShowLevelEnd(true);
+      return;
+    }
+
+    const flow = document.getElementById("flow");
+    flow.innerHTML = "";
+    showLevelIntro(true);
+  }
+
+  function startTutorial() {
+    markTutorialSeen();
+    gamePhase = "tutorial";
+    clearIdleTimer();
+    currentWord = "lobster";
+    document.getElementById("gameClockWrap").classList.remove("visible");
+    document.getElementById("gameClock").classList.remove("urgent");
+    document.getElementById("mobileClock").classList.remove("visible", "urgent");
+    document.getElementById("bottomPanel").classList.remove("visible");
+    document.body.classList.remove("playing");
+
+    const tutorialLangs = shuffle([...TUTORIAL_META])
+      .slice(0, 3)
+      .map((l) => ({
+        name: l.name,
+        aliases: l.aliases,
+        word: WORDS["lobster"][l.name],
+        top10: false
+      }));
+    remaining = tutorialLangs;
+    challengeIndex = 0;
+    wrongCount = 0;
+    totalRounds = tutorialLangs.length;
+
+    if (IS_MOBILE) {
+      document.getElementById("mobileGame").classList.add("active");
+      nextChallenge();
+      return;
+    }
+
+    const flow = document.getElementById("flow");
+    flow.innerHTML = "";
+    const intro = document.createElement("div");
+    intro.className = "line";
+    flow.appendChild(intro);
+
+    typeSegments(
+      intro,
+      [
+        { text: "Lobster", className: "word", style: `color:${ENGLISH_COLOR}; font-weight:400` },
+        { text: " is lobster in english" }
+      ],
+      () => {
+        nextChallenge();
+      }
+    );
+  }
+
+  function initGame(word, level, resetFlow) {
+    if (resetFlow === undefined) resetFlow = true;
+    clearIdleTimer();
+    gamePhase = "playing";
+    document.body.classList.add("playing");
+    document.querySelectorAll(".level-mini-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.level === (level || currentLevel));
+    });
+    currentWord = word;
+    currentLevel = level || currentLevel;
+    updateLevelPanel(currentLevel);
+    totalRounds = LEVEL_TOTALS[currentLevel];
+    usesCountdown = currentLevel !== "insane"; // easy/medium/hard: 2 min regressivos · insane: sobe, sem limite
+    remaining = shuffle(buildLangsForWord(word, currentLevel));
+    challengeIndex = 0;
+    attemptsCount = 0;
+    correctCount = 0;
+    missedCount = 0;
+    roundLog = [];
+    gameEnding = false;
+    startTime = Date.now();
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateProgress, 1000);
+    const clock = document.getElementById("gameClock");
+    const mobileClock = document.getElementById("mobileClock");
+    document.getElementById("gameClockWrap").classList.add("visible");
+    document.getElementById("bottomPanel").classList.add("visible");
+    document.getElementById("bottomPanel").classList.remove("no-mobile-bar");
+    clock.classList.remove("urgent", "flash");
+    mobileClock.classList.remove("urgent");
+    mobileClock.classList.add("visible");
+    const initialClockText = usesCountdown ? formatTime(TIME_LIMIT_SEC * 1000) : "0:00";
+    clock.textContent = initialClockText;
+    mobileClock.textContent = initialClockText;
+    void clock.offsetWidth; // força reflow pra reiniciar a animação mesmo se ela já rodou antes (troca rápida de nível)
+    clock.classList.add("flash");
+    setTimeout(() => clock.classList.remove("flash"), 1000);
+    correctCount = 1; // o inglês já veio dado de cara
+
+    if (IS_MOBILE) {
+      document.getElementById("mobileLevelEnd").classList.remove("active");
+      document.getElementById("mobileResults").classList.remove("active");
+      document.getElementById("mobileGame").classList.add("active");
+      updateProgress();
+      nextChallenge();
+      return;
+    }
+
+    const flow = document.getElementById("flow");
+    if (resetFlow) flow.innerHTML = "";
+    const intro = document.createElement("div");
+    intro.className = "line";
+    const cap = word.charAt(0).toUpperCase() + word.slice(1);
+    flow.appendChild(intro);
+    updateProgress();
+    scrollToLine(intro);
+
+    typeSegments(
+      intro,
+      [
+        { text: cap, className: "word", style: `color:${ENGLISH_COLOR}; font-weight:400` },
+        { text: ` is ${word} in english` }
+      ],
+      () => {
+        nextChallenge();
+      }
+    );
+  }
+
+  // mantém a linha ativa sempre fixa numa faixa a ~60% da altura da tela.
+  // no começo do jogo, o conteúdo ainda não chega lá, então nada rola
+  // (o clamp em 0 cuida disso); a partir do momento em que a linha ativa
+  // ultrapassaria essa faixa, a página sobe pra mantê-la sempre ali.
+  // usa rolagem instantânea (não "smooth") porque chamadas muito seguidas
+  // (uma por linha, várias vezes por rodada) interrompiam a animação suave
+  // antes dela terminar, fazendo a página andar só uns pixels de cada vez.
+  const ANCHOR_RATIO = IS_MOBILE ? 0.68 : 0.75; // no mobile mira um pouco mais alto — a barra fixa embaixo já ocupa parte da tela
+  function scrollToLine(el) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const targetY = window.scrollY + rect.top - window.innerHeight * ANCHOR_RATIO;
+        window.scrollTo({ top: Math.max(targetY, 0) });
+      });
+    });
+  }
+
+  // resultado final: rola pro topo (não pra 75% como durante o jogo) — deixa
+  // claro que é uma tela nova, não só mais uma linha do fluxo
+  function scrollResultsToTop(el) {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        const targetY = window.scrollY + rect.top - 40;
+        window.scrollTo({ top: Math.max(targetY, 0), behavior: "smooth" });
+      });
+    });
+  }
+
+  function endGame(reason) {
+    isResolving = false;
+    if (timerInterval) clearInterval(timerInterval);
+    if (currentBlankInput) currentBlankInput.disabled = true;
+    document.getElementById("gameClockWrap").classList.remove("visible");
+    document.getElementById("gameClock").classList.remove("urgent");
+    document.getElementById("mobileClock").classList.remove("urgent", "visible");
+    document.getElementById("bottomPanel").classList.add("no-mobile-bar");
+    showResultsBlock(reason);
+  }
+
+  // tempo acabou: se já tem uma pergunta em andamento (com campo de resposta
+  // visível), revela a resposta certa contando como erro, igual um skip —
+  // só cai direto pro fim de jogo sem revelar se o timer estourou bem no meio
+  // da animação de digitação, antes do campo de resposta existir
+  function handleTimeUp() {
+    clearIdleTimer();
+    if (timerInterval) clearInterval(timerInterval);
+    document.getElementById("gameClock").classList.remove("urgent");
+    document.getElementById("mobileClock").classList.remove("urgent");
+
+    if (IS_MOBILE) {
+      if (currentGroup && currentGroup.length > 0) {
+        mobileResolveChallenge(currentGroup[0], "#9aa1ac", true, "timeUp");
+      } else {
+        endGame("timeUp");
+      }
+      return;
+    }
+
+    const blankWrap = currentLineEl && currentLineEl.querySelector(".blank-wrap");
+    if (blankWrap && currentGroup) {
+      if (currentBlankInput) currentBlankInput.disabled = true;
+      const attempts = currentLineEl.querySelector(".attempts");
+      fadeOutAndClear(attempts);
+      resolveChallenge(currentGroup[0], "#9aa1ac", true, "timeUp");
+    } else {
+      endGame("timeUp");
+    }
+  }
+
+  function nextChallenge() {
+    isResolving = false;
+    if (remaining.length === 0) {
+      if (timerInterval) clearInterval(timerInterval);
+      if (gamePhase === "tutorial") {
+        if (IS_MOBILE) {
+          mobileShowLevelEnd();
+        } else {
+          showLevelIntro();
+        }
+      } else {
+        if (IS_MOBILE) {
+          document.getElementById("mobileGame").classList.remove("active");
+          showResultsBlock("completed");
+        } else {
+          document.getElementById("gameClockWrap").classList.remove("visible");
+          document.getElementById("gameClock").classList.remove("urgent");
+          document.getElementById("bottomPanel").classList.add("no-mobile-bar");
+          showResultsBlock("completed");
+        }
+      }
+      return;
+    }
+
+    wrongCount = 0;
+    challengeIndex++;
+
+    const onrampLimit = ONRAMP_ROUNDS[currentLevel] || 0;
+    const pool =
+      challengeIndex <= onrampLimit && remaining.some((l) => l.top10)
+        ? remaining.filter((l) => l.top10)
+        : remaining;
+
+    const promptLang = pool[Math.floor(Math.random() * pool.length)];
+    const promptCanon = canonicalizeArabicScript(promptLang.word);
+    currentGroup = remaining.filter((l) => canonicalizeArabicScript(l.word) === promptCanon);
+    currentPromptLangName = promptLang.name;
+
+    // varre TODAS as 99 línguas (não só o pool sorteado nesta partida) atrás
+    // de qualquer uma que compartilhe a mesma grafia — ver comentário na
+    // declaração de currentAcceptableGroup
+    currentAcceptableGroup = ALL_META
+      .filter((l) => WORDS[currentWord] && WORDS[currentWord][l.name] && canonicalizeArabicScript(WORDS[currentWord][l.name]) === promptCanon)
+      .map((l) => ({ name: l.name, aliases: l.aliases }));
+
+    if (IS_MOBILE) {
+      mobileShowChallenge(promptLang);
+      return;
+    }
+
+    const line = document.createElement("div");
+    line.className = "line";
+    document.getElementById("flow").appendChild(line);
+    currentLineEl = line;
+    scrollToLine(line);
+
+    typeSegments(
+      line,
+      [
+        { text: promptLang.word, className: isNonLatin(promptLang.word) ? "word non-latin" : "word" },
+        { text: ` is ${currentWord} in ` }
+      ],
+      () => {
+        const attemptsSpan = document.createElement("span");
+        attemptsSpan.className = "attempts";
+        line.appendChild(attemptsSpan);
+
+        createBlankInput(line);
+        scrollToLine(line);
+      }
+    );
+  }
+
+  const SKIP_WORDS = ["next", "jump", "skip"];
+  const IDLE_HINT_DELAY = 6000;
+  const IDLE_HINT_DELAY_FIRST = 2500; // primeira vez, mostra mais cedo pra ensinar o mecanismo
+  const GEO_HINT_DELAY = 6000; // depois da dica de skip já ter aparecido
+  let idleTimer = null;
+  let geoHintTimer = null;
+  let skipHintIndex = 0;
+  let hasShownHintOnce = false;
+  let hasShownAnswerHint = false; // dica de "como jogar" na primeiríssima blank
+  let currentPromptLangName = null; // pra achar a pista geográfica da rodada atual
+
+  // pista leve por geografia — não entrega a resposta, só reduz o "não faço
+  // ideia de que idioma é esse" que os testadores reportaram no jogo inteiro
+  const GEO_HINT_GROUPS = [
+    { hint: "an East Asian language", langs: ["Mandarin Chinese", "Cantonese", "Japanese", "Korean", "Mongolian"] },
+    { hint: "spoken across South Asia", langs: ["Hindi", "Bengali", "Marathi", "Telugu", "Tamil", "Punjabi", "Gujarati", "Urdu", "Sindhi", "Nepali", "Sinhala", "Oriya", "Kannada", "Malayalam"] },
+    { hint: "spoken in Southeast Asia", langs: ["Indonesian", "Malay", "Vietnamese", "Filipino", "Javanese", "Thai", "Burmese", "Khmer", "Lao", "Cebuano", "Hmong", "Sundanese"] },
+    { hint: "spoken in the Middle East", langs: ["Standard Arabic", "Persian", "Kurdish", "Pashto", "Hebrew"] },
+    { hint: "a Turkic language of Central Asia", langs: ["Turkish", "Azerbaijani", "Uzbek", "Kazakh", "Kyrgyz"] },
+    { hint: "spoken in the Caucasus region", langs: ["Georgian", "Armenian"] },
+    { hint: "an African language", langs: ["Swahili", "Hausa", "Yoruba", "Igbo", "Amharic", "Somali", "Zulu", "Xhosa", "Sesotho", "Shona", "Chichewa", "Kinyarwanda"] },
+    { hint: "spoken on the island of Madagascar", langs: ["Malagasy"] },
+    { hint: "a Romance language of Europe", langs: ["Spanish", "French", "Portuguese", "Italian", "Romanian", "Catalan", "Galician", "Corsican"] },
+    { hint: "spoken mainly in Scandinavia", langs: ["Danish", "Norwegian", "Icelandic"] },
+    { hint: "a Germanic language of Western Europe", langs: ["German", "Dutch", "Luxembourgish", "Frisian"] },
+    { hint: "a Slavic language of Eastern Europe", langs: ["Russian", "Polish", "Ukrainian", "Czech", "Slovak", "Belarusian"] },
+    { hint: "a Slavic language of the Balkans", langs: ["Croatian", "Slovenian", "Serbian", "Bosnian", "Bulgarian", "Macedonian"] },
+    { hint: "a Baltic language", langs: ["Latvian", "Lithuanian"] },
+    { hint: "spoken in Greece", langs: ["Greek"] },
+    { hint: "spoken in the Balkans", langs: ["Albanian"] },
+    { hint: "a Uralic language, unrelated to its neighbors", langs: ["Hungarian", "Finnish", "Estonian"] },
+    { hint: "spoken on a small island in the Mediterranean", langs: ["Maltese"] },
+    { hint: "a language isolate spoken in Spain, unrelated to any other language", langs: ["Basque"] },
+    { hint: "spoken in the Pacific Islands", langs: ["Hawaiian", "Maori", "Samoan"] },
+    { hint: "a creole language spoken in the Caribbean", langs: ["Haitian Creole"] },
+    { hint: "a constructed language, invented rather than evolved naturally", langs: ["Esperanto"] },
+    { hint: "an ancient language, no longer spoken natively", langs: ["Latin"] },
+    { hint: "a Celtic language of Scotland", langs: ["Scottish Gaelic"] }
+  ];
+  const GEO_HINT_BY_LANG = {};
+  GEO_HINT_GROUPS.forEach((g) => g.langs.forEach((name) => (GEO_HINT_BY_LANG[name] = g.hint)));
+  function getGeoHint(name) {
+    return GEO_HINT_BY_LANG[name] || null;
+  }
+
+  function clearIdleTimer() {
+    if (idleTimer) clearTimeout(idleTimer);
+    idleTimer = null;
+    if (geoHintTimer) clearTimeout(geoHintTimer);
+    geoHintTimer = null;
+  }
+
+  function scheduleIdleHint(line) {
+    clearIdleTimer();
+    const existingHint = line.querySelector(".skip-hint");
+    if (existingHint) existingHint.remove();
+
+    // primeiríssima blank da sessão: ensina a mecânica central antes de
+    // qualquer outra dica, e mais rápido — sem isso a pessoa trava sem saber o que fazer
+    if (!hasShownAnswerHint) {
+      idleTimer = setTimeout(() => {
+        if (line.querySelector(".skip-hint")) return;
+        hasShownAnswerHint = true;
+        const hint = document.createElement("span");
+        hint.className = "skip-hint";
+        hint.textContent = " type your answer, press enter";
+        line.appendChild(hint);
+      }, 800);
+      return;
+    }
+
+    const delay = hasShownHintOnce ? IDLE_HINT_DELAY : IDLE_HINT_DELAY_FIRST;
+    idleTimer = setTimeout(() => {
+      if (line.querySelector(".skip-hint")) return;
+      hasShownHintOnce = true;
+      const word = SKIP_WORDS[skipHintIndex % SKIP_WORDS.length];
+      skipHintIndex++;
+      const hint = document.createElement("span");
+      hint.className = "skip-hint";
+      hint.textContent = ` type "${word}" to move on`;
+      line.appendChild(hint);
+
+      // depois da dica de skip, espera mais um pouco e mostra a pista
+      // geográfica — não entrega a resposta, só reduz o "não sei nem que
+      // idioma é esse" pra quem já está travado há um tempo
+      const geo = currentPromptLangName ? getGeoHint(currentPromptLangName) : null;
+      if (geo) {
+        geoHintTimer = setTimeout(() => {
+          if (line.querySelector(".geo-hint")) return;
+          const geoSpan = document.createElement("span");
+          geoSpan.className = "geo-hint";
+          geoSpan.textContent = ` (hint: ${geo})`;
+          line.appendChild(geoSpan);
+        }, GEO_HINT_DELAY);
+      }
+    }, delay);
+  }
+
+  // cria o "_" que pisca e o campo que captura o que a pessoa digita — no
+  // desktop, um input invisível embutido no texto; no mobile, reaproveita a
+  // barra fixa embaixo (ver IS_MOBILE), pra não precisar recriar+focar um
+  // elemento novo a cada rodada (o que no celular nunca abre o teclado sozinho)
+  // este input invisível só é usado no desktop — no mobile, mobileShowChallenge()
+  // cuida disso diretamente com o input fixo #mobileCardInput
+  function createBlankInput(line) {
+    const wrap = document.createElement("span");
+    wrap.className = "blank-wrap";
+
+    const display = document.createElement("span");
+    display.className = "blank";
+    wrap.appendChild(display);
+
+    function render(value) {
+      display.textContent = "";
+      display.appendChild(document.createTextNode(value));
+      const cursor = document.createElement("span");
+      cursor.className = "cursor";
+      cursor.textContent = "_";
+      display.appendChild(cursor);
+    }
+
+    line.appendChild(wrap);
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "hidden-input";
+    input.autocomplete = "off";
+    input.autocapitalize = "off";
+    input.spellcheck = false;
+    wrap.appendChild(input);
+    currentBlankInput = input;
+
+    render("");
+    input.focus();
+    scheduleIdleHint(line);
+
+    input.addEventListener("input", () => {
+      render(input.value);
+      scheduleIdleHint(line);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleGuess(input.value);
+      }
+    });
+
+    wrap.addEventListener("click", () => input.focus());
+    input.focus();
+  }
+
+  // clicar em qualquer lugar da página foca o campo ativo (contorna restrições
+  // de foco automático que alguns navegadores aplicam dentro de previews/iframes)
+  function focusActiveInputFromGesture(e) {
+    // no mobile, ignora toques em botões/links/telas sem digitação (menu,
+    // fim de nível, resultado) — senão reabriria o teclado atrás delas
+    if (IS_MOBILE && e && e.target && e.target.closest &&
+      e.target.closest("button, a, .mobile-menu-overlay, .mobile-level-end, .mobile-results")) {
+      return;
+    }
+    if (currentBlankInput && document.activeElement !== currentBlankInput) {
+      currentBlankInput.focus();
+    }
+    // esse toque É um gesto genuíno da pessoa (diferente do focus()
+    // programático que o jogo dispara sozinho ao trocar de rodada) — só
+    // aqui é seguro considerar que ela já entendeu que precisa tocar pra digitar
+    if (IS_MOBILE) {
+      document.getElementById("mobileTapHint").classList.remove("visible");
+      hasShownAnswerHint = true;
+    }
+  }
+  document.addEventListener("click", focusActiveInputFromGesture);
+  // "click" no celular é sintetizado depois do toque físico, e no primeiro
+  // toque isso às vezes perde o "gesto genuíno" que o focus() precisa pra
+  // abrir o teclado — "touchend" acompanha o toque de verdade, mais cedo
+  if (IS_MOBILE) {
+    document.addEventListener("touchend", focusActiveInputFromGesture);
+  }
+
+  function resolveChallenge(primaryMatch, color, isForced, endReason) {
+    isResolving = true;
+    const blankWrap = currentLineEl.querySelector(".blank-wrap");
+    const attempts = currentLineEl.querySelector(".attempts");
+    const hint = currentLineEl.querySelector(".skip-hint");
+    if (hint) hint.remove();
+    const geoHint = currentLineEl.querySelector(".geo-hint");
+    if (geoHint) geoHint.remove();
+
+    fadeOutAndClear(attempts);
+
+    const wordEl = currentLineEl.querySelector(".word");
+    wordEl.style.color = color;
+    wordEl.style.fontWeight = "400";
+    blankWrap.outerHTML = `<span class="lang-correct" style="color:${color}">${primaryMatch.name.toLowerCase()}</span>`;
+
+    if (isForced) {
+      missedCount++;
+    } else {
+      correctCount++;
+    }
+    roundLog.push({ name: primaryMatch.name, correct: !isForced });
+
+    const others = currentGroup.filter((l) => l.name !== primaryMatch.name);
+    remaining = remaining.filter((l) => !currentGroup.includes(l));
+    updateProgress();
+
+    function revealNextOther(i) {
+      if (i >= others.length) {
+        if (endReason) {
+          endGame(endReason);
+        } else {
+          nextChallenge();
+        }
+        return;
+      }
+      const other = others[i];
+      let c;
+      if (isForced) {
+        c = "#9aa1ac";
+        missedCount++;
+      } else {
+        c = pickColor();
+        correctCount++;
+      }
+      updateProgress();
+      const extraLine = document.createElement("div");
+      extraLine.className = "line";
+      document.getElementById("flow").appendChild(extraLine);
+      scrollToLine(extraLine);
+      typeSegments(
+        extraLine,
+        [
+          { text: other.word, className: isNonLatin(other.word) ? "word non-latin" : "word", style: `color:${c}; font-weight:400` },
+          { text: ` is also ${currentWord} in ` },
+          { text: `${other.name.toLowerCase()}`, className: "lang-correct", style: `color:${c}` }
+        ],
+        () => revealNextOther(i + 1)
+      );
+    }
+    revealNextOther(0);
+  }
+
+  function handleGuess(rawGuess) {
+    const guess = rawGuess.trim();
+    if (!guess) return;
+    // proteção contra entrada atrasada depois do fim de jogo (ex: várias
+    // teclas em sequência muito rápida) — sem isso, processava um guess
+    // com currentLineEl/currentGroup já obsoletos e quebrava
+    const input = IS_MOBILE ? document.getElementById("mobileCardInput") : currentBlankInput;
+    if (!currentGroup || currentGroup.length === 0 || (input && input.disabled) || isResolving) return;
+
+    clearIdleTimer();
+    // se a pessoa já respondeu uma vez, ela entendeu a mecânica — não
+    // precisa ver "type your answer, press enter" de novo mais tarde
+    hasShownAnswerHint = true;
+
+    // skip vale nos outros níveis; no insane, tentar pular é desqualificação na hora
+    if (SKIP_WORDS.includes(guess.toLowerCase())) {
+      if (IS_MOBILE) {
+        mobileResolveChallenge(currentGroup[0], "#9aa1ac", true, currentLevel === "insane" ? "mistake" : null);
+      } else {
+        const attempts = currentLineEl.querySelector(".attempts");
+        fadeOutAndClear(attempts);
+        resolveChallenge(currentGroup[0], "#9aa1ac", true, currentLevel === "insane" ? "mistake" : null);
+      }
+      return;
+    }
+
+    attemptsCount++;
+
+    const match = findMatch(guess, currentAcceptableGroup);
+
+    if (match) {
+      const color = pickColor();
+      if (IS_MOBILE) {
+        mobileResolveChallenge(match, color, false);
+      } else {
+        resolveChallenge(match, color, false);
+      }
+    } else {
+      wrongCount++;
+
+      // sem limite de tentativas em easy/medium/hard — o skip já é a forma
+      // voluntária de desistir de uma língua difícil; só no insane esgotar
+      // as 3 chances desqualifica de verdade (é a identidade desse modo)
+      if (currentLevel === "insane" && wrongCount >= MAX_WRONG) {
+        if (IS_MOBILE) {
+          mobileResolveChallenge(currentGroup[0], "#9aa1ac", true, "mistake");
+        } else {
+          const attempts = currentLineEl.querySelector(".attempts");
+          fadeOutAndClear(attempts);
+          resolveChallenge(currentGroup[0], "#9aa1ac", true, "mistake");
+        }
+        return;
+      }
+
+      if (IS_MOBILE) {
+        mobileHandleWrongAttempt(guess);
+        return;
+      }
+
+      const attempts = currentLineEl.querySelector(".attempts");
+      const wrongSpan = document.createElement("span");
+      wrongSpan.className = "lang-wrong";
+      wrongSpan.textContent = guess;
+      attempts.appendChild(wrongSpan);
+      if (currentBlankInput) {
+        currentBlankInput.value = "";
+        currentBlankInput.dispatchEvent(new Event("input"));
+        currentBlankInput.focus();
+      }
+      updateProgress();
+      // sem limite de tentativas, a linha pode crescer bastante (várias
+      // tentativas erradas empilhadas, às vezes quebrando em novas linhas
+      // visuais) — reancora no campo de resposta em si, não na linha inteira
+      // (o topo da linha não muda de posição, só a base dela desce conforme
+      // cresce, então ancorar na linha não acompanha o campo se afastando)
+      if (currentBlankInput) scrollToLine(currentBlankInput);
+    }
+  }
+
+  // ---------- transição tutorial -> escolha de dificuldade ----------
+
+  const LEVEL_INFO = {
+    easy: { title: "1 · Easy · 12 rounds", desc: "Roman alphabet only — languages that read like English. 2 minutes on the clock." },
+    medium: { title: "2 · Medium · 12 rounds", desc: "A mix of scripts — some familiar, some not. 2 minutes on the clock." },
+    hard: { title: "3 · Hard · 12 rounds", desc: "Full language pool — the rare ones show up too. 2 minutes on the clock." },
+    insane: { title: "4 · Insane · 96 rounds", desc: "Full pool, 3 tries per language. Miss all 3 or try to skip and you're out. Clock counts up — get to the end as fast as you can." }
+  };
+
+  // texto exato de cada linha do painel de baixo — um por nível, cada um
+  // com sua própria estrutura (não é um template único preenchido por dados)
+  const LEVEL_PANEL_TEXT = {
+    easy: "Easy · 12 rounds · common languages · roman alphabet only",
+    medium: "Medium · 12 rounds · common languages · mixed scripts",
+    hard: "Hard · 12 rounds · rare scripts included",
+    insane: "Insane · 96 rounds · 1 error you're out · no skip"
+  };
+
+  function updateLevelPanel(level) {
+    document.getElementById("levelPanelDetails").textContent = LEVEL_PANEL_TEXT[level];
+    document.getElementById("mobileMenuLevelInfo").textContent = LEVEL_PANEL_TEXT[level];
+  }
+
+  function showLevelIntro(returning) {
+    const flow = document.getElementById("flow");
+
+    const spacer = document.createElement("div");
+    spacer.className = "line";
+    spacer.innerHTML = "&nbsp;";
+    flow.appendChild(spacer);
+
+    const line1 = document.createElement("div");
+    line1.className = "line";
+    flow.appendChild(line1);
+    scrollToLine(line1);
+
+    typeSegments(line1, [{ text: returning ? "welcome back." : "got it?" }], () => {
+      const line2 = document.createElement("div");
+      line2.className = "line";
+      flow.appendChild(line2);
+      scrollToLine(line2);
+
+      typeSegments(line2, [{ text: "choose a level to start:" }], () => {
+        const line3 = document.createElement("div");
+        line3.className = "line";
+        flow.appendChild(line3);
+        scrollToLine(line3);
+
+        typeSegments(
+          line3,
+          [
+            { text: "1 easy", className: "level-word", dataLevel: "easy" },
+            { text: ", " },
+            { text: "2 medium", className: "level-word", dataLevel: "medium" },
+            { text: ", " },
+            { text: "3 hard", className: "level-word", dataLevel: "hard" },
+            { text: ", " },
+            { text: "4 insane", className: "level-word", dataLevel: "insane" }
+          ],
+          () => {
+            attachLevelWordHandlers(line3);
+
+            const line4 = document.createElement("div");
+            line4.className = "line";
+            flow.appendChild(line4);
+            scrollToLine(line4);
+            typeSegments(line4, [{ text: "click one, or type its number: " }], () => {
+              createLevelSelectInput(line4);
+              scrollToLine(line4);
+            });
+          }
+        );
+      });
+    });
+  }
+
+  // digita 1-4 (ou o nome do nível) + enter pra escolher — mesma mecânica
+  // de "digitar pra interagir" usada no resto do jogo, sem precisar do mouse
+  const LEVEL_CHOICE_MAP = {
+    "1": "easy", "easy": "easy",
+    "2": "medium", "medium": "medium",
+    "3": "hard", "hard": "hard",
+    "4": "insane", "insane": "insane"
+  };
+  function matchLevelChoice(raw) {
+    return LEVEL_CHOICE_MAP[raw.trim().toLowerCase()] || null;
+  }
+
+  function selectLevel(level) {
+    document.getElementById("levelDescCard").style.display = "none";
+    const nextWord = WORD_LIST.filter((w) => w !== "lobster")[
+      Math.floor(Math.random() * (WORD_LIST.length - 1))
+    ];
+    initGame(nextWord, level, true);
+  }
+
+  // usado só no desktop — no mobile, o fim do tutorial vai direto pra
+  // mobileShowLevelEnd() com botões grandes, sem precisar digitar nada
+  function createLevelSelectInput(line) {
+    const wrap = document.createElement("span");
+    wrap.className = "blank-wrap";
+    const display = document.createElement("span");
+    display.className = "blank";
+    wrap.appendChild(display);
+    line.appendChild(wrap);
+
+    function render(value) {
+      display.textContent = "";
+      display.appendChild(document.createTextNode(value));
+      const cursor = document.createElement("span");
+      cursor.className = "cursor";
+      cursor.textContent = "_";
+      display.appendChild(cursor);
+    }
+
+    function handleEnter(input) {
+      const picked = matchLevelChoice(input.value);
+      if (picked) {
+        selectLevel(picked);
+      } else {
+        input.value = "";
+        render("");
+      }
+    }
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "hidden-input";
+    input.autocomplete = "off";
+    input.autocapitalize = "off";
+    input.spellcheck = false;
+    wrap.appendChild(input);
+    currentBlankInput = input;
+
+    render("");
+    input.focus();
+    input.addEventListener("input", () => render(input.value));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleEnter(input);
+      }
+    });
+    wrap.addEventListener("click", () => input.focus());
+  }
+
+  function attachLevelWordHandlers(container) {
+    const descCard = document.getElementById("levelDescCard");
+    const descTitle = document.getElementById("levelDescTitle");
+    const descText = document.getElementById("levelDescText");
+
+    container.querySelectorAll(".level-word").forEach((el) => {
+      const info = LEVEL_INFO[el.dataset.level];
+
+      el.addEventListener("mouseenter", () => {
+        descTitle.textContent = info.title;
+        descText.textContent = info.desc;
+        // mede a altura do card antes de posicionar, pra grudar exatamente
+        // acima da palavra (não abaixo)
+        descCard.style.visibility = "hidden";
+        descCard.style.display = "block";
+        const rect = el.getBoundingClientRect();
+        const cardHeight = descCard.offsetHeight;
+        descCard.style.left = `${rect.left}px`;
+        descCard.style.top = `${rect.top - cardHeight - 12}px`;
+        descCard.style.visibility = "visible";
+      });
+
+      el.addEventListener("mouseleave", () => {
+        descCard.style.display = "none";
+      });
+
+      el.addEventListener("click", () => selectLevel(el.dataset.level));
+    });
+  }
+
+  // ---------- bloco de resultados (fim de uma sessão de nível) ----------
+
+  const RESULTS_TITLES = {
+    completed: "Results",
+    timeUp: "Time's up!",
+    mistake: "Run over"
+  };
+
+  // banco de avaliações por faixa de desempenho — cada faixa tem várias opções
+  // em idiomas diferentes, sorteada a cada partida, pra sempre ensinar algo novo
+  const RATING_WORDS = {
+    excellent: [
+      { word: "Fantastico!", lang: "Italian", meaning: "fantastic", color: "#3f8a68" },
+      { word: "¡Excelente!", lang: "Spanish", meaning: "excellent", color: "#3f8a68" },
+      { word: "Wunderbar!", lang: "German", meaning: "wonderful", color: "#3f8a68" },
+      { word: "Formidável!", lang: "Portuguese", meaning: "amazing", color: "#3f8a68" }
+    ],
+    veryGood: [
+      { word: "Bravo!", lang: "French", meaning: "very good", color: "#3474D3" },
+      { word: "¡Muy bien!", lang: "Spanish", meaning: "very good", color: "#3474D3" },
+      { word: "Sehr gut!", lang: "German", meaning: "very good", color: "#3474D3" },
+      { word: "Molto bene!", lang: "Italian", meaning: "very good", color: "#3474D3" }
+    ],
+    good: [
+      { word: "Bien!", lang: "French", meaning: "good", color: "#542E75" },
+      { word: "Gut!", lang: "German", meaning: "good", color: "#542E75" },
+      { word: "Bene!", lang: "Italian", meaning: "good", color: "#542E75" },
+      { word: "Bom!", lang: "Portuguese", meaning: "good", color: "#542E75" }
+    ],
+    keepPracticing: [
+      { word: "Ganbatte!", lang: "Japanese", meaning: "keep trying", color: "#9aa1ac" },
+      { word: "¡Ánimo!", lang: "Spanish", meaning: "keep going", color: "#9aa1ac" },
+      { word: "Weiter so!", lang: "German", meaning: "keep it up", color: "#9aa1ac" },
+      { word: "Coraggio!", lang: "Italian", meaning: "keep at it", color: "#9aa1ac" }
+    ]
+  };
+
+  function pickTier(pct) {
+    if (pct >= 90) return "excellent";
+    if (pct >= 70) return "veryGood";
+    if (pct >= 50) return "good";
+    return "keepPracticing";
+  }
+
+  // ranking global de "popularidade" — top10 primeiro, depois o resto do
+  // lake médio (LANG_META), depois as 50 mais raras (INSANE_META)
+  const GLOBAL_RANK_ORDER = [
+    ...LANG_META.filter((l) => TOP10_NAMES.includes(l.name)).map((l) => l.name),
+    ...LANG_META.filter((l) => !TOP10_NAMES.includes(l.name)).map((l) => l.name),
+    ...INSANE_META.map((l) => l.name)
+  ];
+  function rankOf(name) {
+    return GLOBAL_RANK_ORDER.indexOf(name);
+  }
+
+  // pool de línguas de cada nível, na ordem "comum -> raro" — usado pra achar
+  // a mais rara ENTRE AS QUE VOCÊ ACERTOU relativa ao próprio nível jogado.
+  // isso importa porque o pool do Easy (alfabeto latino) inclui várias línguas
+  // que rankeiam como "raras" no ranking global (ex: islandês, eslovaco) — um
+  // corte global sempre disparava no Easy, então a raridade certa é relativa
+  // ao que era possível sortear naquele nível, não ao jogo inteiro
+  function poolNamesForLevel(level) {
+    if (level === "easy") return EASY_POOL_NAMES;
+    if (level === "medium") {
+      return [
+        ...LANG_META.filter((l) => TOP10_NAMES.includes(l.name)).map((l) => l.name),
+        ...LANG_META.filter((l) => !TOP10_NAMES.includes(l.name)).map((l) => l.name)
+      ];
+    }
+    return GLOBAL_RANK_ORDER; // hard / insane: pool completo, mesma ordem do ranking global
+  }
+
+  const REASON_SENTENCE = {
+    completed: (c, t, lvl, time) =>
+      `You named <b>${c}</b> of <b>${t}</b> languages on the <b>${lvl}</b> level, in <b>${time}</b>.`,
+    timeUp: (c, t, lvl) =>
+      `Time ran out — you named <b>${c}</b> of <b>${t}</b> languages on the <b>${lvl}</b> level.`,
+    mistake: (c, t, lvl, time) =>
+      `You named <b>${c}</b> of <b>${t}</b> languages on <b>${lvl}</b> before the run ended, in <b>${time}</b>.`
+  };
+
+  // ---------- card de compartilhamento (PNG via Canvas) ----------
+  // cores e posições dos pontinhos são sorteadas na hora, não refletem o
+  // histórico real da partida — decisão deliberada pra simplificar (não
+  // precisa guardar qual cor cada rodada ganhou, só quantas foram certas)
+  function drawShareCard(canvas, correctCount, totalRounds, level, elapsedStr, rarest) {
+    const scale = 2;
+    const W = 400 * scale;
+    const showDots = level !== "insane";
+    const H = 724 * scale; // mesma proporção em todos os níveis — importa pro compartilhamento (Insta/TikTok)
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d");
+    const fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+
+    // borda arredondada
+    const r = 28 * scale;
+    const m = 3 * scale;
+    ctx.strokeStyle = "#171a21";
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.moveTo(r + m, m);
+    ctx.lineTo(W - r - m, m);
+    ctx.quadraticCurveTo(W - m, m, W - m, r + m);
+    ctx.lineTo(W - m, H - r - m);
+    ctx.quadraticCurveTo(W - m, H - m, W - r - m, H - m);
+    ctx.lineTo(r + m, H - m);
+    ctx.quadraticCurveTo(m, H - m, m, H - r - m);
+    ctx.lineTo(m, r + m);
+    ctx.quadraticCurveTo(m, m, r + m, m);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    let y = 165 * scale;
+
+    ctx.fillStyle = "#171a21";
+    ctx.font = `300 ${26 * scale}px ${fontFamily}`;
+    ctx.fillText("You named correctly", W / 2, y);
+
+    y += 48 * scale;
+    ctx.font = `700 ${34 * scale}px ${fontFamily}`;
+    ctx.fillText(`${correctCount} out of ${totalRounds}`, W / 2, y);
+
+    y += 44 * scale;
+    ctx.font = `300 ${26 * scale}px ${fontFamily}`;
+    ctx.fillText("languages", W / 2, y);
+
+    // pontinhos — cor e posição sorteadas, só a QUANTIDADE de certos é real.
+    // no insane (96 rounds) a grade inteira some: 96 pontinhos minúsculos
+    // não comunicam nada de relance, fica só numérico + texto, mais limpo
+    y += 60 * scale;
+    if (showDots) {
+      const perRow = Math.min(totalRounds, 6);
+      const rows = Math.ceil(totalRounds / perRow);
+      const maxGridHeight = 260 * scale;
+      let gap = 22 * scale;
+      let dotR = 8 * scale;
+      if (rows * gap > maxGridHeight) {
+        gap = maxGridHeight / rows;
+        dotR = Math.max(gap * 0.3, 2 * scale);
+      }
+
+      const flags = Array.from({ length: totalRounds }, (_, i) => i < correctCount);
+      for (let i = flags.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [flags[i], flags[j]] = [flags[j], flags[i]];
+      }
+
+      let idx = 0;
+      for (let row = 0; row < rows; row++) {
+        const cy = y + row * gap;
+        const itemsInRow = Math.min(perRow, totalRounds - row * perRow);
+        const rowStartX = W / 2 - ((itemsInRow - 1) * gap) / 2;
+        for (let col = 0; col < itemsInRow; col++, idx++) {
+          const cx = rowStartX + col * gap;
+          ctx.beginPath();
+          ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
+          ctx.fillStyle = flags[idx] ? RATING_DOT_COLORS[Math.floor(Math.random() * RATING_DOT_COLORS.length)] : "#d1d5db";
+          ctx.fill();
+        }
+      }
+      y += (rows - 1) * gap + 60 * scale;
+    } else {
+      y += 220 * scale; // sem a grade, empurra o texto de baixo pro meio do card, em vez de deixar tudo colado no topo
+    }
+
+    ctx.fillStyle = "#6b7280";
+    ctx.font = `300 ${18 * scale}px ${fontFamily}`;
+    ctx.fillText(`Level ${level} - ${elapsedStr}`, W / 2, y);
+
+    if (rarest) {
+      y += 28 * scale;
+      ctx.fillText(`Rarest catch: ${rarest}`, W / 2, y);
+    }
+
+    ctx.fillStyle = "#171a21";
+    ctx.font = `300 ${16 * scale}px ${fontFamily}`;
+    ctx.fillText("www.lobsterislobster.online", W / 2, H - 50 * scale);
+  }
+
+  const RATING_DOT_COLORS = ["#3f8a68", "#B44B69", "#3B5BA5", "#542E75", "#AE90E9", "#3474D3", "#D98CA0"];
+
+  async function shareResultCard() {
+    const data = computeResultsData("completed");
+    const canvas = document.createElement("canvas");
+    drawShareCard(canvas, correctCount, totalRounds, currentLevel, data.elapsed, data.rarest);
+    const dataUrl = canvas.toDataURL("image/png");
+
+    // no celular, tenta abrir a folha de compartilhamento nativa; se não
+    // rolar (ou no desktop), cai pro download direto do arquivo
+    try {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], "lobster-is-lobster-result.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: "Lobster is Lobster" });
+        return;
+      }
+    } catch (e) {
+      /* cai pro download abaixo */
+    }
+
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = "lobster-is-lobster-result.png";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  function computeResultsData(reason) {
+    const elapsed = formatTime(Date.now() - startTime);
+    const pct = totalRounds > 0 ? Math.round((correctCount / totalRounds) * 100) : 0;
+    const tier = pickTier(pct);
+    const options = RATING_WORDS[tier];
+    const chosen = options[Math.floor(Math.random() * options.length)];
+
+    const correctNames = roundLog.filter((r) => r.correct).map((r) => r.name);
+    const levelPoolNames = poolNamesForLevel(currentLevel);
+    let rarest = null;
+    let rarestRank = -1;
+    correctNames.forEach((n) => {
+      const r = levelPoolNames.indexOf(n);
+      if (r > rarestRank) {
+        rarestRank = r;
+        rarest = n;
+      }
+    });
+
+    return { elapsed, chosen, rarest, sentenceHTML: REASON_SENTENCE[reason](correctCount, totalRounds, currentLevel, elapsed) };
+  }
+
+  function showResultsBlock(reason) {
+    reason = reason || "completed";
+    if (IS_MOBILE) {
+      mobileShowResults(reason);
+      return;
+    }
+    const data = computeResultsData(reason);
+    const chosen = data.chosen;
+    const rarest = data.rarest;
+
+    const block = document.createElement("div");
+    block.className = "results-block";
+
+    const evalLine = document.createElement("div");
+    evalLine.className = "eval-word reveal-item";
+    evalLine.style.color = chosen.color;
+    evalLine.innerHTML = `${chosen.word} <span class="eval-meaning-inline">means ${chosen.meaning} in ${chosen.lang.toLowerCase()}</span>`;
+    block.appendChild(evalLine);
+
+    const sentence = document.createElement("div");
+    sentence.className = "results-sentence reveal-item";
+    sentence.innerHTML = data.sentenceHTML;
+    block.appendChild(sentence);
+
+    let rarestLine = null;
+    if (rarest) {
+      rarestLine = document.createElement("div");
+      rarestLine.className = "results-rarest reveal-item";
+      rarestLine.innerHTML = `rarest catch: <b>${rarest}</b>.`;
+      block.appendChild(rarestLine);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "results-actions reveal-item";
+    actions.innerHTML = `
+      <div class="results-actions-row">
+        <button class="btn-share-result" id="shareResultBtn">Share your result →</button>
+        <button class="btn-play-again" id="playAgainBtn">Play again</button>
+      </div>
+      <div class="share-icon-row">
+        <button class="share-icon-btn" id="shareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
+        <button class="share-icon-btn" id="shareX" aria-label="Share on X">${SHARE_ICONS.x}</button>
+        <button class="share-icon-btn" id="shareBluesky" aria-label="Share on Bluesky">${SHARE_ICONS.bluesky}</button>
+        <button class="share-icon-btn" id="shareInstagram" aria-label="Share on Instagram">${SHARE_ICONS.instagram}</button>
+        <button class="share-icon-btn" id="shareTiktok" aria-label="Share on TikTok">${SHARE_ICONS.tiktok}</button>
+      </div>
+    `;
+    block.appendChild(actions);
+
+    document.getElementById("flow").appendChild(block);
+    scrollResultsToTop(block);
+
+    // revelação gradual e cadenciada — dá um ar de finalização depois do
+    // ritmo mais rápido do jogo cronometrado, em vez de tudo aparecer de uma vez
+    const steps = [evalLine, sentence, rarestLine, actions].filter(Boolean);
+    steps.forEach((el, i) => {
+      setTimeout(() => el.classList.add("visible"), 500 + i * 700);
+    });
+
+    // "Share your result" gera o PNG (melhor caminho pro Instagram/TikTok,
+    // que não têm link de "postar com imagem pronta" — só resta baixar e
+    // postar manualmente, inclusive pelos ícones redondos abaixo)
+    document.getElementById("shareResultBtn").addEventListener("click", shareResultCard);
+    document.getElementById("playAgainBtn").addEventListener("click", () => {
+      initGame(currentWord, currentLevel);
+    });
+    wireShareIconButtons();
+  }
+
+  // texto simples pra WhatsApp/X/Bluesky — essas plataformas não aceitam
+  // imagem por link, só texto+URL; Instagram/TikTok não têm nem isso, então
+  // seus botões só disparam o mesmo PNG do "Share your result"
+  // ícones simples desenhados na mão (formas genéricas reconhecíveis, não os
+  // arquivos de logo oficiais registrados de cada marca) — mesma cor do
+  // texto do botão, herdada via currentColor, então o hover já funciona sozinho
+  const SHARE_ICONS = {
+    whatsapp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.5a8.5 8.5 0 0 0-7.35 12.77L3.5 20.5l4.36-1.14A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.5 9.7c0-.4.3-1 .6-1.1.3-.1.8-.1 1 .3l.6 1.4c.1.3 0 .6-.2.8l-.5.5c.4.9 1.3 1.8 2.2 2.2l.5-.5c.2-.2.5-.3.8-.2l1.4.6c.4.2.4.7.3 1-.1.3-.7.6-1.1.6-1.9 0-4.6-2.7-4.6-4.6z" fill="currentColor" stroke="none"/></svg>`,
+    x: `<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.9 2H22l-7.6 8.7L23.3 22H16.6l-5.2-6.8L5.4 22H2.3l8.1-9.3L1.5 2h6.8l4.7 6.2L18.9 2zm-1.2 18h1.7L7.4 4H5.6l12.1 16z"/></svg>`,
+    bluesky: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 8.6C10.6 6 6.7 3.2 4.5 3.9c-.5.15-.8.6-.8 1.4 0 4.8 1.9 8.2 4.1 9.4-2.6-.3-5 .5-5 2.4 0 2.1 3 3 5.6 2 1.6-.6 3-1.7 3.6-2.9.6 1.2 2 2.3 3.6 2.9 2.6 1 5.6.1 5.6-2 0-1.9-2.4-2.7-5-2.4 2.2-1.2 4.1-4.6 4.1-9.4 0-.8-.3-1.25-.8-1.4C17.3 3.2 13.4 6 12 8.6z"/></svg>`,
+    instagram: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>`,
+    tiktok: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M14 3h3c.2 2 1.6 3.6 3.7 3.9v3c-1.4 0-2.7-.4-3.7-1.1v6.4c0 3.3-2.7 5.8-5.9 5.8S5.2 18.5 5.2 15.2c0-3.2 2.6-5.8 5.8-5.8.3 0 .6 0 .9.1v3.1a2.8 2.8 0 0 0-.9-.15 2.75 2.75 0 1 0 0 5.5c1.5 0 2.8-1.1 2.9-2.6V3z"/></svg>`
+  };
+
+  function buildShareText() {
+    return `I named ${correctCount} of ${totalRounds} languages on ${currentLevel} in Lobster is Lobster — can you beat me?`;
+  }
+
+  function wireShareIconButtons() {
+    const shareUrl = "https://www.lobsterislobster.online";
+    const text = buildShareText();
+
+    const waBtn = document.getElementById("shareWhatsapp");
+    if (waBtn) {
+      waBtn.addEventListener("click", () => {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+      });
+    }
+    const xBtn = document.getElementById("shareX");
+    if (xBtn) {
+      xBtn.addEventListener("click", () => {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener");
+      });
+    }
+    const bsBtn = document.getElementById("shareBluesky");
+    if (bsBtn) {
+      bsBtn.addEventListener("click", () => {
+        window.open(`https://bsky.app/intent/compose?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+      });
+    }
+    const igBtn = document.getElementById("shareInstagram");
+    if (igBtn) igBtn.addEventListener("click", shareResultCard);
+    const ttBtn = document.getElementById("shareTiktok");
+    if (ttBtn) ttBtn.addEventListener("click", shareResultCard);
+  }
+
+  // ---------- versão mobile: tela cheia por pergunta, sem rolagem ----------
+
+  function mobileRenderBlank(value) {
+    const blank = document.getElementById("mobileCardBlank");
+    blank.className = "mobile-card-blank";
+    blank.style.color = "";
+    blank.innerHTML = "";
+    blank.appendChild(document.createTextNode(value));
+    const cursor = document.createElement("span");
+    cursor.className = "cursor";
+    cursor.textContent = "_";
+    blank.appendChild(cursor);
+  }
+
+  let mobileInputWired = false;
+  function mobileEnsureInput() {
+    const input = document.getElementById("mobileCardInput");
+    if (!mobileInputWired) {
+      mobileInputWired = true;
+      input.addEventListener("input", () => mobileRenderBlank(input.value));
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleGuess(input.value);
+        }
+      });
+    }
+    return input;
+  }
+
+  function mobileShowChallenge(promptLang) {
+    const promptEl = document.getElementById("mobileCardPrompt");
+    promptEl.textContent = promptLang.word;
+    promptEl.className = "mobile-card-prompt" + (isNonLatin(promptLang.word) ? " non-latin" : "");
+    document.getElementById("mobileCardConnector").textContent = ` is ${currentWord} in `;
+    document.getElementById("mobileCardFeedback").textContent = "";
+    document.getElementById("mobileGeoHint").textContent = "";
+    mobileRenderBlank("");
+    document.getElementById("mobileCounter").textContent = `${challengeIndex}/${totalRounds}`;
+    document.getElementById("mobileSkipBtn").classList.toggle("hidden", currentLevel === "insane");
+    // antes do primeiríssimo toque, o teclado não abre sozinho (celular só
+    // abre teclado com toque direto) — essa dica avisa que precisa tocar
+    document.getElementById("mobileTapHint").classList.toggle("visible", !hasShownAnswerHint);
+
+    // pista geográfica leve depois de um tempo parado — mesma ideia do
+    // desktop, só que sem o sistema de dica de skip (o botão já é visível)
+    if (geoHintTimer) clearTimeout(geoHintTimer);
+    const geo = getGeoHint(promptLang.name);
+    if (geo) {
+      geoHintTimer = setTimeout(() => {
+        document.getElementById("mobileGeoHint").textContent = `hint: ${geo}`;
+      }, IDLE_HINT_DELAY_FIRST + GEO_HINT_DELAY);
+    }
+
+    const input = mobileEnsureInput();
+    input.value = "";
+    currentBlankInput = input;
+    // nunca desabilita/desfoca esse input entre rodadas — no celular, um
+    // input desabilitado fecha o teclado, e reabrir programaticamente depois
+    // (fora de um toque direto da pessoa) não funciona; o teclado precisa
+    // ficar aberto o tempo todo, a trava de repetição é só lógica (isResolving)
+    input.focus();
+  }
+
+  function mobileHandleWrongAttempt(guess) {
+    const blank = document.getElementById("mobileCardBlank");
+    const feedback = document.getElementById("mobileCardFeedback");
+    blank.innerHTML = "";
+    blank.textContent = guess;
+    blank.className = "mobile-card-blank lang-wrong";
+    feedback.textContent = "✗";
+    feedback.style.color = "#c7cbd1";
+
+    const input = document.getElementById("mobileCardInput");
+    updateProgress();
+    setTimeout(() => {
+      input.value = "";
+      mobileRenderBlank("");
+      feedback.textContent = "";
+    }, 700);
+  }
+
+  function mobileResolveChallenge(primaryMatch, color, isForced, endReason) {
+    isResolving = true;
+    if (geoHintTimer) clearTimeout(geoHintTimer);
+    document.getElementById("mobileGeoHint").textContent = "";
+    const blank = document.getElementById("mobileCardBlank");
+    const feedback = document.getElementById("mobileCardFeedback");
+
+    blank.innerHTML = "";
+    blank.textContent = primaryMatch.name.toLowerCase();
+    blank.className = "mobile-card-blank " + (isForced ? "lang-wrong" : "lang-correct");
+    blank.style.color = isForced ? "" : color;
+
+    feedback.textContent = isForced ? "✗" : "✓";
+    feedback.style.color = isForced ? "#c7cbd1" : "#3f8a68";
+
+    // conta o grupo inteiro de sinônimos, igual o desktop faz — só que sem
+    // revelar visualmente cada um, pra manter o ritmo rápido de um card só
+    const others = currentGroup.filter((l) => l.name !== primaryMatch.name);
+    if (isForced) {
+      missedCount += 1 + others.length;
+    } else {
+      correctCount += 1 + others.length;
+    }
+    roundLog.push({ name: primaryMatch.name, correct: !isForced });
+    others.forEach((o) => roundLog.push({ name: o.name, correct: !isForced }));
+
+    remaining = remaining.filter((l) => !currentGroup.includes(l));
+    updateProgress();
+
+    setTimeout(() => {
+      if (endReason) {
+        endGame(endReason);
+      } else {
+        nextChallenge();
+      }
+    }, isForced ? 900 : 700);
+  }
+
+  function mobileShowLevelEnd(returning) {
+    document.getElementById("mobileGame").classList.remove("active");
+    const el = document.getElementById("mobileLevelEnd");
+    document.getElementById("mobileLevelEndText").textContent = returning
+      ? "Welcome back. Pick a level to start playing:"
+      : "Got it? Pick a level to start playing for real:";
+    el.classList.add("active");
+    // solta o foco do campo de digitação — sem isso, o teclado continuava
+    // aberto nessa tela mesmo sem ter mais nada pra digitar
+    const input = document.getElementById("mobileCardInput");
+    if (input) input.blur();
+  }
+
+  function mobileSelectLevelFromEnd(level) {
+    document.getElementById("mobileLevelEnd").classList.remove("active");
+    const nextWord = WORD_LIST.filter((w) => w !== "lobster")[
+      Math.floor(Math.random() * (WORD_LIST.length - 1))
+    ];
+    initGame(nextWord, level, true);
+  }
+
+  function mobileShowResults(reason) {
+    document.getElementById("mobileGame").classList.remove("active");
+    // solta o foco do campo de digitação — mesmo motivo do fim de tutorial:
+    // o resultado não tem nada pra digitar, o teclado não devia continuar aberto
+    const activeInput = document.getElementById("mobileCardInput");
+    if (activeInput) activeInput.blur();
+    const data = computeResultsData(reason);
+    const el = document.getElementById("mobileResults");
+    el.innerHTML = `
+      <div class="mobile-results-eval" style="color:${data.chosen.color}">
+        ${data.chosen.word}<br>
+        <span class="mobile-results-meaning">means ${data.chosen.meaning} in ${data.chosen.lang.toLowerCase()}</span>
+      </div>
+      <div class="mobile-results-sentence">${data.sentenceHTML}</div>
+      ${data.rarest ? `<div class="mobile-results-rarest">rarest catch: <b>${data.rarest}</b>.</div>` : ""}
+      <div class="mobile-results-actions">
+        <button class="mobile-results-btn-primary" id="mobileShareBtn">Share your result →</button>
+        <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">Play again</button>
+        <div class="share-icon-row" style="justify-content:center; margin-top:4px;">
+          <button class="share-icon-btn" id="mobileShareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
+          <button class="share-icon-btn" id="mobileShareX" aria-label="Share on X">${SHARE_ICONS.x}</button>
+          <button class="share-icon-btn" id="mobileShareBluesky" aria-label="Share on Bluesky">${SHARE_ICONS.bluesky}</button>
+          <button class="share-icon-btn" id="mobileShareInstagram" aria-label="Share on Instagram">${SHARE_ICONS.instagram}</button>
+          <button class="share-icon-btn" id="mobileShareTiktok" aria-label="Share on TikTok">${SHARE_ICONS.tiktok}</button>
+        </div>
+        <a href="#" class="mobile-results-about-link" id="mobileResultsAbout">About</a>
+      </div>
+    `;
+    el.classList.add("active");
+    document.getElementById("mobileShareBtn").addEventListener("click", shareResultCard);
+    document.getElementById("mobilePlayAgainBtn").addEventListener("click", () => {
+      el.classList.remove("active");
+      initGame(currentWord, currentLevel);
+    });
+    document.getElementById("mobileResultsAbout").addEventListener("click", (e) => {
+      e.preventDefault();
+      showAboutPage();
+    });
+
+    const shareUrl = "https://www.lobsterislobster.online";
+    const text = buildShareText();
+    document.getElementById("mobileShareWhatsapp").addEventListener("click", () => {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+    });
+    document.getElementById("mobileShareX").addEventListener("click", () => {
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener");
+    });
+    document.getElementById("mobileShareBluesky").addEventListener("click", () => {
+      window.open(`https://bsky.app/intent/compose?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+    });
+    document.getElementById("mobileShareInstagram").addEventListener("click", shareResultCard);
+    document.getElementById("mobileShareTiktok").addEventListener("click", shareResultCard);
+  }
+
+  document.getElementById("newWordLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
+    const nextWord = choices[Math.floor(Math.random() * choices.length)];
+    initGame(nextWord, currentLevel);
+  });
+
+  document.querySelectorAll(".level-mini-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.getElementById("mobileMenuOverlay").classList.remove("visible");
+      const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
+      const nextWord = choices[Math.floor(Math.random() * choices.length)];
+      initGame(nextWord, btn.dataset.level);
+    });
+  });
+
+  // ---------- controles exclusivos do mobile: skip, hamburger, fim de nível ----------
+
+  document.getElementById("mobileSkipBtn").addEventListener("click", () => {
+    handleGuess("skip");
+  });
+
+  document.getElementById("mobileMenuBtn").addEventListener("click", (e) => {
+    e.stopPropagation(); // sem isso, o listener global de "clique em qualquer lugar" refocava o campo na sequência
+    document.getElementById("mobileMenuOverlay").classList.add("visible");
+    const activeInput = document.getElementById("mobileCardInput");
+    if (activeInput) activeInput.blur(); // sem teclado aberto atrás do menu
+  });
+  document.getElementById("mobileMenuClose").addEventListener("click", () => {
+    document.getElementById("mobileMenuOverlay").classList.remove("visible");
+    const stillPlaying = document.getElementById("mobileGame").classList.contains("active");
+    const activeInput = document.getElementById("mobileCardInput");
+    if (stillPlaying && activeInput) activeInput.focus(); // volta o teclado se a rodada ainda está rolando
+  });
+  document.getElementById("mobileMenuOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "mobileMenuOverlay") {
+      document.getElementById("mobileMenuOverlay").classList.remove("visible");
+    }
+  });
+  document.getElementById("mobileMenuNewWord").addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("mobileMenuOverlay").classList.remove("visible");
+    const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
+    const nextWord = choices[Math.floor(Math.random() * choices.length)];
+    initGame(nextWord, currentLevel);
+  });
+  document.getElementById("mobileMenuAbout").addEventListener("click", (e) => {
+    e.preventDefault();
+    showAboutPage();
+  });
+
+  document.querySelectorAll(".mobile-level-end-btn").forEach((btn) => {
+    btn.addEventListener("click", () => mobileSelectLevelFromEnd(btn.dataset.level));
+  });
+
+  if (hasSeenTutorial()) {
+    startReturningFlow();
+  } else {
+    startTutorial();
+  }
+
+  // troca a página do jogo pela página do About (e vice-versa) — pausa o
+  // relógio regressivo/progressivo enquanto a pessoa estiver lendo, pra não
+  // roubar tempo de partida à toa, e retoma exatamente de onde parou ao voltar
+  let aboutPausedAt = null;
+  let aboutPreviousMobileScreen = null; // "game" | "results" | "levelEnd" | null — pra voltar pra tela certa
+
+  function showAboutPage() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      aboutPausedAt = Date.now();
+    }
+    clearIdleTimer(); // cancela qualquer dica pendente — senão ela dispara "escondida" e já aparece pronta quando a pessoa volta
+    document.getElementById("mobileMenuOverlay").classList.remove("visible");
+    if (IS_MOBILE) {
+      if (document.getElementById("mobileGame").classList.contains("active")) {
+        aboutPreviousMobileScreen = "game";
+      } else if (document.getElementById("mobileResults").classList.contains("active")) {
+        aboutPreviousMobileScreen = "results";
+      } else if (document.getElementById("mobileLevelEnd").classList.contains("active")) {
+        aboutPreviousMobileScreen = "levelEnd";
+      } else {
+        aboutPreviousMobileScreen = null;
+      }
+      document.getElementById("mobileGame").classList.remove("active");
+      document.getElementById("mobileResults").classList.remove("active");
+      document.getElementById("mobileLevelEnd").classList.remove("active");
+      const activeInput = document.getElementById("mobileCardInput");
+      if (activeInput) activeInput.blur(); // sem teclado aberto atrás do About
+    } else {
+      document.getElementById("gameWrap").style.display = "none";
+      document.getElementById("gameClockWrap").style.display = "none";
+      document.getElementById("bottomPanel").style.display = "none";
+      document.getElementById("scrollSpacer").style.display = "none";
+      document.getElementById("topRightBlock").style.display = "none";
+    }
+    document.getElementById("aboutCloseBtn").classList.add("visible");
+    document.getElementById("aboutPage").classList.add("visible");
+    window.scrollTo({ top: 0 });
+  }
+
+  function hideAboutPage() {
+    document.getElementById("aboutPage").classList.remove("visible");
+    document.getElementById("aboutCloseBtn").classList.remove("visible");
+    if (IS_MOBILE) {
+      if (aboutPreviousMobileScreen === "game") {
+        document.getElementById("mobileGame").classList.add("active");
+      } else if (aboutPreviousMobileScreen === "results") {
+        document.getElementById("mobileResults").classList.add("active");
+      } else if (aboutPreviousMobileScreen === "levelEnd") {
+        document.getElementById("mobileLevelEnd").classList.add("active");
+      }
+    } else {
+      document.getElementById("gameWrap").style.display = "";
+      document.getElementById("gameClockWrap").style.display = "";
+      document.getElementById("bottomPanel").style.display = "";
+      document.getElementById("scrollSpacer").style.display = "";
+      document.getElementById("topRightBlock").style.display = "";
+    }
+    // só retoma o relógio se estávamos mesmo numa rodada em andamento —
+    // voltar pra tela de resultado ou fim de nível não deve religar o timer
+    if (aboutPausedAt && aboutPreviousMobileScreen !== "results" && aboutPreviousMobileScreen !== "levelEnd") {
+      startTime += Date.now() - aboutPausedAt; // desconta o tempo pausado do cronômetro
+      timerInterval = setInterval(updateProgress, 1000);
+    }
+    aboutPausedAt = null;
+    if (currentBlankInput) currentBlankInput.focus();
+    // reagenda a dica do zero a partir de agora — sem isso ela ficaria
+    // desativada pro resto da partida depois de qualquer visita ao About
+    if (!IS_MOBILE && currentLineEl && currentBlankInput && !currentBlankInput.disabled) {
+      scheduleIdleHint(currentLineEl);
+    }
+  }
+
+  document.getElementById("aboutLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    showAboutPage();
+  });
+  document.getElementById("backToGameLink").addEventListener("click", (e) => {
+    e.preventDefault();
+    hideAboutPage();
+  });
+  document.getElementById("aboutCloseBtn").addEventListener("click", () => {
+    hideAboutPage();
+  });
+
+  const FORMSPREE_ENDPOINT = "https://formspree.io/f/mzebjyel";
+
+  // newsletter: envia de verdade pro Formspree (o navegador não consegue
+  // mandar e-mail sozinho, então isso passa por um serviço de terceiro —
+  // é o mesmo endpoint que você configurou na sua conta)
+  document.getElementById("newsletterSubmit").addEventListener("click", async () => {
+    const input = document.getElementById("newsletterEmail");
+    const btn = document.getElementById("newsletterSubmit");
+    const email = input.value.trim();
+
+    if (!email) {
+      input.focus();
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      input.value = "";
+      input.placeholder = "that doesn't look like an email";
+      return;
+    }
+
+    const originalBtnHTML = btn.innerHTML;
+    btn.textContent = "…";
+    input.disabled = true;
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify({ email })
+      });
+      if (res.ok) {
+        input.value = "";
+        input.placeholder = "thanks! check your inbox to confirm";
+      } else {
+        input.placeholder = "something went wrong — try again";
+      }
+    } catch (e) {
+      input.placeholder = "something went wrong — try again";
+    } finally {
+      input.disabled = false;
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHTML;
+    }
+  });
+
+  // tenta focar de novo em alguns momentos em que o navegador costuma
+  // permitir foco automático (carregamento da página, aba voltando ao foco)
+  window.addEventListener("load", () => {
+    if (currentBlankInput) currentBlankInput.focus();
+  });
+  window.addEventListener("focus", () => {
+    if (currentBlankInput) currentBlankInput.focus();
+  });
+</script>
+</body>
+</html>
