@@ -125,6 +125,9 @@
     left: 0;
     pointer-events: none;
     border: none;
+    padding: 0;
+    margin: 0;
+    resize: none;
   }
   .mobile-game {
     display: none;
@@ -866,15 +869,17 @@
 
   <div class="mobile-results" id="mobileResults"></div>
 
-  <input
-    type="text"
+  <textarea
     id="mobileCardInput"
     class="mobile-hidden-input"
+    rows="1"
+    inputmode="text"
     autocomplete="off"
     autocapitalize="off"
     spellcheck="false"
     enterkeyhint="go"
-  />
+    aria-label="Language answer"
+  ></textarea>
 
   <button class="about-close" id="aboutCloseBtn" aria-label="Close">&times;</button>
 
@@ -2522,9 +2527,36 @@
     const input = document.getElementById("mobileCardInput");
     if (!mobileInputWired) {
       mobileInputWired = true;
-      input.addEventListener("input", () => mobileRenderBlank(input.value));
+      let composing = false;
+
+      function renderInput(isComposing = composing) {
+        // Keep the old text input's single-line value, including after paste.
+        const value = input.value.replace(/[\r\n]/g, "");
+        if (!isComposing && input.value !== value) {
+          const start = input.value.slice(0, input.selectionStart).replace(/[\r\n]/g, "").length;
+          const end = input.value.slice(0, input.selectionEnd).replace(/[\r\n]/g, "").length;
+          input.value = value;
+          input.setSelectionRange(start, end);
+        }
+        if (!isResolving) mobileRenderBlank(value);
+      }
+
+      input.addEventListener("compositionstart", () => { composing = true; });
+      input.addEventListener("compositionend", () => {
+        composing = false;
+        renderInput();
+      });
+      input.addEventListener("input", (e) => {
+        renderInput(composing || e.isComposing);
+        // Some soft keyboards insert a line break without an Enter key event.
+        if (!composing && !e.isComposing &&
+            (e.inputType === "insertLineBreak" || e.inputType === "insertParagraph")) {
+          handleGuess(input.value);
+        }
+      });
       input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
+        // Enter can accept composed text without submitting an answer.
+        if (e.key === "Enter" && !composing && !e.isComposing && e.keyCode !== 229) {
           e.preventDefault();
           handleGuess(input.value);
         }
