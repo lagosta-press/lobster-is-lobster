@@ -4,6 +4,15 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Language Game</title>
+<script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="Bl Hl zl Ul Gl init fu pu du vu bu Ta cu wu lu Cu Tu Mu capture getExtension gu ql Ru calculateEventProperties Eu register register_once register_for_session unregister unregister_for_session Ou hu Au getFeatureFlag getFeatureFlagPayload getFeatureFlagResult getAllFeatureFlags isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync $u identify setPersonProperties unsetPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset Du shutdown setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty Pu xu createPersonProfile setInternalOrTestUser Fu Zl Jl opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing ku debug Ma ds getPageViewId captureTraceFeedback captureTraceMetric nu".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_BPheaw5UJuMNDNGbrvy6KgBWWTsx3HJW5XJjXBpmrszc', {
+        api_host: 'https://us.i.posthog.com',
+        defaults: '2026-05-30',
+        person_profiles: 'identified_only',
+        autocapture: false, // Use the explicit product events below.
+    })
+</script>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -928,7 +937,7 @@
     <div class="level-desc-text" id="levelDescText"></div>
   </div>
 
-<script>
+<script id="game-script">
   // ---------- dados ----------
 
   const LANG_META = [
@@ -1131,6 +1140,56 @@
   let roundLog = []; // { name, correct } por rodada — usado pra "rarest catch" no resultado
   let startTime = Date.now();
   let timerInterval = null;
+
+  // Event capture: https://posthog.com/docs/libraries/js/usage#custom-event-capture
+  // Send fixed game data and counts. Never send typed answers or email addresses.
+  let analyticsRun = null;
+  let analyticsRunSequence = 0;
+
+  function captureEvent(event, properties = {}) {
+    try {
+      window.posthog?.capture(event, {
+        layout: IS_MOBILE ? "mobile" : "desktop",
+        ...analyticsRun?.properties,
+        ...properties
+      });
+    } catch (e) {
+      // Analytics must not stop the game if PostHog is blocked or fails.
+    }
+  }
+
+  function startAnalyticsRun(source) {
+    analyticsRun = {
+      properties: {
+        run_id: `${Date.now().toString(36)}-${++analyticsRunSequence}-${Math.random().toString(36).slice(2)}`,
+        game_phase: gamePhase,
+        level: gamePhase === "playing" ? currentLevel : null,
+        word: currentWord,
+        total_languages: totalRounds,
+        time_limit_seconds: gamePhase === "playing" && usesCountdown ? TIME_LIMIT_SEC : null,
+        start_source: source
+      },
+      summary: null
+    };
+    captureEvent(gamePhase === "tutorial" ? "tutorial_started" : "game_started");
+  }
+
+  function finishAnalyticsRun(reason, abandoned = false) {
+    if (!analyticsRun || analyticsRun.summary) return;
+    analyticsRun.summary = {
+      reason,
+      elapsed_ms: Math.max(0, Date.now() - startTime),
+      rounds_presented: challengeIndex,
+      attempts: attemptsCount,
+      correct_languages: correctCount,
+      missed_languages: missedCount,
+      remaining_languages: remaining.length
+    };
+    const event = analyticsRun.properties.game_phase === "tutorial"
+      ? (abandoned ? "tutorial_abandoned" : "tutorial_completed")
+      : (abandoned ? "game_abandoned" : "game_ended");
+    captureEvent(event, analyticsRun.summary);
+  }
 
   // uma língua que traduz a palavra pro mesmo texto do inglês (empréstimo
   // direto, tipo "lobster" em indonésio) fica confusa como charada, já que
@@ -1380,6 +1439,7 @@
   // pra quem já viu o tutorial antes: pula direto pra escolha de nível,
   // sem repetir as 3 rodadas de "lobster" nem as dicas de digitação
   function startReturningFlow() {
+    captureEvent("tutorial_skipped", { reason: "returning_visitor" });
     gamePhase = "tutorial";
     clearIdleTimer();
     document.getElementById("gameClockWrap").classList.remove("visible");
@@ -1421,6 +1481,11 @@
     challengeIndex = 0;
     wrongCount = 0;
     totalRounds = tutorialLangs.length;
+    attemptsCount = 0;
+    correctCount = 0;
+    missedCount = 0;
+    startTime = Date.now();
+    startAnalyticsRun("first_visit");
 
     if (IS_MOBILE) {
       document.getElementById("mobileGame").classList.add("active");
@@ -1446,7 +1511,8 @@
     );
   }
 
-  function initGame(word, level, resetFlow) {
+  function initGame(word, level, resetFlow, source = "level_selection") {
+    finishAnalyticsRun(source, true);
     if (resetFlow === undefined) resetFlow = true;
     clearIdleTimer();
     gamePhase = "playing";
@@ -1484,6 +1550,7 @@
     clock.classList.add("flash");
     setTimeout(() => clock.classList.remove("flash"), 1000);
     correctCount = 1; // o inglês já veio dado de cara
+    startAnalyticsRun(source);
 
     if (IS_MOBILE) {
       document.getElementById("mobileLevelEnd").classList.remove("active");
@@ -1591,6 +1658,7 @@
     if (remaining.length === 0) {
       if (timerInterval) clearInterval(timerInterval);
       if (gamePhase === "tutorial") {
+        finishAnalyticsRun("completed");
         if (IS_MOBILE) {
           mobileShowLevelEnd();
         } else {
@@ -1726,6 +1794,7 @@
         hint.className = "skip-hint";
         hint.textContent = " type your answer, press enter";
         line.appendChild(hint);
+        captureEvent("hint_shown", { hint_type: "answer_entry", round_number: challengeIndex });
       }, 800);
       return;
     }
@@ -1740,6 +1809,7 @@
       hint.className = "skip-hint";
       hint.textContent = ` type "${word}" to move on`;
       line.appendChild(hint);
+      captureEvent("hint_shown", { hint_type: "skip", round_number: challengeIndex });
 
       // depois da dica de skip, espera mais um pouco e mostra a pista
       // geográfica — não entrega a resposta, só reduz o "não sei nem que
@@ -1752,6 +1822,7 @@
           geoSpan.className = "geo-hint";
           geoSpan.textContent = ` (hint: ${geo})`;
           line.appendChild(geoSpan);
+          captureEvent("hint_shown", { hint_type: "geography", round_number: challengeIndex });
         }, GEO_HINT_DELAY);
       }
     }, delay);
@@ -1902,7 +1973,7 @@
     revealNextOther(0);
   }
 
-  function handleGuess(rawGuess) {
+  function handleGuess(rawGuess, source = "keyboard") {
     const guess = rawGuess.trim();
     if (!guess) return;
     // proteção contra entrada atrasada depois do fim de jogo (ex: várias
@@ -1918,6 +1989,13 @@
 
     // skip vale nos outros níveis; no insane, tentar pular é desqualificação na hora
     if (SKIP_WORDS.includes(guess.toLowerCase())) {
+      captureEvent("challenge_skipped", {
+        round_number: challengeIndex,
+        prompt_language: currentPromptLangName,
+        group_size: currentGroup.length,
+        wrong_attempts: wrongCount,
+        input_source: source
+      });
       if (IS_MOBILE) {
         mobileResolveChallenge(currentGroup[0], "#9aa1ac", true, currentLevel === "insane" ? "mistake" : null);
       } else {
@@ -1931,6 +2009,15 @@
     attemptsCount++;
 
     const match = findMatch(guess, currentAcceptableGroup);
+    captureEvent("answer_submitted", {
+      round_number: challengeIndex,
+      prompt_language: currentPromptLangName,
+      group_size: currentGroup.length,
+      attempt_number: wrongCount + 1,
+      is_correct: Boolean(match),
+      matched_language: match ? match.name : null,
+      input_source: source
+    });
 
     if (match) {
       const color = pickColor();
@@ -2343,11 +2430,19 @@
 
   const RATING_DOT_COLORS = ["#3f8a68", "#B44B69", "#3B5BA5", "#542E75", "#AE90E9", "#3474D3", "#D98CA0"];
 
-  async function shareResultCard() {
-    const data = computeResultsData("completed");
-    const canvas = document.createElement("canvas");
-    drawShareCard(canvas, correctCount, totalRounds, currentLevel, data.elapsed, data.rarest);
-    const dataUrl = canvas.toDataURL("image/png");
+  async function shareResultCard(channel = "result_button") {
+    const properties = { ...analyticsRun?.properties, ...analyticsRun?.summary, channel };
+    captureEvent("result_share_requested", properties);
+    let dataUrl;
+    try {
+      const data = computeResultsData("completed");
+      const canvas = document.createElement("canvas");
+      drawShareCard(canvas, correctCount, totalRounds, currentLevel, data.elapsed, data.rarest);
+      dataUrl = canvas.toDataURL("image/png");
+    } catch (e) {
+      captureEvent("result_share_failed", { ...properties, reason: "image_generation" });
+      return;
+    }
 
     // no celular, tenta abrir a folha de compartilhamento nativa; se não
     // rolar (ou no desktop), cai pro download direto do arquivo
@@ -2357,9 +2452,13 @@
       const file = new File([blob], "lobster-is-lobster-result.png", { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: "Lobster is Lobster" });
+        captureEvent("result_share_completed", { ...properties, method: "native" });
         return;
       }
     } catch (e) {
+      captureEvent(e.name === "AbortError" ? "result_share_cancelled" : "result_share_failed", {
+        ...properties, reason: e.name === "AbortError" ? "cancelled" : "native_share"
+      });
       /* cai pro download abaixo */
     }
 
@@ -2369,6 +2468,7 @@
     document.body.appendChild(a);
     a.click();
     a.remove();
+    captureEvent("result_card_download_started", properties);
   }
 
   function computeResultsData(reason) {
@@ -2395,6 +2495,7 @@
 
   function showResultsBlock(reason) {
     reason = reason || "completed";
+    finishAnalyticsRun(reason);
     if (IS_MOBILE) {
       mobileShowResults(reason);
       return;
@@ -2455,9 +2556,9 @@
     // "Share your result" gera o PNG (melhor caminho pro Instagram/TikTok,
     // que não têm link de "postar com imagem pronta" — só resta baixar e
     // postar manualmente, inclusive pelos ícones redondos abaixo)
-    document.getElementById("shareResultBtn").addEventListener("click", shareResultCard);
+    document.getElementById("shareResultBtn").addEventListener("click", () => shareResultCard());
     document.getElementById("playAgainBtn").addEventListener("click", () => {
-      initGame(currentWord, currentLevel);
+      initGame(currentWord, currentLevel, true, "play_again");
     });
     wireShareIconButtons();
   }
@@ -2480,6 +2581,13 @@
     return `I named ${correctCount} of ${totalRounds} languages on ${currentLevel} in Lobster is Lobster — can you beat me?`;
   }
 
+  function openShareLink(channel, url) {
+    captureEvent("result_share_requested", {
+      ...analyticsRun?.summary, channel, method: "external_link"
+    });
+    window.open(url, "_blank", "noopener");
+  }
+
   function wireShareIconButtons() {
     const shareUrl = "https://www.lobsterislobster.online";
     const text = buildShareText();
@@ -2487,25 +2595,25 @@
     const waBtn = document.getElementById("shareWhatsapp");
     if (waBtn) {
       waBtn.addEventListener("click", () => {
-        window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+        openShareLink("whatsapp", `https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`);
       });
     }
     const xBtn = document.getElementById("shareX");
     if (xBtn) {
       xBtn.addEventListener("click", () => {
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener");
+        openShareLink("x", `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`);
       });
     }
     const bsBtn = document.getElementById("shareBluesky");
     if (bsBtn) {
       bsBtn.addEventListener("click", () => {
-        window.open(`https://bsky.app/intent/compose?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+        openShareLink("bluesky", `https://bsky.app/intent/compose?text=${encodeURIComponent(text + " " + shareUrl)}`);
       });
     }
     const igBtn = document.getElementById("shareInstagram");
-    if (igBtn) igBtn.addEventListener("click", shareResultCard);
+    if (igBtn) igBtn.addEventListener("click", () => shareResultCard("instagram"));
     const ttBtn = document.getElementById("shareTiktok");
-    if (ttBtn) ttBtn.addEventListener("click", shareResultCard);
+    if (ttBtn) ttBtn.addEventListener("click", () => shareResultCard("tiktok"));
   }
 
   // ---------- versão mobile: tela cheia por pergunta, sem rolagem ----------
@@ -2586,6 +2694,7 @@
     if (geo) {
       geoHintTimer = setTimeout(() => {
         document.getElementById("mobileGeoHint").textContent = `hint: ${geo}`;
+        captureEvent("hint_shown", { hint_type: "geography", round_number: challengeIndex });
       }, IDLE_HINT_DELAY_FIRST + GEO_HINT_DELAY);
     }
 
@@ -2705,10 +2814,10 @@
       </div>
     `;
     el.classList.add("active");
-    document.getElementById("mobileShareBtn").addEventListener("click", shareResultCard);
+    document.getElementById("mobileShareBtn").addEventListener("click", () => shareResultCard());
     document.getElementById("mobilePlayAgainBtn").addEventListener("click", () => {
       el.classList.remove("active");
-      initGame(currentWord, currentLevel);
+      initGame(currentWord, currentLevel, true, "play_again");
     });
     document.getElementById("mobileResultsAbout").addEventListener("click", (e) => {
       e.preventDefault();
@@ -2718,23 +2827,23 @@
     const shareUrl = "https://www.lobsterislobster.online";
     const text = buildShareText();
     document.getElementById("mobileShareWhatsapp").addEventListener("click", () => {
-      window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+      openShareLink("whatsapp", `https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`);
     });
     document.getElementById("mobileShareX").addEventListener("click", () => {
-      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener");
+      openShareLink("x", `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`);
     });
     document.getElementById("mobileShareBluesky").addEventListener("click", () => {
-      window.open(`https://bsky.app/intent/compose?text=${encodeURIComponent(text + " " + shareUrl)}`, "_blank", "noopener");
+      openShareLink("bluesky", `https://bsky.app/intent/compose?text=${encodeURIComponent(text + " " + shareUrl)}`);
     });
-    document.getElementById("mobileShareInstagram").addEventListener("click", shareResultCard);
-    document.getElementById("mobileShareTiktok").addEventListener("click", shareResultCard);
+    document.getElementById("mobileShareInstagram").addEventListener("click", () => shareResultCard("instagram"));
+    document.getElementById("mobileShareTiktok").addEventListener("click", () => shareResultCard("tiktok"));
   }
 
   document.getElementById("newWordLink").addEventListener("click", (e) => {
     e.preventDefault();
     const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
     const nextWord = choices[Math.floor(Math.random() * choices.length)];
-    initGame(nextWord, currentLevel);
+    initGame(nextWord, currentLevel, true, "new_word");
   });
 
   document.querySelectorAll(".level-mini-btn").forEach((btn) => {
@@ -2742,19 +2851,20 @@
       document.getElementById("mobileMenuOverlay").classList.remove("visible");
       const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
       const nextWord = choices[Math.floor(Math.random() * choices.length)];
-      initGame(nextWord, btn.dataset.level);
+      initGame(nextWord, btn.dataset.level, true, "level_change");
     });
   });
 
   // ---------- controles exclusivos do mobile: skip, hamburger, fim de nível ----------
 
   document.getElementById("mobileSkipBtn").addEventListener("click", () => {
-    handleGuess("skip");
+    handleGuess("skip", "skip_button");
   });
 
   document.getElementById("mobileMenuBtn").addEventListener("click", (e) => {
     e.stopPropagation(); // sem isso, o listener global de "clique em qualquer lugar" refocava o campo na sequência
     document.getElementById("mobileMenuOverlay").classList.add("visible");
+    captureEvent("menu_opened");
     const activeInput = document.getElementById("mobileCardInput");
     if (activeInput) activeInput.blur(); // sem teclado aberto atrás do menu
   });
@@ -2774,7 +2884,7 @@
     document.getElementById("mobileMenuOverlay").classList.remove("visible");
     const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
     const nextWord = choices[Math.floor(Math.random() * choices.length)];
-    initGame(nextWord, currentLevel);
+    initGame(nextWord, currentLevel, true, "new_word");
   });
   document.getElementById("mobileMenuAbout").addEventListener("click", (e) => {
     e.preventDefault();
@@ -2798,6 +2908,7 @@
   let aboutPreviousMobileScreen = null; // "game" | "results" | "levelEnd" | null — pra voltar pra tela certa
 
   function showAboutPage() {
+    captureEvent("about_viewed");
     if (timerInterval) {
       clearInterval(timerInterval);
       timerInterval = null;
@@ -2888,10 +2999,12 @@
     const email = input.value.trim();
 
     if (!email) {
+      captureEvent("newsletter_validation_failed", { reason: "empty_email" });
       input.focus();
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      captureEvent("newsletter_validation_failed", { reason: "invalid_email" });
       input.value = "";
       input.placeholder = "that doesn't look like an email";
       return;
@@ -2901,6 +3014,8 @@
     btn.textContent = "…";
     input.disabled = true;
     btn.disabled = true;
+    const properties = { ...analyticsRun?.properties };
+    captureEvent("newsletter_subscription_submitted", properties);
 
     try {
       const res = await fetch(FORMSPREE_ENDPOINT, {
@@ -2909,12 +3024,15 @@
         body: JSON.stringify({ email })
       });
       if (res.ok) {
+        captureEvent("newsletter_subscription_succeeded", properties);
         input.value = "";
         input.placeholder = "thanks! check your inbox to confirm";
       } else {
+        captureEvent("newsletter_subscription_failed", { ...properties, reason: "http_error", status_code: res.status });
         input.placeholder = "something went wrong — try again";
       }
     } catch (e) {
+      captureEvent("newsletter_subscription_failed", { ...properties, reason: "network_error" });
       input.placeholder = "something went wrong — try again";
     } finally {
       input.disabled = false;
