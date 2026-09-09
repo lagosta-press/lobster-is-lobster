@@ -281,9 +281,9 @@ await check('leaving an unfinished tutorial records abandonment', () => {
 await check('menu, About, and visible hints emit events', async () => {
   const app = boot();
   app.start();
-  app.advance(9000);
-  // a ordem entre dica geográfica e cultural agora é sorteada por rodada —
-  // o que importa aqui é que alguma dica de conteúdo apareceu por inatividade
+  // dicas de conteúdo (geo/cultural) não são mais automáticas por
+  // inatividade — só aparecem depois de uma resposta errada
+  app.run('handleGuess("__not_a_real_answer__")');
   assert.ok(['geography', 'cultural'].includes(app.named('hint_shown')[0].properties.hint_type));
   await app.click('mobileMenuBtn');
   await app.click('mobileMenuAbout');

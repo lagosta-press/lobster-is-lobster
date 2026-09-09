@@ -620,8 +620,18 @@
     margin-left: 14px;
     transform: translateY(-4px);
   }
-  .about-curious-label {
+  .about-share-label {
     margin-top: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .about-share-icons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 16px;
+    margin-bottom: 10px;
   }
   .about-para {
     font-size: 1rem;
@@ -946,12 +956,8 @@
 
     <a href="#" class="about-back" id="backToGameLink">BACK TO THE GAME</a>
 
-    <div class="about-para muted about-curious-label">
-      now, for the really curious
-    </div>
-
     <div class="about-para muted">
-      It started as an idea for the publishing house's own website — and ended up too fun to leave there, so we gave it a home of its own. The plan is to keep building it and making it better. It's a work by Eduardo Menezes with a huge collaboration from <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#3B5BA5">Joel Souza</a>, as well as a handful of friends who tested the mechanics. Thanks to all of them.
+      This game idea came as an experiment for a publishing house's own website, Lagosta Press — and ended up too fun to leave there, so we gave it a home of its own to make it accessible to more people. The plan is to keep building it and making it better, so please send us your suggestions. It's a work by Eduardo Menezes with a huge collaboration from <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#3B5BA5">Joel Souza</a>, as well as a handful of friends who tested the mechanics. Thanks to all of them.
     </div>
 
     <div class="about-para muted" style="text-align:center; margin-bottom:6px;">
@@ -960,6 +966,17 @@
 
     <div class="about-para muted" style="text-align:center;">
       <a href="https://www.lobsterislobster.online" target="_blank" rel="noopener" style="color:#3f8a68">www.lobsterislobster.online</a>
+    </div>
+
+    <div class="about-para muted about-share-label" style="text-align:center;">
+      SHARE THE GAME
+    </div>
+    <div class="about-share-icons">
+      <button class="share-icon-btn" id="aboutShareWhatsapp" aria-label="Share on WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.5a8.5 8.5 0 0 0-7.35 12.77L3.5 20.5l4.36-1.14A8.5 8.5 0 1 0 12 3.5z"/><path d="M8.5 9.7c0-.4.3-1 .6-1.1.3-.1.8-.1 1 .3l.6 1.4c.1.3 0 .6-.2.8l-.5.5c.4.9 1.3 1.8 2.2 2.2l.5-.5c.2-.2.5-.3.8-.2l1.4.6c.4.2.4.7.3 1-.1.3-.7.6-1.1.6-1.9 0-4.6-2.7-4.6-4.6z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="share-icon-btn" id="aboutShareX" aria-label="Share on X"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.9 2H22l-7.6 8.7L23.3 22H16.6l-5.2-6.8L5.4 22H2.3l8.1-9.3L1.5 2h6.8l4.7 6.2L18.9 2zm-1.2 18h1.7L7.4 4H5.6l12.1 16z"/></svg></button>
+      <button class="share-icon-btn" id="aboutShareBluesky" aria-label="Share on Bluesky"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 8.6C10.6 6 6.7 3.2 4.5 3.9c-.5.15-.8.6-.8 1.4 0 4.8 1.9 8.2 4.1 9.4-2.6-.3-5 .5-5 2.4 0 2.1 3 3 5.6 2 1.6-.6 3-1.7 3.6-2.9.6 1.2 2 2.3 3.6 2.9 2.6 1 5.6.1 5.6-2 0-1.9-2.4-2.7-5-2.4 2.2-1.2 4.1-4.6 4.1-9.4 0-.8-.3-1.25-.8-1.4C17.3 3.2 13.4 6 12 8.6z"/></svg></button>
+      <button class="share-icon-btn" id="aboutShareInstagram" aria-label="Share on Instagram"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg></button>
+      <button class="share-icon-btn" id="aboutShareTiktok" aria-label="Share on TikTok"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M14 3h3c.2 2 1.6 3.6 3.7 3.9v3c-1.4 0-2.7-.4-3.7-1.1v6.4c0 3.3-2.7 5.8-5.9 5.8S5.2 18.5 5.2 15.2c0-3.2 2.6-5.8 5.8-5.8.3 0 .6 0 .9.1v3.1a2.8 2.8 0 0 0-.9-.15 2.75 2.75 0 1 0 0 5.5c1.5 0 2.8-1.1 2.9-2.6V3z"/></svg></button>
     </div>
   </div>
 
@@ -1637,7 +1654,7 @@
   // usa rolagem instantânea (não "smooth") porque chamadas muito seguidas
   // (uma por linha, várias vezes por rodada) interrompiam a animação suave
   // antes dela terminar, fazendo a página andar só uns pixels de cada vez.
-  const ANCHOR_RATIO = IS_MOBILE ? 0.68 : 0.75; // no mobile mira um pouco mais alto — a barra fixa embaixo já ocupa parte da tela
+  const ANCHOR_RATIO = IS_MOBILE ? 0.42 : 0.46; // perto do meio da tela — antes ficava a 0.75/0.68, quase no rodapé
   function scrollToLine(el) {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -1790,9 +1807,8 @@
   }
 
   const SKIP_WORDS = ["next", "jump", "skip"];
-  const IDLE_HINT_DELAY = 4375; // +75% — dá mais tempo pra pensar antes da 1ª dica de cada rodada
+  const IDLE_HINT_DELAY = 4375; // +75% — dá mais tempo pra pensar antes do "type next to move on"
   const IDLE_HINT_DELAY_FIRST = 2100; // idem, +75%, mas continua menor que o padrão pra ensinar o mecanismo cedo na primeiríssima vez
-  const GEO_HINT_DELAY = 1200; // gap entre a 1ª dica e o "type next to move on" — sem mudança
   let idleTimer = null;
   let geoHintTimer = null;
   let skipHintIndex = 0;
@@ -2023,18 +2039,10 @@
     captureEvent("hint_shown", { hint_type: "skip", round_number: challengeIndex });
   }
 
-  // só a primeira dica aparece sozinha, por inatividade. A partir da
-  // segunda, só aparecem quando a pessoa erra uma tentativa (ver
-  // revealNextHint chamado em handleGuess) — nunca mais por tempo parado
-  function scheduleContentReveal(line) {
-    if (hintsRevealedCount === 0 && roundHints.length > 0) {
-      revealNextHint();
-      geoHintTimer = setTimeout(() => showSkipHint(line), GEO_HINT_DELAY);
-    } else {
-      showSkipHint(line);
-    }
-  }
-
+  // por inatividade só aparece o "type next to move on" — nenhuma dica de
+  // conteúdo é automática. Todas as dicas (1ª, 2ª, 3ª...) só surgem quando a
+  // pessoa erra uma tentativa (revealNextHint, chamado em handleGuess), pra
+  // o jogo não virar uma espera constante por dica
   function scheduleIdleHint(line) {
     clearIdleTimer();
     const existingHint = line.querySelector(".skip-hint");
@@ -2055,15 +2063,14 @@
       return;
     }
 
-    // dicas (geo/culturais) e o "type next to move on" só existem no
-    // easy/medium/hard — no insane, cada erro conta pra valer, então dar
-    // pista ou sugerir pular mudaria a identidade do modo
+    // o "type next to move on" só existe no easy/medium/hard — no insane,
+    // cada erro conta pra valer, então sugerir pular mudaria a identidade do modo
     if (currentLevel === "insane") return;
 
     const delay = hasShownHintOnce ? IDLE_HINT_DELAY : IDLE_HINT_DELAY_FIRST;
     idleTimer = setTimeout(() => {
       hasShownHintOnce = true;
-      scheduleContentReveal(line);
+      showSkipHint(line);
     }, delay);
   }
 
@@ -2687,7 +2694,7 @@
       const res = await fetch(dataUrl);
       const blob = await res.blob();
       const file = new File([blob], "lobster-is-lobster-result.png", { type: "image/png" });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (IS_MOBILE && navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title: "Lobster is Lobster" });
         captureEvent("result_share_completed", { ...properties, method: "native" });
         return;
@@ -2853,6 +2860,63 @@
     if (ttBtn) ttBtn.addEventListener("click", () => shareResultCard("tiktok"));
   }
 
+  // botões de "SHARE THE GAME" do About — sem resultado de partida por trás,
+  // então o texto é um convite genérico, não o placar de ninguém
+  let aboutShareWired = false;
+  function buildAboutShareText() {
+    return "Guess the language: a quick, addictive word game. Give it a try!";
+  }
+  async function aboutShareGeneric(channel) {
+    const shareUrl = "https://www.lobsterislobster.online";
+    const text = buildAboutShareText();
+    captureEvent("game_share_requested", { channel, source: "about" });
+    if (IS_MOBILE && navigator.share) {
+      try {
+        await navigator.share({ title: "Lobster is Lobster", text, url: shareUrl });
+        return;
+      } catch (e) {
+        /* cancelado ou indisponível — cai pro fallback abaixo */
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(`${text} ${shareUrl}`);
+        return;
+      } catch (e) {
+        /* nada a fazer se nem isso funcionar */
+      }
+    }
+  }
+  function wireAboutShareButtons() {
+    if (aboutShareWired) return;
+    aboutShareWired = true;
+    const shareUrl = "https://www.lobsterislobster.online";
+    const text = buildAboutShareText();
+
+    const waBtn = document.getElementById("aboutShareWhatsapp");
+    if (waBtn) {
+      waBtn.addEventListener("click", () => {
+        openShareLink("whatsapp", `https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`);
+      });
+    }
+    const xBtn = document.getElementById("aboutShareX");
+    if (xBtn) {
+      xBtn.addEventListener("click", () => {
+        openShareLink("x", `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`);
+      });
+    }
+    const bsBtn = document.getElementById("aboutShareBluesky");
+    if (bsBtn) {
+      bsBtn.addEventListener("click", () => {
+        openShareLink("bluesky", `https://bsky.app/intent/compose?text=${encodeURIComponent(text + " " + shareUrl)}`);
+      });
+    }
+    const igBtn = document.getElementById("aboutShareInstagram");
+    if (igBtn) igBtn.addEventListener("click", () => aboutShareGeneric("instagram"));
+    const ttBtn = document.getElementById("aboutShareTiktok");
+    if (ttBtn) ttBtn.addEventListener("click", () => aboutShareGeneric("tiktok"));
+  }
+
   // ---------- versão mobile: tela cheia por pergunta, sem rolagem ----------
 
   function mobileRenderBlank(value) {
@@ -2924,16 +2988,10 @@
     // abre teclado com toque direto) — essa dica avisa que precisa tocar
     document.getElementById("mobileTapHint").classList.toggle("visible", !hasShownAnswerHint);
 
-    // primeira dica (geo ou cultural, sorteada) aparece sozinha depois de um
-    // tempo parado — igual ao desktop. As próximas só aparecem quando a
-    // pessoa erra uma tentativa (revealNextHint chamado em handleGuess),
-    // não mais por tempo parado. Não roda no insane (roundHints vem vazio).
+    // no mobile o botão de skip já é sempre visível, então não existe
+    // equivalente ao "type next" por inatividade — e agora nenhuma dica de
+    // conteúdo aparece sozinha por tempo parado (só via erro, em handleGuess)
     if (geoHintTimer) clearTimeout(geoHintTimer);
-    if (roundHints.length > 0) {
-      geoHintTimer = setTimeout(() => {
-        if (hintsRevealedCount === 0) revealNextHint();
-      }, IDLE_HINT_DELAY_FIRST + GEO_HINT_DELAY);
-    }
 
     const input = mobileEnsureInput();
     input.value = "";
@@ -3187,6 +3245,7 @@
     }
     document.getElementById("aboutCloseBtn").classList.add("visible");
     document.getElementById("aboutPage").classList.add("visible");
+    wireAboutShareButtons();
     window.scrollTo({ top: 0 });
   }
 
