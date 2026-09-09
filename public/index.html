@@ -2164,14 +2164,23 @@
     wordEl.style.fontWeight = "400";
     blankWrap.outerHTML = `<span class="lang-correct" style="color:${color}">${primaryMatch.name.toLowerCase()}</span>`;
 
+    // o palpite certo pode ser uma língua válida pra essa palavra que NÃO
+    // foi sorteada nessa partida (o jogo aceita qualquer uma das 99, não só
+    // as do pool) — nesse caso ela não faz parte do currentGroup, e não deve
+    // somar um ponto A MAIS além do que currentGroup.length realmente tira
+    // do "remaining"; o crédito dela já vem inteiro do loop de "also X" abaixo
+    const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
+
     if (isForced) {
       missedCount++;
-    } else {
+    } else if (isPrimaryInGroup) {
       correctCount++;
     }
     roundLog.push({ name: primaryMatch.name, correct: !isForced });
 
-    const others = currentGroup.filter((l) => l.name !== primaryMatch.name);
+    const others = isPrimaryInGroup
+      ? currentGroup.filter((l) => l.name !== primaryMatch.name)
+      : currentGroup;
     remaining = remaining.filter((l) => !currentGroup.includes(l));
     updateProgress();
 
@@ -2988,13 +2997,19 @@
     feedback.textContent = isForced ? "✗" : "✓";
     feedback.style.color = isForced ? "#c7cbd1" : "#3f8a68";
 
-    // conta o grupo inteiro de sinônimos, igual o desktop faz — só que sem
-    // revelar visualmente cada um, pra manter o ritmo rápido de um card só
-    const others = currentGroup.filter((l) => l.name !== primaryMatch.name);
+    // mesmo caso do desktop: o palpite certo pode ser uma língua válida que
+    // não foi sorteada nessa partida — nesse caso ela não está no
+    // currentGroup, e o crédito não pode passar de currentGroup.length
+    // (o que de fato é removido do "remaining")
+    const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
+    const others = isPrimaryInGroup
+      ? currentGroup.filter((l) => l.name !== primaryMatch.name)
+      : currentGroup;
+    const creditedCount = isPrimaryInGroup ? 1 + others.length : others.length;
     if (isForced) {
-      missedCount += 1 + others.length;
+      missedCount += creditedCount;
     } else {
-      correctCount += 1 + others.length;
+      correctCount += creditedCount;
     }
     roundLog.push({ name: primaryMatch.name, correct: !isForced });
     others.forEach((o) => roundLog.push({ name: o.name, correct: !isForced }));
