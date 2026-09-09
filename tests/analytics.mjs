@@ -43,6 +43,15 @@ function boot({ mobile = true, returning = true, posthog = 'working' } = {}) {
     get className() { return [...this.classes].join(' '); }
     setAttribute() {}
     appendChild(child) { this.children.push(child); return child; }
+    insertBefore(child, referenceNode) {
+      const idx = this.children.indexOf(referenceNode);
+      if (idx === -1) {
+        this.children.push(child);
+      } else {
+        this.children.splice(idx, 0, child);
+      }
+      return child;
+    }
     querySelectorAll(selector) {
       return this.children.flatMap(child => [
         ...(child.classes?.has(selector.slice(1)) ? [child] : []),
@@ -273,7 +282,9 @@ await check('menu, About, and visible hints emit events', async () => {
   const app = boot();
   app.start();
   app.advance(9000);
-  assert.equal(app.named('hint_shown')[0].properties.hint_type, 'geography');
+  // a ordem entre dica geográfica e cultural agora é sorteada por rodada —
+  // o que importa aqui é que alguma dica de conteúdo apareceu por inatividade
+  assert.ok(['geography', 'cultural'].includes(app.named('hint_shown')[0].properties.hint_type));
   await app.click('mobileMenuBtn');
   await app.click('mobileMenuAbout');
   assert.equal(app.named('menu_opened').length, 1);

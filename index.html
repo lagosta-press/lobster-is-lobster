@@ -3,7 +3,21 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Language Game</title>
+<title>Lobster is Lobster — Guess the Language</title>
+<meta name="description" content="A word appears. You guess which language it was translated into. Free, no sign-up, a new word every round — from easy (Spanish, French, Portuguese...) to insane." />
+<meta name="application-name" content="Lobster is Lobster" />
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<meta property="og:title" content="Lobster is Lobster — Guess the Language" />
+<meta property="og:description" content="A word appears. You guess which language it was translated into. Free, no sign-up, a new word every round." />
+<meta property="og:site_name" content="Lobster is Lobster" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://www.lobsterislobster.online" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Lobster is Lobster — Guess the Language" />
+<meta name="twitter:description" content="A word appears. You guess which language it was translated into. Free, no sign-up, a new word every round." />
 <script>
     !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="Bl Hl zl Ul Gl init fu pu du vu bu Ta cu wu lu Cu Tu Mu capture getExtension gu ql Ru calculateEventProperties Eu register register_once register_for_session unregister unregister_for_session Ou hu Au getFeatureFlag getFeatureFlagPayload getFeatureFlagResult getAllFeatureFlags isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync $u identify setPersonProperties unsetPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset Du shutdown setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty Pu xu createPersonProfile setInternalOrTestUser Fu Zl Jl opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing ku debug Ma ds getPageViewId captureTraceFeedback captureTraceMetric nu".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
     posthog.init('phc_BPheaw5UJuMNDNGbrvy6KgBWWTsx3HJW5XJjXBpmrszc', {
@@ -71,17 +85,21 @@
   .lang-correct {
     font-weight: 400;
   }
+  .hint-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 10px;
+  }
   .skip-hint {
-    font-size: 0.9rem;
-    color: #c7cbd1;
-    font-weight: 400;
-    margin-left: 0.3em;
+    font-size: 0.95rem;
+    color: #9aa1ac;
+    font-weight: 300;
   }
   .geo-hint {
-    font-size: 0.9rem;
-    color: #3474D3;
-    font-weight: 400;
-    margin-left: 0.3em;
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: #4b5563;
   }
   .lang-wrong {
     text-decoration: line-through;
@@ -238,7 +256,7 @@
     margin-top: 18px;
     font-size: 0.95rem;
     font-weight: 300;
-    color: #3474D3;
+    color: #4b5563;
     min-height: 1.3em;
   }
   .mobile-tap-hint.visible {
@@ -589,6 +607,19 @@
     text-decoration: none;
     border-bottom: 1px solid currentColor;
   }
+  .beta-badge {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #171a21;
+    border: 1.5px solid #171a21;
+    border-radius: 999px;
+    padding: 3px 11px;
+    margin-left: 14px;
+    transform: translateY(-4px);
+  }
   .about-curious-label {
     margin-top: 50px;
   }
@@ -894,7 +925,7 @@
 
   <div class="about-page" id="aboutPage">
     <div class="about-intro">
-      Lobster is lobster is a project by Lagosta Press.
+      Lobster is lobster is a project by Lagosta Press.<span class="beta-badge">BETA</span>
     </div>
     <div class="about-intro">
       <a href="mailto:hello@lagosta.press" style="color:#3474D3">hello@lagosta.press</a>
@@ -920,7 +951,7 @@
     </div>
 
     <div class="about-para muted">
-      It started as an idea for the publishing house's own website — and ended up too fun to leave there, so we gave it a home of its own. The plan is to keep building it and making it better. It's a work by Eduardo Menezes with a huge collaboration from Joel Souza, as well as a handful of friends who tested the mechanics. Thanks to all of them.
+      It started as an idea for the publishing house's own website — and ended up too fun to leave there, so we gave it a home of its own. The plan is to keep building it and making it better. It's a work by Eduardo Menezes with a huge collaboration from <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#3B5BA5">Joel Souza</a>, as well as a handful of friends who tested the mechanics. Thanks to all of them.
     </div>
 
     <div class="about-para muted" style="text-align:center; margin-bottom:6px;">
@@ -1078,18 +1109,14 @@
   // "lake" de línguas: pool maior de onde cada partida sorteia seu próprio conjunto
   const ALL_META = LANG_META.concat(INSANE_META);
 
-  // línguas amplamente reconhecíveis, quase todas em alfabeto latino —
-  // o nível fácil sorteia 9 dessas a cada partida (+ inglês de graça = 10)
+  // línguas do nível fácil: alfabeto latino E realmente reconhecíveis pela
+  // maioria das pessoas — tiramos do pool as ~15 que eram só "alfabeto
+  // latino" mas tão obscuras quanto qualquer coisa do Hard (Letão, Cazaque,
+  // Esloveno, Islandês etc.), então agora pool e "familiares" são a mesma lista
   const EASY_POOL_NAMES = [
-    "Spanish","French","Portuguese","Italian","German","Dutch","Indonesian","Malay","Turkish","Vietnamese","Filipino","Polish","Romanian","Czech","Slovak","Croatian","Slovenian","Hungarian","Finnish","Danish","Norwegian","Icelandic","Estonian","Latvian","Lithuanian","Catalan","Swahili","Kazakh"
-  ];
-  // dentro do pool do Easy, essas são as que a maioria das pessoas realmente
-  // reconhece — "alfabeto latino" não é o mesmo que "idioma familiar", e as
-  // outras 15 do pool (Letão, Cazaque, Esloveno, etc.) são tão obscuras
-  // quanto qualquer coisa do Hard pra quem não estudou línguas
-  const EASY_FAMILIAR_NAMES = [
     "Spanish","French","Portuguese","Italian","German","Dutch","Indonesian","Malay","Turkish","Vietnamese","Filipino","Polish","Romanian"
   ];
+  const EASY_FAMILIAR_NAMES = EASY_POOL_NAMES;
 
   // total de rodadas (línguas + inglês) por nível — usado só pro placar mostrar o progresso
   const LEVEL_TOTALS = { easy: 12, medium: 12, hard: 12, insane: 96 };
@@ -1137,6 +1164,12 @@
   let attemptsCount = 0;
   let correctCount = 0;
   let missedCount = 0;
+  // incrementado toda vez que um jogo novo começa (initGame) — cadeias
+  // assíncronas antigas (animação de "also X", revelação de dicas) guardam
+  // o valor no início e conferem antes de mexer em qualquer estado global;
+  // se não bater mais, é uma cadeia órfã de uma partida anterior e ela para
+  // sozinha, em vez de inflar o placar da partida nova
+  let gameToken = 0;
   let roundLog = []; // { name, correct } por rodada — usado pra "rarest catch" no resultado
   let startTime = Date.now();
   let timerInterval = null;
@@ -1203,9 +1236,9 @@
 
   // "onramp": em quantas das primeiras perguntas o jogo prioriza uma língua
   // comum (se ela estiver presente no sorteio) antes de soltar tudo aleatório.
-  // easy: 3 primeiras · medium: só a 1ª · hard/insane: nenhuma, aleatório
+  // easy e medium: 3 primeiras · hard/insane: nenhuma, aleatório
   // desde a primeira pergunta
-  const ONRAMP_ROUNDS = { easy: 3, medium: 1, hard: 0, insane: 0 };
+  const ONRAMP_ROUNDS = { easy: 3, medium: 3, hard: 0, insane: 0 };
 
   function buildLangsForWord(word, level) {
     let pool;
@@ -1229,24 +1262,34 @@
 
     let drawn;
     if (level === "easy") {
-      // garante um "chão comum" bem maior — de 7 a 9 das línguas realmente
+      // garante um "chão comum" bem maior — de 9 a 10 das línguas realmente
       // reconhecíveis do pool (não só top10), pra maioria da partida ser
-      // familiar e sobrar só um punhado de rodadas genuinamente desafiadoras
+      // familiar e sobrar só 1-2 rodadas genuinamente desafiadoras
       const familiarAvailable = shuffle(pool.filter((l) => EASY_FAMILIAR_NAMES.includes(l.name)));
-      const guaranteedCount = Math.min(7 + Math.floor(Math.random() * 3), familiarAvailable.length, drawCount);
+      const guaranteedCount = Math.min(9 + Math.floor(Math.random() * 2), familiarAvailable.length, drawCount);
       const guaranteed = familiarAvailable.slice(0, guaranteedCount);
       const rest = pool.filter((l) => !guaranteed.includes(l));
       const fillerCount = Math.max(drawCount - guaranteed.length, 0);
       const filler = shuffle([...rest]).slice(0, fillerCount);
       drawn = shuffle([...guaranteed, ...filler]);
     } else if (level === "medium") {
-      // garante de 3 a 5 línguas comuns (top10) no sorteio — evita que o
-      // médio vire "quase um mini-hard" só porque o resto do pool de 49 é
-      // majoritariamente de scripts não-latinos; o resto do sorteio segue aleatório
+      // garante de 5 a 7 línguas comuns (top10, mistura scripts latinos e
+      // não-latinos de propósito) no sorteio — evita que o médio vire "quase
+      // um mini-hard" só porque o resto do pool de 49 é majoritariamente de
+      // scripts não-latinos; o resto do sorteio segue aleatório
       const commonsAvailable = shuffle(pool.filter((l) => TOP10_NAMES.includes(l.name)));
-      const guaranteedCount = Math.min(3 + Math.floor(Math.random() * 3), commonsAvailable.length); // 3, 4 ou 5
-      const guaranteed = commonsAvailable.slice(0, guaranteedCount);
-      const rest = pool.filter((l) => !TOP10_NAMES.includes(l.name));
+      const guaranteedCommonCount = Math.min(5 + Math.floor(Math.random() * 3), commonsAvailable.length); // 5, 6 ou 7
+      const guaranteedCommon = commonsAvailable.slice(0, guaranteedCommonCount);
+      // + 1 ou 2 línguas latinas "fáceis" (mesmo pool do Easy) fora do top10,
+      // pra suavizar a transição fácil -> médio sem tirar espaço dos scripts
+      // não-latinos que já entram garantidos acima
+      const easyLatinAvailable = shuffle(
+        pool.filter((l) => EASY_POOL_NAMES.includes(l.name) && !guaranteedCommon.includes(l))
+      );
+      const guaranteedEasyLatinCount = Math.min(1 + Math.floor(Math.random() * 2), easyLatinAvailable.length); // 1 ou 2
+      const guaranteedEasyLatin = easyLatinAvailable.slice(0, guaranteedEasyLatinCount);
+      const guaranteed = [...guaranteedCommon, ...guaranteedEasyLatin];
+      const rest = pool.filter((l) => !guaranteed.includes(l));
       const fillerCount = Math.max(drawCount - guaranteed.length, 0);
       const filler = shuffle([...rest]).slice(0, fillerCount);
       drawn = shuffle([...guaranteed, ...filler]);
@@ -1515,8 +1558,13 @@
     finishAnalyticsRun(source, true);
     if (resetFlow === undefined) resetFlow = true;
     clearIdleTimer();
+    gameToken++; // invalida qualquer cadeia assíncrona (also X, dicas) de uma partida anterior
     gamePhase = "playing";
     document.body.classList.add("playing");
+    if (!IS_MOBILE) {
+      const spacer = document.getElementById("scrollSpacer");
+      if (spacer) spacer.style.display = ""; // restaura o fôlego de rolagem — a tela de resultado o escondia
+    }
     document.querySelectorAll(".level-mini-btn").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.level === (level || currentLevel));
     });
@@ -1601,13 +1649,23 @@
   }
 
   // resultado final: rola pro topo (não pra 75% como durante o jogo) — deixa
-  // claro que é uma tela nova, não só mais uma linha do fluxo
+  // claro que é uma tela nova, não só mais uma linha do fluxo.
+  // reforça a posição de novo pouco depois (sem "smooth", direto): se sobrar
+  // impulso de rolagem do mouse/trackpad bem no instante da última resposta,
+  // ele soma ao scroll suave e passa do alvo, cortando a primeira linha —
+  // essa segunda chamada corrige a posição final mesmo nesse caso
   function scrollResultsToTop(el) {
+    const spacer = document.getElementById("scrollSpacer");
+    if (spacer) spacer.style.display = "none"; // sem isso sobra ~35vh de vazio embaixo do card de resultado
+    function applyScroll(smooth) {
+      const rect = el.getBoundingClientRect();
+      const targetY = window.scrollY + rect.top - 40;
+      window.scrollTo({ top: Math.max(targetY, 0), behavior: smooth ? "smooth" : "instant" });
+    }
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect();
-        const targetY = window.scrollY + rect.top - 40;
-        window.scrollTo({ top: Math.max(targetY, 0), behavior: "smooth" });
+        applyScroll(true);
+        setTimeout(() => applyScroll(false), 500);
       });
     });
   }
@@ -1655,6 +1713,7 @@
 
   function nextChallenge() {
     isResolving = false;
+    const myToken = gameToken;
     if (remaining.length === 0) {
       if (timerInterval) clearInterval(timerInterval);
       if (gamePhase === "tutorial") {
@@ -1691,6 +1750,8 @@
     const promptCanon = canonicalizeArabicScript(promptLang.word);
     currentGroup = remaining.filter((l) => canonicalizeArabicScript(l.word) === promptCanon);
     currentPromptLangName = promptLang.name;
+    roundHints = currentLevel === "insane" ? [] : getRoundHints(promptLang.name);
+    hintsRevealedCount = 0;
 
     // varre TODAS as 99 línguas (não só o pool sorteado nesta partida) atrás
     // de qualquer uma que compartilhe a mesma grafia — ver comentário na
@@ -1717,6 +1778,7 @@
         { text: ` is ${currentWord} in ` }
       ],
       () => {
+        if (myToken !== gameToken) return; // um jogo novo já começou nesse meio-tempo
         const attemptsSpan = document.createElement("span");
         attemptsSpan.className = "attempts";
         line.appendChild(attemptsSpan);
@@ -1728,9 +1790,9 @@
   }
 
   const SKIP_WORDS = ["next", "jump", "skip"];
-  const IDLE_HINT_DELAY = 6000;
-  const IDLE_HINT_DELAY_FIRST = 2500; // primeira vez, mostra mais cedo pra ensinar o mecanismo
-  const GEO_HINT_DELAY = 6000; // depois da dica de skip já ter aparecido
+  const IDLE_HINT_DELAY = 4375; // +75% — dá mais tempo pra pensar antes da 1ª dica de cada rodada
+  const IDLE_HINT_DELAY_FIRST = 2100; // idem, +75%, mas continua menor que o padrão pra ensinar o mecanismo cedo na primeiríssima vez
+  const GEO_HINT_DELAY = 1200; // gap entre a 1ª dica e o "type next to move on" — sem mudança
   let idleTimer = null;
   let geoHintTimer = null;
   let skipHintIndex = 0;
@@ -1772,11 +1834,205 @@
     return GEO_HINT_BY_LANG[name] || null;
   }
 
+  // pistas culturais (personalidades, música, cinema, comida, pontos
+  // turísticos) — até 2 por língua, complementam a geográfica. Preenchido
+  // por língua conforme entram no jogo; ausente = só a dica geográfica mesmo.
+  const CULTURAL_HINTS_BY_LANG = {
+    "Mandarin Chinese": ["the language of Sun Tzu's The Art of War", "handy for ordering tea in Beijing"],
+    "Cantonese": ["the language most classic kung-fu movies were shot in", "will get you far in Hong Kong"],
+    "Japanese": ["the language behind basically every anime", "sushi, sumo, karate \u2014 pick your favorite export"],
+    "Korean": ["loving or hating it, the language of K-pop", "the language of most K-dramas"],
+    "Mongolian": ["the language Genghis Khan spoke", "still spoken by a huge nomadic population"],
+    "Hindi": ["watch a Bollywood movie without needing subtitles", "the language on a train to New Delhi"],
+    "Bengali": ["the language of Rabindranath Tagore, the first non-European Nobel laureate in Literature", "about 68% of speakers live in Bangladesh"],
+    "Marathi": ["spoken across southwest and central India", "has more native speakers than Italian or Korean"],
+    "Telugu": ["the language behind India's other huge film industry, Tollywood", "spoken across southeastern India"],
+    "Tamil": ["one of the oldest languages still spoken today", "an official language of Singapore and Sri Lanka"],
+    "Punjabi": ["the language bhangra music comes from", "one of the ways Indians and Pakistanis can understand each other"],
+    "Gujarati": ["Mahatma Gandhi's mother tongue", "also spoken by a huge share of Indians in the UK and the US"],
+    "Urdu": ["the language of most classical Mughal-era poetry (yes, still a tough one)", "77% of Pakistanis will understand you"],
+    "Sindhi": ["spoken along the Indus River, in Pakistan", "one of the oldest living languages in South Asia"],
+    "Nepali": ["spoken at the foot of Everest (or Sagarmatha)", "the language of the Sherpas"],
+    "Sinhala": ["the language of the tea island \u2014 old Ceylon", "spoken on the beaches of Sri Lanka"],
+    "Oriya": ["spoken on India's east coast, near the Konark Sun Temple", "the language of Bhubaneswar"],
+    "Kannada": ["the language of Bangalore, India's tech capital", "has its own 'Kannada-wood' film industry"],
+    "Malayalam": ["a palindrome as a language name", "spoken in Kerala, land of backwaters and coconut curry"],
+    "Indonesian": ["the language dangdut music is sung in", "worth learning before a trip to Bali"],
+    "Malay": ["the language you'll hear under the Petronas Towers", "good for haggling in Kuala Lumpur"],
+    "Vietnamese": ["the language behind the word \"pho\"", "the language spoken in Ho Chi Minh City"],
+    "Filipino": ["spoken in a country famous for its karaoke culture", "for ordering a halo-halo in style"],
+    "Javanese": ["straight from the island of Java", "has more native speakers than German"],
+    "Thai": ["the language on the menu at your favorite pad thai spot", "handy to know before picking a muay thai fight"],
+    "Burmese": ["the language of Yangon's golden pagodas", "spoken along the Irrawaddy River"],
+    "Khmer": ["the language spoken around Angkor Wat", "the language of Cambodia"],
+    "Lao": ["the language of Vientiane, on the banks of the Mekong", "close enough to Thai that you can follow along"],
+    "Cebuano": ["spoken on the island of Cebu, in the Philippines", "has more native speakers than Tagalog in some regions"],
+    "Hmong": ["the language of Southeast Asia's mountain ranges", "had no writing system of its own until the 20th century"],
+    "Sundanese": ["spoken in Bandung, western Java", "Indonesia's second most-spoken native language"],
+    "Standard Arabic": ["you could listen to this language for 1001 nights", "will get you understood from Morocco to Iraq"],
+    "Persian": ["the language the poet Rumi wrote in", "the language of Tehran and much of Iran and Afghanistan"],
+    "Kurdish": ["the language of Kurdistan, spanning Turkey, Iraq, and Iran", "a people without a country of their own, but with an incredibly rich music scene"],
+    "Pashto": ["spoken on both sides of the Afghanistan-Pakistan border", "one of Afghanistan's two official languages"],
+    "Hebrew": ["a language revived from mostly religious use into everyday speech", "spoken in Israel"],
+    "Turkish": ["the language behind half the soap operas on TV", "you'd speak it, but your mouth is full of baklava"],
+    "Azerbaijani": ["the language of Baku, on the shores of the Caspian Sea", "close enough to Turkish that knowing one gets you far with the other"],
+    "Uzbek": ["spoken along much of the old Silk Road", "the language of Samarkand"],
+    "Kazakh": ["the language of the Kazakh steppe", "spoken by horseback nomads for centuries"],
+    "Kyrgyz": ["the language of the World Nomad Games", "spoken in the Tian Shan mountains"],
+    "Georgian": ["written in one of the oldest alphabets still in use", "the language of Tbilisi, straddling Europe and Asia"],
+    "Armenian": ["written in its own unique alphabet since the year 405", "the language at the foot of Mount Ararat"],
+    "Swahili": ["the language \"hakuna matata\" comes from", "spoken from Kenya to Tanzania, right past Kilimanjaro"],
+    "Hausa": ["one of the most widely spoken languages in West Africa", "you'd hear this in a big Nigerian market"],
+    "Yoruba": ["an influence you can hear in Beyonc\u00e9's Black Is King", "spoken in Nigeria, and still alive in Brazil's candombl\u00e9 temples"],
+    "Igbo": ["spoken in southeastern Nigeria", "the mother tongue of writer Chinua Achebe"],
+    "Amharic": ["the language of Ethiopia, one of the only African countries never colonized", "the language of Addis Ababa"],
+    "Somali": ["a culture with a strong oral poetry tradition", "spoken across the Horn of Africa"],
+    "Zulu": ["the language behind the opening chant of \"Circle of Life\" in The Lion King", "South Africa's most-spoken native language"],
+    "Xhosa": ["famous for its click consonants", "one of Nelson Mandela's mother tongues"],
+    "Sesotho": ["the language of Lesotho, the kingdom in the sky", "spoken right in the middle of South Africa"],
+    "Shona": ["the language of most of Zimbabwe's population", "you'd hear this near Victoria Falls"],
+    "Chichewa": ["Malawi's national language", "spoken along the shores of Lake Malawi"],
+    "Kinyarwanda": ["the language of Rwanda, the land of a thousand hills", "also spoken near the mountain gorillas"],
+    "Malagasy": ["closer to languages of Borneo than to any language in Africa", "the language of Madagascar, island of the lemurs"],
+    "Spanish": ["the language Don Quixote tilted at windmills in", "the language most reggaet\u00f3n is sung in"],
+    "French": ["the language Victor Hugo made you cry in", "your croissant pronunciation will be judged"],
+    "Portuguese": ["the language a good bossa nova sounds best in", "the language of Machado de Assis and Fernando Pessoa"],
+    "Italian": ["the language most opera divas are yelling in", "the language for ordering 'un cappuccino, per favore' without butchering the accent"],
+    "Romanian": ["the language spoken in Dracula's homeland", "the only Latin language surrounded entirely by Slavic neighbors"],
+    "Catalan": ["the language spoken in Barcelona", "the language you hear sung at Camp Nou"],
+    "Galician": ["the language of northwest Spain, near Santiago de Compostela", "a close cousin of Portuguese"],
+    "Corsican": ["the language Napoleon grew up speaking", "spoken on a French island right next to Italy"],
+    "Danish": ["the language behind the word \"hygge\"", "the language of Copenhagen \u2014 and of Lego"],
+    "Norwegian": ["the language of the fjords", "handy for watching a Nordic noir series without subtitles"],
+    "Icelandic": ["a language so unchanged that locals can still read 1000-year-old sagas", "the language of a country with more volcanoes than traffic lights"],
+    "German": ["the language philosophers ruin your day in", "the language of Grimm's original, much darker fairy tales"],
+    "Dutch": ["the language Van Gogh wrote his letters in", "the language of Amsterdam"],
+    "Luxembourgish": ["the language of a country the size of a big city", "spoken by everyone working in Luxembourg's banks"],
+    "Frisian": ["considered the living language closest to Old English", "spoken in the north of the Netherlands"],
+    "Russian": ["the language of extremely long, extremely sad novels", "the language that put the first satellite into orbit"],
+    "Polish": ["the language of Marie Curie's home country", "the language of Warsaw and Krak\u00f3w"],
+    "Ukrainian": ["the language of Kyiv", "far more different from Russian than most people assume"],
+    "Czech": ["the language of Franz Kafka", "fancy a beer in Prague?"],
+    "Slovak": ["one of the languages of the former Czechoslovakia", "the language of Bratislava"],
+    "Belarusian": ["the language of Minsk", "today spoken day-to-day by fewer people than Russian, even in its own country"],
+    "Croatian": ["the language that gave the world the necktie", "the language of the Dalmatian coast"],
+    "Slovenian": ["the language of Slovenia, between the Alps and the Adriatic", "one of the few languages with its very own grammar just for \"the two of us\""],
+    "Serbian": ["the language of Belgrade", "written in both Cyrillic and the Latin alphabet"],
+    "Bosnian": ["the language of Sarajevo", "practically identical to Serbian and Croatian in everyday life"],
+    "Bulgarian": ["a country where nodding your head can mean \"no\"", "the country where yogurt as we know it was born"],
+    "Macedonian": ["the language of Skopje", "the southernmost of all Slavic languages"],
+    "Latvian": ["the language of Riga, on the Baltic coast", "one of the oldest living languages in the Indo-European family"],
+    "Lithuanian": ["considered one of the closest living languages to ancient Sanskrit", "the language of Vilnius"],
+    "Greek": ["the language the Odyssey was actually written in", "gave us the word \"democracy\""],
+    "Albanian": ["the language of Albania and Kosovo", "with no close relatives among Europe's other languages"],
+    "Hungarian": ["the language of the country that invented the Rubik's Cube", "so different from its neighbors that nobody around understands a word"],
+    "Finnish": ["the language of Nokia's home country", "the language of Santa's homeland, according to legend"],
+    "Estonian": ["the language of Tallinn", "closer to Finnish than to its Baltic neighbors"],
+    "Maltese": ["the only Semitic language written in the Latin alphabet", "the language of an island right in the middle of the Mediterranean"],
+    "Basque": ["a language unrelated to any other on Earth", "spoken on both sides of the Spain-France border"],
+    "Hawaiian": ["the language behind the word \"aloha\"", "the language of surfing and the ukulele"],
+    "Maori": ["the language of rugby's haka", "the indigenous language of New Zealand"],
+    "Samoan": ["the language of the Samoan islands, in the South Pacific", "the language behind the siva tau, Samoa's own haka"],
+    "Haitian Creole": ["born out of the only slave revolt that founded a nation", "the language of Haiti, blending French with African languages"],
+    "Esperanto": ["invented in the 1880s to be everyone's second language", "no country on Earth has this as its native language"],
+    "Latin": ["still the official language of the Vatican today", "the language of the Roman emperors"],
+    "Scottish Gaelic": ["the language behind a lot of the Gaelic in Outlander", "the language of the Scottish Highlands"],
+  };
+
+  // todas as dicas disponíveis pra rodada atual, da mais vaga (geografia)
+  // pra mais específica (cultural) — reveladas uma de cada vez: a primeira
+  // depois de um tempo parado, as próximas a cada resposta errada
+  let roundHints = [];
+  let hintsRevealedCount = 0;
+
+  function getRoundHints(name) {
+    const hints = [];
+    const geo = getGeoHint(name);
+    if (geo) hints.push(geo);
+    const cultural = CULTURAL_HINTS_BY_LANG[name] || [];
+    hints.push(...cultural);
+    // ordem sorteada — às vezes a geográfica vem primeiro, às vezes uma
+    // cultural; ao longo da rodada, todas as disponíveis acabam aparecendo
+    return shuffle(hints);
+  }
+
+  function getHintBlock(line) {
+    let block = line.querySelector(".hint-block");
+    if (!block) {
+      block = document.createElement("div");
+      block.className = "hint-block";
+      line.appendChild(block);
+    }
+    return block;
+  }
+
+  function revealNextHint() {
+    if (hintsRevealedCount >= roundHints.length) return false;
+    const text = roundHints[hintsRevealedCount];
+    const hintType = text === getGeoHint(currentPromptLangName) ? "geography" : "cultural";
+    hintsRevealedCount++;
+    if (IS_MOBILE) {
+      // no mobile a dica SUBSTITUI a anterior (não empilha) — o card fica
+      // logo acima do teclado, e texto acumulando ali acaba indo parar
+      // atrás dele
+      const el = document.getElementById("mobileGeoHint");
+      if (el) el.textContent = `hint: ${text}`;
+    } else if (currentLineEl) {
+      // cada dica revelada vira uma linha nova, empilhada — a pessoa vê
+      // todas as dicas já reveladas nessa rodada, não só a mais recente.
+      // se o "type next to move on" já apareceu, a dica nova entra ANTES
+      // dele, pra ele continuar sempre na última posição do bloco
+      const block = getHintBlock(currentLineEl);
+      const hintLine = document.createElement("div");
+      hintLine.className = "geo-hint";
+      hintLine.textContent = `hint: ${text}`;
+      const skipEl = block.querySelector(".skip-hint");
+      if (skipEl) {
+        block.insertBefore(hintLine, skipEl);
+      } else {
+        block.appendChild(hintLine);
+      }
+      if (currentBlankInput) scrollToLine(currentBlankInput);
+    }
+    captureEvent("hint_shown", {
+      hint_type: hintType,
+      hint_index: hintsRevealedCount,
+      round_number: challengeIndex
+    });
+    return true;
+  }
+
   function clearIdleTimer() {
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = null;
     if (geoHintTimer) clearTimeout(geoHintTimer);
     geoHintTimer = null;
+  }
+
+  function showSkipHint(line) {
+    if (line.querySelector(".skip-hint")) return;
+    const word = SKIP_WORDS[skipHintIndex % SKIP_WORDS.length];
+    skipHintIndex++;
+    const hint = document.createElement("div");
+    hint.className = "skip-hint";
+    hint.textContent = `type "${word}" to move on`;
+    // entra como último filho do bloco — se mais dicas chegarem depois (via
+    // resposta errada), revealNextHint() as insere ANTES dele, então o skip
+    // continua sempre na última posição
+    getHintBlock(line).appendChild(hint);
+    captureEvent("hint_shown", { hint_type: "skip", round_number: challengeIndex });
+  }
+
+  // só a primeira dica aparece sozinha, por inatividade. A partir da
+  // segunda, só aparecem quando a pessoa erra uma tentativa (ver
+  // revealNextHint chamado em handleGuess) — nunca mais por tempo parado
+  function scheduleContentReveal(line) {
+    if (hintsRevealedCount === 0 && roundHints.length > 0) {
+      revealNextHint();
+      geoHintTimer = setTimeout(() => showSkipHint(line), GEO_HINT_DELAY);
+    } else {
+      showSkipHint(line);
+    }
   }
 
   function scheduleIdleHint(line) {
@@ -1790,41 +2046,24 @@
       idleTimer = setTimeout(() => {
         if (line.querySelector(".skip-hint")) return;
         hasShownAnswerHint = true;
-        const hint = document.createElement("span");
+        const hint = document.createElement("div");
         hint.className = "skip-hint";
-        hint.textContent = " type your answer, press enter";
-        line.appendChild(hint);
+        hint.textContent = "type your answer, press enter";
+        getHintBlock(line).appendChild(hint);
         captureEvent("hint_shown", { hint_type: "answer_entry", round_number: challengeIndex });
       }, 800);
       return;
     }
 
+    // dicas (geo/culturais) e o "type next to move on" só existem no
+    // easy/medium/hard — no insane, cada erro conta pra valer, então dar
+    // pista ou sugerir pular mudaria a identidade do modo
+    if (currentLevel === "insane") return;
+
     const delay = hasShownHintOnce ? IDLE_HINT_DELAY : IDLE_HINT_DELAY_FIRST;
     idleTimer = setTimeout(() => {
-      if (line.querySelector(".skip-hint")) return;
       hasShownHintOnce = true;
-      const word = SKIP_WORDS[skipHintIndex % SKIP_WORDS.length];
-      skipHintIndex++;
-      const hint = document.createElement("span");
-      hint.className = "skip-hint";
-      hint.textContent = ` type "${word}" to move on`;
-      line.appendChild(hint);
-      captureEvent("hint_shown", { hint_type: "skip", round_number: challengeIndex });
-
-      // depois da dica de skip, espera mais um pouco e mostra a pista
-      // geográfica — não entrega a resposta, só reduz o "não sei nem que
-      // idioma é esse" pra quem já está travado há um tempo
-      const geo = currentPromptLangName ? getGeoHint(currentPromptLangName) : null;
-      if (geo) {
-        geoHintTimer = setTimeout(() => {
-          if (line.querySelector(".geo-hint")) return;
-          const geoSpan = document.createElement("span");
-          geoSpan.className = "geo-hint";
-          geoSpan.textContent = ` (hint: ${geo})`;
-          line.appendChild(geoSpan);
-          captureEvent("hint_shown", { hint_type: "geography", round_number: challengeIndex });
-        }, GEO_HINT_DELAY);
-      }
+      scheduleContentReveal(line);
     }, delay);
   }
 
@@ -1912,12 +2151,11 @@
 
   function resolveChallenge(primaryMatch, color, isForced, endReason) {
     isResolving = true;
+    const myToken = gameToken;
     const blankWrap = currentLineEl.querySelector(".blank-wrap");
     const attempts = currentLineEl.querySelector(".attempts");
-    const hint = currentLineEl.querySelector(".skip-hint");
-    if (hint) hint.remove();
-    const geoHint = currentLineEl.querySelector(".geo-hint");
-    if (geoHint) geoHint.remove();
+    const hintBlock = currentLineEl.querySelector(".hint-block");
+    if (hintBlock) hintBlock.remove();
 
     fadeOutAndClear(attempts);
 
@@ -1938,6 +2176,10 @@
     updateProgress();
 
     function revealNextOther(i) {
+      // se um jogo novo já começou desde que essa rodada foi resolvida,
+      // essa cadeia é órfã — para aqui, sem tocar em correctCount/remaining
+      // nem disparar nextChallenge/endGame de uma partida que já acabou
+      if (myToken !== gameToken) return;
       if (i >= others.length) {
         if (endReason) {
           endGame(endReason);
@@ -2028,6 +2270,10 @@
       }
     } else {
       wrongCount++;
+      // a cada erro, revela a próxima dica disponível (geo, depois
+      // culturais) — se ainda não tinha aparecido nenhuma por inatividade,
+      // o erro já conta como o primeiro sinal de que a pessoa está travada
+      revealNextHint();
 
       // sem limite de tentativas em easy/medium/hard — o skip já é a forma
       // voluntária de desistir de uma língua difícil; só no insane esgotar
@@ -2687,14 +2933,14 @@
     // abre teclado com toque direto) — essa dica avisa que precisa tocar
     document.getElementById("mobileTapHint").classList.toggle("visible", !hasShownAnswerHint);
 
-    // pista geográfica leve depois de um tempo parado — mesma ideia do
-    // desktop, só que sem o sistema de dica de skip (o botão já é visível)
+    // primeira dica (geo ou cultural, sorteada) aparece sozinha depois de um
+    // tempo parado — igual ao desktop. As próximas só aparecem quando a
+    // pessoa erra uma tentativa (revealNextHint chamado em handleGuess),
+    // não mais por tempo parado. Não roda no insane (roundHints vem vazio).
     if (geoHintTimer) clearTimeout(geoHintTimer);
-    const geo = getGeoHint(promptLang.name);
-    if (geo) {
+    if (roundHints.length > 0) {
       geoHintTimer = setTimeout(() => {
-        document.getElementById("mobileGeoHint").textContent = `hint: ${geo}`;
-        captureEvent("hint_shown", { hint_type: "geography", round_number: challengeIndex });
+        if (hintsRevealedCount === 0) revealNextHint();
       }, IDLE_HINT_DELAY_FIRST + GEO_HINT_DELAY);
     }
 
@@ -2728,6 +2974,7 @@
 
   function mobileResolveChallenge(primaryMatch, color, isForced, endReason) {
     isResolving = true;
+    const myToken = gameToken;
     if (geoHintTimer) clearTimeout(geoHintTimer);
     document.getElementById("mobileGeoHint").textContent = "";
     const blank = document.getElementById("mobileCardBlank");
@@ -2756,6 +3003,9 @@
     updateProgress();
 
     setTimeout(() => {
+      // idem ao desktop: se um jogo novo já começou, não avança essa
+      // partida antiga por cima da nova
+      if (myToken !== gameToken) return;
       if (endReason) {
         endGame(endReason);
       } else {
