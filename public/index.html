@@ -2597,24 +2597,6 @@
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, W, H);
 
-    // borda arredondada
-    const r = 28 * scale;
-    const m = 3 * scale;
-    ctx.strokeStyle = "#171a21";
-    ctx.lineWidth = 2 * scale;
-    ctx.beginPath();
-    ctx.moveTo(r + m, m);
-    ctx.lineTo(W - r - m, m);
-    ctx.quadraticCurveTo(W - m, m, W - m, r + m);
-    ctx.lineTo(W - m, H - r - m);
-    ctx.quadraticCurveTo(W - m, H - m, W - r - m, H - m);
-    ctx.lineTo(r + m, H - m);
-    ctx.quadraticCurveTo(m, H - m, m, H - r - m);
-    ctx.lineTo(m, r + m);
-    ctx.quadraticCurveTo(m, m, r + m, m);
-    ctx.closePath();
-    ctx.stroke();
-
     ctx.textAlign = "center";
     let y = 165 * scale;
 
