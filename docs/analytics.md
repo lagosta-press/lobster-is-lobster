@@ -1,7 +1,7 @@
 # PostHog events
 
 The app sends manual events through `posthog.capture(event, properties)`.
-It uses the existing browser setup in `index.html`.
+It uses the existing browser setup in `public/index.html`.
 Automatic click and input capture is off. PostHog still handles page views and page leaves.
 See the [PostHog capture documentation](https://posthog.com/docs/libraries/js/usage#custom-event-capture).
 

@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
 const script = html.match(/<script id="game-script">([\s\S]*?)<\/script>/)[1];
 new vm.Script(script);
 assert.match(html, /<textarea\s+id="mobileCardInput"[\s\S]*?><\/textarea>/);
