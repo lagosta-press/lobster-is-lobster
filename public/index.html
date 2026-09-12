@@ -15,7 +15,11 @@
 <meta property="og:site_name" content="Lobster is Lobster" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://www.lobsterislobster.online" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:image" content="https://www.lobsterislobster.online/og-image.png" />
+<meta property="og:image:width" content="2834" />
+<meta property="og:image:height" content="1488" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://www.lobsterislobster.online/og-image.png" />
 <meta name="twitter:title" content="Lobster is Lobster — Guess the Language" />
 <meta name="twitter:description" content="A word appears. You guess which language it was translated into. Free, no sign-up, a new word every round." />
 <script>
@@ -1008,15 +1012,15 @@
     { name: "Tamil", aliases: ["tamil"] },
     { name: "Cantonese", aliases: ["cantonese","yue","yue chinese"] },
     { name: "Vietnamese", aliases: ["vietnamese"] },
-    { name: "Filipino", aliases: ["filipino","tagalog"] },
+    { name: "Filipino", aliases: ["filipino","tagalog","philippines","philippine"] },
     { name: "Korean", aliases: ["korean"] },
-    { name: "Persian", aliases: ["persian","farsi"] },
+    { name: "Persian", aliases: ["persian","farsi","iranian"] },
     { name: "Hausa", aliases: ["hausa"] },
     { name: "Javanese", aliases: ["javanese"] },
     { name: "Italian", aliases: ["italian"] },
     { name: "Punjabi", aliases: ["punjabi"] },
     { name: "Gujarati", aliases: ["gujarati"] },
-    { name: "Amharic", aliases: ["amharic"] },
+    { name: "Amharic", aliases: ["amharic","ethiopian"] },
     { name: "Yoruba", aliases: ["yoruba"] },
     { name: "Igbo", aliases: ["igbo"] },
     { name: "Sindhi", aliases: ["sindhi"] },
@@ -1026,7 +1030,7 @@
     { name: "Polish", aliases: ["polish"] },
     { name: "Ukrainian", aliases: ["ukrainian"] },
     { name: "Romanian", aliases: ["romanian"] },
-    { name: "Dutch", aliases: ["dutch"] },
+    { name: "Dutch", aliases: ["dutch","netherlands","holland"] },
     { name: "Greek", aliases: ["greek"] },
     { name: "Zulu", aliases: ["zulu"] },
     { name: "Xhosa", aliases: ["xhosa"] },
@@ -1035,9 +1039,9 @@
     { name: "Khmer", aliases: ["khmer","cambodian"] },
     { name: "Lao", aliases: ["lao","laotian"] },
     { name: "Somali", aliases: ["somali"] },
-    { name: "Uzbek", aliases: ["uzbek"] },
+    { name: "Uzbek", aliases: ["uzbek","uzbekistan"] },
     { name: "Azerbaijani", aliases: ["azerbaijani","azeri"] },
-    { name: "Kazakh", aliases: ["kazakh"] }
+    { name: "Kazakh", aliases: ["kazakh","kazakhstan"] }
   ];
 
   const TOP10_NAMES = ["Mandarin Chinese","Hindi","Spanish","French","Standard Arabic","Bengali","Portuguese","Russian","Urdu","Indonesian"];
@@ -1072,7 +1076,7 @@
     { name: "Kannada", aliases: ["kannada"] },
     { name: "Kinyarwanda", aliases: ["kinyarwanda","rwandan"] },
     { name: "Kurdish", aliases: ["kurdish"] },
-    { name: "Kyrgyz", aliases: ["kyrgyz"] },
+    { name: "Kyrgyz", aliases: ["kyrgyz","kyrgyzstan"] },
     { name: "Latin", aliases: ["latin"] },
     { name: "Latvian", aliases: ["latvian"] },
     { name: "Lithuanian", aliases: ["lithuanian"] },
@@ -2132,9 +2136,12 @@
   // de foco automático que alguns navegadores aplicam dentro de previews/iframes)
   function focusActiveInputFromGesture(e) {
     // no mobile, ignora toques em botões/links/telas sem digitação (menu,
-    // fim de nível, resultado) — senão reabriria o teclado atrás delas
+    // fim de nível, resultado), na página About inteira (tem seu próprio
+    // campo de e-mail) e em qualquer input/textarea que não seja o do
+    // próprio jogo — senão reabriria o teclado atrás delas ou roubaria o
+    // foco de campos como o de e-mail da newsletter
     if (IS_MOBILE && e && e.target && e.target.closest &&
-      e.target.closest("button, a, .mobile-menu-overlay, .mobile-level-end, .mobile-results")) {
+      e.target.closest("button, a, .mobile-menu-overlay, .mobile-level-end, .mobile-results, .about-page, input, textarea")) {
       return;
     }
     if (currentBlankInput && document.activeElement !== currentBlankInput) {
@@ -2166,28 +2173,29 @@
 
     fadeOutAndClear(attempts);
 
+    // o palpite certo pode ser uma língua válida pra essa palavra que NÃO
+    // foi sorteada nessa partida (o jogo aceita qualquer uma das 99, não só
+    // as do pool). Nesse caso, NUNCA mostramos/logamos essa língua "de fora"
+    // como se fosse a resposta — isso inflava o total de línguas exibidas
+    // além do pool sorteado (ex.: "13 línguas" numa partida de hard/12).
+    // Em vez disso, mostramos um membro real do currentGroup como resposta;
+    // o palpite da pessoa continua válido e correto, só não aparece na tela
+    const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
+    const displayMatch = isPrimaryInGroup ? primaryMatch : currentGroup[0];
+
     const wordEl = currentLineEl.querySelector(".word");
     wordEl.style.color = color;
     wordEl.style.fontWeight = "400";
-    blankWrap.outerHTML = `<span class="lang-correct" style="color:${color}">${primaryMatch.name.toLowerCase()}</span>`;
-
-    // o palpite certo pode ser uma língua válida pra essa palavra que NÃO
-    // foi sorteada nessa partida (o jogo aceita qualquer uma das 99, não só
-    // as do pool) — nesse caso ela não faz parte do currentGroup, e não deve
-    // somar um ponto A MAIS além do que currentGroup.length realmente tira
-    // do "remaining"; o crédito dela já vem inteiro do loop de "also X" abaixo
-    const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
+    blankWrap.outerHTML = `<span class="lang-correct" style="color:${color}">${displayMatch.name.toLowerCase()}</span>`;
 
     if (isForced) {
       missedCount++;
-    } else if (isPrimaryInGroup) {
+    } else {
       correctCount++;
     }
-    roundLog.push({ name: primaryMatch.name, correct: !isForced });
+    roundLog.push({ name: displayMatch.name, correct: !isForced });
 
-    const others = isPrimaryInGroup
-      ? currentGroup.filter((l) => l.name !== primaryMatch.name)
-      : currentGroup;
+    const others = currentGroup.filter((l) => l.name !== displayMatch.name);
     remaining = remaining.filter((l) => !currentGroup.includes(l));
     updateProgress();
 
@@ -2213,6 +2221,7 @@
         c = pickColor();
         correctCount++;
       }
+      roundLog.push({ name: other.name, correct: !isForced });
       updateProgress();
       const extraLine = document.createElement("div");
       extraLine.className = "line";
@@ -3029,29 +3038,29 @@
     const blank = document.getElementById("mobileCardBlank");
     const feedback = document.getElementById("mobileCardFeedback");
 
+    // mesmo caso do desktop: o palpite certo pode ser uma língua válida que
+    // não foi sorteada nessa partida — nesse caso ela não está no
+    // currentGroup, e NUNCA deve ser exibida/logada como resposta (inflava
+    // o total de línguas mostradas além do pool sorteado). Mostra sempre
+    // um membro real do currentGroup.
+    const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
+    const displayMatch = isPrimaryInGroup ? primaryMatch : currentGroup[0];
+
     blank.innerHTML = "";
-    blank.textContent = primaryMatch.name.toLowerCase();
+    blank.textContent = displayMatch.name.toLowerCase();
     blank.className = "mobile-card-blank " + (isForced ? "lang-wrong" : "lang-correct");
     blank.style.color = isForced ? "" : color;
 
     feedback.textContent = isForced ? "✗" : "✓";
     feedback.style.color = isForced ? "#c7cbd1" : "#3f8a68";
 
-    // mesmo caso do desktop: o palpite certo pode ser uma língua válida que
-    // não foi sorteada nessa partida — nesse caso ela não está no
-    // currentGroup, e o crédito não pode passar de currentGroup.length
-    // (o que de fato é removido do "remaining")
-    const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
-    const others = isPrimaryInGroup
-      ? currentGroup.filter((l) => l.name !== primaryMatch.name)
-      : currentGroup;
-    const creditedCount = isPrimaryInGroup ? 1 + others.length : others.length;
+    const others = currentGroup.filter((l) => l.name !== displayMatch.name);
     if (isForced) {
-      missedCount += creditedCount;
+      missedCount += 1 + others.length;
     } else {
-      correctCount += creditedCount;
+      correctCount += 1 + others.length;
     }
-    roundLog.push({ name: primaryMatch.name, correct: !isForced });
+    roundLog.push({ name: displayMatch.name, correct: !isForced });
     others.forEach((o) => roundLog.push({ name: o.name, correct: !isForced }));
 
     remaining = remaining.filter((l) => !currentGroup.includes(l));
@@ -3294,11 +3303,15 @@
     hideAboutPage();
   });
 
-  const FORMSPREE_ENDPOINT = "https://formspree.io/f/mzebjyel";
+  // TODO: troque pelo ID numérico do formulário criado no Kit (fica na URL
+  // do formulário, ou no trecho de embed HTML que o Kit gera — o número
+  // depois de /forms/ e antes de /subscriptions)
+  const KIT_FORM_ID = "9911637";
+  const KIT_ENDPOINT = `https://app.kit.com/forms/${KIT_FORM_ID}/subscriptions`;
 
-  // newsletter: envia de verdade pro Formspree (o navegador não consegue
-  // mandar e-mail sozinho, então isso passa por um serviço de terceiro —
-  // é o mesmo endpoint que você configurou na sua conta)
+  // newsletter: envia de verdade pro Kit (o navegador não consegue mandar
+  // e-mail sozinho, então isso passa por um serviço de terceiro — é o
+  // mesmo formato que o próprio embed do Kit usa por trás dos panos)
   document.getElementById("newsletterSubmit").addEventListener("click", async () => {
     const input = document.getElementById("newsletterEmail");
     const btn = document.getElementById("newsletterSubmit");
@@ -3324,10 +3337,10 @@
     captureEvent("newsletter_subscription_submitted", properties);
 
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res = await fetch(KIT_ENDPOINT, {
         method: "POST",
-        headers: { Accept: "application/json", "Content-Type": "application/json" },
-        body: JSON.stringify({ email })
+        headers: { Accept: "application/json", "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ email_address: email })
       });
       if (res.ok) {
         captureEvent("newsletter_subscription_succeeded", properties);

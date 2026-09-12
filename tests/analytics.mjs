@@ -97,6 +97,7 @@ function boot({ mobile = true, returning = true, posthog = 'working' } = {}) {
     navigator: {}, File,
     Date: class extends Date { static now() { return now; } },
     Event: class { constructor(type) { this.type = type; } },
+    URLSearchParams,
     fetch: async () => { throw new Error('Unexpected network request'); },
     setTimeout(fn, delay) { const id = ++nextTimer; timers.set(id, { fn, at: now + delay }); return id; },
     clearTimeout: id => timers.delete(id),
