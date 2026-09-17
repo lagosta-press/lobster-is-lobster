@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 
-const html = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
+const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const source = html.match(/<script id="game-script">([\s\S]*?)<\/script>/)[1];
 for (const script of html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)) new vm.Script(script[1]);
 
@@ -154,12 +154,22 @@ for (const mobile of [true, false]) {
   const layout = mobile ? 'mobile' : 'desktop';
   await check(`${layout}: tutorial completes once and stays separate from the game`, () => {
     const app = boot({ mobile, returning: false });
-    app.advance(1500);
+    // no mobile, o início do tutorial passa por um cartão de anúncio
+    // ("Lobster is lobster in english") antes da primeira rodada de
+    // verdade — precisa de mais tempo que o desktop
+    app.advance(4200);
     assert.equal(app.named('tutorial_started').length, 1);
+    // a frase de instrução aparece junto com a 1ª rodada (Espanhol), acima
+    // do "type your answer"/"tap anywhere" — não mais como linha própria
+    const hookText = mobile
+      ? app.doc.getElementById('mobileGeoHint').textContent
+      : app.doc.getElementById('flow').textContent;
+    assert.ok(hookText.includes('guess the language each word gets translated into'));
     while (app.run('remaining.length')) app.answer();
     const completed = app.named('tutorial_completed');
     assert.equal(completed.length, 1);
-    assert.equal(completed[0].properties.correct_languages, 3);
+    // tutorial agora tem 2 rodadas fixas (Espanhol, depois Basco)
+    assert.equal(completed[0].properties.correct_languages, 2);
     assert.equal(completed[0].properties.level, null);
     app.start();
     assert.equal(app.named('tutorial_abandoned').length, 0);
@@ -279,13 +289,29 @@ await check('leaving an unfinished tutorial records abandonment', () => {
   assert.equal(app.named('tutorial_completed').length, 0);
 });
 
+await check('running out of hints shows an apology instead of nothing', () => {
+  const app = boot();
+  app.start();
+  // erra bastante mais vezes do que o total de dicas possíveis (geo +
+  // culturais + letra) pra garantir que o pool sorteado se esgote
+  for (let i = 0; i < 8; i++) {
+    app.run('handleGuess("__not_a_real_answer__")');
+  }
+  const hintEl = app.doc.getElementById('mobileGeoHint');
+  assert.equal(hintEl.textContent, "sorry, that's all the hints I have");
+  // não deve continuar emitindo hint_shown depois de esgotado
+  const shownCount = app.named('hint_shown').length;
+  app.run('handleGuess("__still_wrong__")');
+  assert.equal(app.named('hint_shown').length, shownCount);
+});
+
 await check('menu, About, and visible hints emit events', async () => {
   const app = boot();
   app.start();
   // dicas de conteúdo (geo/cultural) não são mais automáticas por
   // inatividade — só aparecem depois de uma resposta errada
   app.run('handleGuess("__not_a_real_answer__")');
-  assert.ok(['geography', 'cultural'].includes(app.named('hint_shown')[0].properties.hint_type));
+  assert.ok(['geography', 'cultural', 'letter'].includes(app.named('hint_shown')[0].properties.hint_type));
   await app.click('mobileMenuBtn');
   await app.click('mobileMenuAbout');
   assert.equal(app.named('menu_opened').length, 1);
