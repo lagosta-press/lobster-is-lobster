@@ -105,6 +105,16 @@
     font-weight: 300;
     color: #4b5563;
   }
+  .hints-exhausted {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: #4b5563;
+  }
+  .tutorial-note {
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: #9aa1ac;
+  }
   .lang-wrong {
     text-decoration: line-through;
     color: #9aa1ac;
@@ -1143,9 +1153,16 @@
   const LEVEL_TOTALS = { easy: 12, medium: 12, hard: 12, insane: 96 };
   const TIME_LIMIT_SEC = 150; // countdown fixo pra easy/medium/hard (2:30) — insane não usa isso (cronômetro sobe)
 
-  // línguas usadas nas 3 perguntas de teste antes de escolher a dificuldade
-  const TUTORIAL_NAMES = ["Spanish", "French", "Portuguese", "German", "Italian"];
-  const TUTORIAL_META = LANG_META.filter((l) => TUTORIAL_NAMES.includes(l.name));
+  // sequência fixa (não sorteada) das 2 perguntas de teste antes de escolher
+  // a dificuldade: Espanhol primeiro — quase todo mundo acerta, cria
+  // confiança — depois Basco, propositalmente difícil (não tem parentesco
+  // com nenhuma outra língua), pra mostrar na prática que errar rende dica
+  // e que dá pra pular
+  const TUTORIAL_NAMES = ["Spanish", "Basque"];
+  // Basco só existe em INSANE_META (não em LANG_META) — por isso busca em
+  // ALL_META, que junta as duas listas
+  const TUTORIAL_META = TUTORIAL_NAMES.map((name) => ALL_META.find((l) => l.name === name));
+  const TUTORIAL_HARD_NAME = "Basque";
 
   // ---------- estado ----------
   const COLORS = ["#3f8a68","#B44B69","#3B5BA5","#542E75","#AE90E9","#3474D3","#D98CA0"];
@@ -1423,8 +1440,11 @@
       mobileClock.textContent = formatTime(remainingMs);
       mobileClock.classList.toggle("urgent", remainingMs <= 10000);
     } else {
-      clock.textContent = formatTime(elapsedMs);
-      mobileClock.textContent = formatTime(elapsedMs);
+      // insane não usa relógio (nunca teve limite de tempo) — mostra o
+      // total de acertos no mesmo lugar, no lugar do tempo decorrido. O
+      // resultado final continua sendo dado normalmente no fim do jogo.
+      clock.textContent = String(correctCount);
+      mobileClock.textContent = String(correctCount);
     }
   }
 
@@ -1533,14 +1553,13 @@
     document.getElementById("bottomPanel").classList.remove("visible");
     document.body.classList.remove("playing");
 
-    const tutorialLangs = shuffle([...TUTORIAL_META])
-      .slice(0, 3)
-      .map((l) => ({
-        name: l.name,
-        aliases: l.aliases,
-        word: WORDS["lobster"][l.name],
-        top10: false
-      }));
+    // ordem fixa (não sorteada) — ver comentário em TUTORIAL_NAMES
+    const tutorialLangs = TUTORIAL_META.map((l) => ({
+      name: l.name,
+      aliases: l.aliases,
+      word: WORDS["lobster"][l.name],
+      top10: false
+    }));
     remaining = tutorialLangs;
     challengeIndex = 0;
     wrongCount = 0;
@@ -1552,8 +1571,12 @@
     startAnalyticsRun("first_visit");
 
     if (IS_MOBILE) {
+      const myToken = gameToken;
       document.getElementById("mobileGame").classList.add("active");
-      nextChallenge();
+      mobileShowAnnouncement("Lobster is lobster in english", 1800, () => {
+        if (myToken !== gameToken) return;
+        nextChallenge();
+      });
       return;
     }
 
@@ -1612,7 +1635,8 @@
     clock.classList.remove("urgent", "flash");
     mobileClock.classList.remove("urgent");
     mobileClock.classList.add("visible");
-    const initialClockText = usesCountdown ? formatTime(TIME_LIMIT_SEC * 1000) : "0:00";
+    // no insane, o "1" já reflete o ponto do inglês, dado de cara (correctCount vira 1 logo abaixo)
+    const initialClockText = usesCountdown ? formatTime(TIME_LIMIT_SEC * 1000) : "1";
     clock.textContent = initialClockText;
     mobileClock.textContent = initialClockText;
     void clock.offsetWidth; // força reflow pra reiniciar a animação mesmo se ela já rodou antes (troca rápida de nível)
@@ -1767,7 +1791,8 @@
         ? remaining.filter((l) => l.top10)
         : remaining;
 
-    const promptLang = pool[Math.floor(Math.random() * pool.length)];
+    // no tutorial a ordem é fixa (Espanhol, depois Basco) — fora dele, sorteado
+    const promptLang = gamePhase === "tutorial" ? pool[0] : pool[Math.floor(Math.random() * pool.length)];
     const promptCanon = canonicalizeArabicScript(promptLang.word);
     currentGroup = remaining.filter((l) => canonicalizeArabicScript(l.word) === promptCanon);
     currentPromptLangName = promptLang.name;
@@ -1806,6 +1831,28 @@
 
         createBlankInput(line);
         scrollToLine(line);
+
+        // na primeiríssima rodada do tutorial (Espanhol), a frase de
+        // instrução entra no bloco de dicas — adicionada ANTES do
+        // createBlankInput's scheduleIdleHint aparecer com "type your
+        // answer, press enter" (por inatividade, ~800ms depois), então ela
+        // sempre aparece acima dessa instrução, nunca depois
+        if (gamePhase === "tutorial" && challengeIndex === 1) {
+          const hook = document.createElement("div");
+          hook.className = "tutorial-note";
+          hook.textContent = "guess the language each word gets translated into";
+          getHintBlock(line).appendChild(hook);
+        }
+
+        // no tutorial, a rodada difícil de propósito (Basco) ganha um aviso
+        // imediato explicando a mecânica de dica, em vez de deixar a pessoa
+        // descobrir sozinha só depois de errar
+        if (gamePhase === "tutorial" && promptLang.name === TUTORIAL_HARD_NAME) {
+          const note = document.createElement("div");
+          note.className = "tutorial-note";
+          note.textContent = "get this one wrong, and you'll get a hint";
+          getHintBlock(line).appendChild(note);
+        }
       }
     );
   }
@@ -1852,6 +1899,15 @@
   GEO_HINT_GROUPS.forEach((g) => g.langs.forEach((name) => (GEO_HINT_BY_LANG[name] = g.hint)));
   function getGeoHint(name) {
     return GEO_HINT_BY_LANG[name] || null;
+  }
+
+  // dica final, mais direta que as outras: a primeira letra do nome da
+  // língua ("the answer starts with an R") — entra no MESMO sorteio que as
+  // dicas de geografia e cultura, sem regra especial de ordem
+  function getLetterHint(name) {
+    const letter = name.charAt(0).toUpperCase();
+    const article = "AEIOU".includes(letter) ? "an" : "a";
+    return `the answer starts with ${article} "${letter}"`;
   }
 
   // pistas culturais (personalidades, música, cinema, comida, pontos
@@ -1971,8 +2027,10 @@
     if (geo) hints.push(geo);
     const cultural = CULTURAL_HINTS_BY_LANG[name] || [];
     hints.push(...cultural);
-    // ordem sorteada — às vezes a geográfica vem primeiro, às vezes uma
-    // cultural; ao longo da rodada, todas as disponíveis acabam aparecendo
+    hints.push(getLetterHint(name));
+    // todas as dicas (geo, cultural, letra inicial) entram no mesmo sorteio,
+    // sem regra especial pra nenhum tipo — às vezes a letra vem primeiro,
+    // às vezes uma cultural; ao longo da rodada, todas acabam aparecendo
     return shuffle(hints);
   }
 
@@ -1989,14 +2047,19 @@
   function revealNextHint() {
     if (hintsRevealedCount >= roundHints.length) return false;
     const text = roundHints[hintsRevealedCount];
-    const hintType = text === getGeoHint(currentPromptLangName) ? "geography" : "cultural";
+    const hintType =
+      text === getGeoHint(currentPromptLangName)
+        ? "geography"
+        : text === getLetterHint(currentPromptLangName)
+        ? "letter"
+        : "cultural";
     hintsRevealedCount++;
     if (IS_MOBILE) {
       // no mobile a dica SUBSTITUI a anterior (não empilha) — o card fica
       // logo acima do teclado, e texto acumulando ali acaba indo parar
       // atrás dele
       const el = document.getElementById("mobileGeoHint");
-      if (el) el.textContent = `hint: ${text}`;
+      if (el) el.textContent = `hint ${hintsRevealedCount}: ${text}`;
     } else if (currentLineEl) {
       // cada dica revelada vira uma linha nova, empilhada — a pessoa vê
       // todas as dicas já reveladas nessa rodada, não só a mais recente.
@@ -2005,7 +2068,7 @@
       const block = getHintBlock(currentLineEl);
       const hintLine = document.createElement("div");
       hintLine.className = "geo-hint";
-      hintLine.textContent = `hint: ${text}`;
+      hintLine.textContent = `hint ${hintsRevealedCount}: ${text}`;
       const skipEl = block.querySelector(".skip-hint");
       if (skipEl) {
         block.insertBefore(hintLine, skipEl);
@@ -2020,6 +2083,29 @@
       round_number: challengeIndex
     });
     return true;
+  }
+
+  // quando a pessoa erra de novo depois de já ter recebido todas as dicas
+  // disponíveis pra essa língua, mostra um pedido de desculpa em vez de não
+  // acontecer nada — deixa claro que não tem mais ajuda vindo nessa rodada
+  function showHintsExhausted() {
+    if (IS_MOBILE) {
+      const el = document.getElementById("mobileGeoHint");
+      if (el) el.textContent = "sorry, that's all the hints I have";
+    } else if (currentLineEl) {
+      const block = getHintBlock(currentLineEl);
+      if (block.querySelector(".hints-exhausted")) return;
+      const msg = document.createElement("div");
+      msg.className = "hints-exhausted";
+      msg.textContent = "sorry, that's all the hints I have";
+      const skipEl = block.querySelector(".skip-hint");
+      if (skipEl) {
+        block.insertBefore(msg, skipEl);
+      } else {
+        block.appendChild(msg);
+      }
+      if (currentBlankInput) scrollToLine(currentBlankInput);
+    }
   }
 
   function clearIdleTimer() {
@@ -2295,10 +2381,12 @@
       }
     } else {
       wrongCount++;
-      // a cada erro, revela a próxima dica disponível (geo, depois
-      // culturais) — se ainda não tinha aparecido nenhuma por inatividade,
-      // o erro já conta como o primeiro sinal de que a pessoa está travada
-      revealNextHint();
+      // a cada erro, revela a próxima dica disponível (geo, cultural ou a
+      // letra inicial, sorteadas juntas) — se não sobrar nenhuma, mostra um
+      // pedido de desculpa em vez de não acontecer nada
+      if (!revealNextHint() && roundHints.length > 0) {
+        showHintsExhausted();
+      }
 
       // sem limite de tentativas em easy/medium/hard — o skip já é a forma
       // voluntária de desistir de uma língua difícil; só no insane esgotar
@@ -2345,7 +2433,7 @@
     easy: { title: "1 · Easy · 12 rounds", desc: "Roman alphabet only — languages that read like English. 2 minutes on the clock." },
     medium: { title: "2 · Medium · 12 rounds", desc: "A mix of scripts — some familiar, some not. 2 minutes on the clock." },
     hard: { title: "3 · Hard · 12 rounds", desc: "Full language pool — the rare ones show up too. 2 minutes on the clock." },
-    insane: { title: "4 · Insane · 96 rounds", desc: "Full pool, 3 tries per language. Miss all 3 or try to skip and you're out. Clock counts up — get to the end as fast as you can." }
+    insane: { title: "4 · Insane · 96 rounds", desc: "Full pool, 3 tries per language. Miss all 3 or try to skip and you're out. Watch your correct count live — the time only shows at the end." }
   };
 
   // texto exato de cada linha do painel de baixo — um por nível, cada um
@@ -2375,7 +2463,7 @@
     flow.appendChild(line1);
     scrollToLine(line1);
 
-    typeSegments(line1, [{ text: returning ? "welcome back." : "got it?" }], () => {
+    typeSegments(line1, [{ text: returning ? "welcome back." : "nice work — that was the tutorial. let's really play." }], () => {
       const line2 = document.createElement("div");
       line2.className = "line";
       flow.appendChild(line2);
@@ -2957,6 +3045,18 @@
           input.setSelectionRange(start, end);
         }
         if (!isResolving) mobileRenderBlank(value);
+        // depois da dica de "toque pra digitar" (só na primeiríssima vez),
+        // esse mesmo aviso vira "aperte enter" assim que a pessoa começa a
+        // digitar em qualquer rodada — some de novo se o campo esvaziar
+        if (hasShownAnswerHint) {
+          const tapHint = document.getElementById("mobileTapHint");
+          if (value.length > 0) {
+            tapHint.textContent = "⏎ press enter to submit";
+            tapHint.classList.add("visible");
+          } else {
+            tapHint.classList.remove("visible");
+          }
+        }
       }
 
       input.addEventListener("compositionstart", () => { composing = true; });
@@ -2983,19 +3083,44 @@
     return input;
   }
 
+  // usado só no início do tutorial mobile, pra mostrar "Lobster is lobster
+  // in english" como um cartão de passagem, antes da primeira rodada de
+  // verdade — sem blank, sem dica, só o texto e um tempo pra ler antes de
+  // avançar sozinho
+  function mobileShowAnnouncement(text, duration, next) {
+    document.getElementById("mobileCardPrompt").textContent = text;
+    document.getElementById("mobileCardPrompt").className = "mobile-card-prompt";
+    document.getElementById("mobileCardConnector").textContent = "";
+    document.getElementById("mobileCardFeedback").textContent = "";
+    document.getElementById("mobileGeoHint").textContent = "";
+    document.getElementById("mobileTapHint").classList.remove("visible");
+    mobileRenderBlank("");
+    setTimeout(next, duration);
+  }
+
   function mobileShowChallenge(promptLang) {
     const promptEl = document.getElementById("mobileCardPrompt");
     promptEl.textContent = promptLang.word;
     promptEl.className = "mobile-card-prompt" + (isNonLatin(promptLang.word) ? " non-latin" : "");
     document.getElementById("mobileCardConnector").textContent = ` is ${currentWord} in `;
     document.getElementById("mobileCardFeedback").textContent = "";
-    document.getElementById("mobileGeoHint").textContent = "";
+    // na primeira rodada do tutorial (Espanhol), mostra a frase de instrução
+    // ali em cima do "tap anywhere..."/"press enter" — na rodada difícil de
+    // propósito (Basco), mostra o aviso de que errar rende dica; ambos
+    // somem assim que uma dica de verdade substituir esse texto (revealNextHint)
+    document.getElementById("mobileGeoHint").textContent =
+      gamePhase === "tutorial" && challengeIndex === 1
+        ? "guess the language each word gets translated into"
+        : gamePhase === "tutorial" && promptLang.name === TUTORIAL_HARD_NAME
+        ? "get this one wrong, and you'll get a hint"
+        : "";
     mobileRenderBlank("");
     document.getElementById("mobileCounter").textContent = `${challengeIndex}/${totalRounds}`;
     document.getElementById("mobileSkipBtn").classList.toggle("hidden", currentLevel === "insane");
     // antes do primeiríssimo toque, o teclado não abre sozinho (celular só
     // abre teclado com toque direto) — essa dica avisa que precisa tocar
     document.getElementById("mobileTapHint").classList.toggle("visible", !hasShownAnswerHint);
+    document.getElementById("mobileTapHint").textContent = "tap anywhere to type your answer →";
 
     // no mobile o botão de skip já é sempre visível, então não existe
     // equivalente ao "type next" por inatividade — e agora nenhuma dica de
@@ -3083,7 +3208,7 @@
     const el = document.getElementById("mobileLevelEnd");
     document.getElementById("mobileLevelEndText").textContent = returning
       ? "Welcome back. Pick a level to start playing:"
-      : "Got it? Pick a level to start playing for real:";
+      : "Nice work — that was the tutorial. Let's really play. Pick a level:";
     el.classList.add("active");
     // solta o foco do campo de digitação — sem isso, o teclado continuava
     // aberto nessa tela mesmo sem ter mais nada pra digitar
@@ -3117,6 +3242,7 @@
       <div class="mobile-results-actions">
         <button class="mobile-results-btn-primary" id="mobileShareBtn">Share your result →</button>
         <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">Play again</button>
+        <a href="#" class="mobile-results-about-link" id="mobileResultsNewWord">Try another word →</a>
         <div class="share-icon-row" style="justify-content:center; margin-top:4px;">
           <button class="share-icon-btn" id="mobileShareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
           <button class="share-icon-btn" id="mobileShareX" aria-label="Share on X">${SHARE_ICONS.x}</button>
@@ -3132,6 +3258,13 @@
     document.getElementById("mobilePlayAgainBtn").addEventListener("click", () => {
       el.classList.remove("active");
       initGame(currentWord, currentLevel, true, "play_again");
+    });
+    document.getElementById("mobileResultsNewWord").addEventListener("click", (e) => {
+      e.preventDefault();
+      el.classList.remove("active");
+      const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
+      const nextWord = choices[Math.floor(Math.random() * choices.length)];
+      initGame(nextWord, currentLevel, true, "new_word");
     });
     document.getElementById("mobileResultsAbout").addEventListener("click", (e) => {
       e.preventDefault();
