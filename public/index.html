@@ -14,12 +14,12 @@
 <meta property="og:description" content="A word appears. You guess which language it was translated into. Free, no sign-up, a new word every round." />
 <meta property="og:site_name" content="Lobster is Lobster" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://www.lobsterislobster.online" />
-<meta property="og:image" content="https://www.lobsterislobster.online/og-image.png" />
+<meta property="og:url" content="https://lobsterislobster.online" />
+<meta property="og:image" content="https://lobsterislobster.online/og-image.png" />
 <meta property="og:image:width" content="2834" />
 <meta property="og:image:height" content="1488" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="https://www.lobsterislobster.online/og-image.png" />
+<meta name="twitter:image" content="https://lobsterislobster.online/og-image.png" />
 <meta name="twitter:title" content="Lobster is Lobster — Guess the Language" />
 <meta name="twitter:description" content="A word appears. You guess which language it was translated into. Free, no sign-up, a new word every round." />
 <script>
@@ -955,7 +955,7 @@
       <a href="mailto:hello@lagosta.press" style="color:#3474D3">hello@lagosta.press</a>
     </div>
     <div class="about-intro">
-      <a href="https://www.instagram.com/lagosta.press" target="_blank" rel="noopener" style="color:#542E75">instagram</a>
+      <a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener" style="color:#542E75">instagram</a>
     </div>
     <div class="about-intro">
       <a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener" style="color:#B44B69">Buy us a Coffee</a>
@@ -979,7 +979,7 @@
     </div>
 
     <div class="about-para muted" style="text-align:center;">
-      <a href="https://www.lobsterislobster.online" target="_blank" rel="noopener" style="color:#3f8a68">www.lobsterislobster.online</a>
+      <a href="https://lobsterislobster.online" target="_blank" rel="noopener" style="color:#3f8a68">lobsterislobster.online</a>
     </div>
 
     <div class="about-para muted about-share-label" style="text-align:center;">
@@ -2766,7 +2766,7 @@
 
     ctx.fillStyle = "#171a21";
     ctx.font = `300 ${16 * scale}px ${fontFamily}`;
-    ctx.fillText("www.lobsterislobster.online", W / 2, H - 50 * scale);
+    ctx.fillText("lobsterislobster.online", W / 2, H - 50 * scale);
   }
 
   const RATING_DOT_COLORS = ["#3f8a68", "#B44B69", "#3B5BA5", "#542E75", "#AE90E9", "#3474D3", "#D98CA0"];
@@ -2930,7 +2930,7 @@
   }
 
   function wireShareIconButtons() {
-    const shareUrl = "https://www.lobsterislobster.online";
+    const shareUrl = "https://lobsterislobster.online";
     const text = buildShareText();
 
     const waBtn = document.getElementById("shareWhatsapp");
@@ -2964,7 +2964,7 @@
     return "Guess the language: a quick, addictive word game. Give it a try!";
   }
   async function aboutShareGeneric(channel) {
-    const shareUrl = "https://www.lobsterislobster.online";
+    const shareUrl = "https://lobsterislobster.online";
     const text = buildAboutShareText();
     captureEvent("game_share_requested", { channel, source: "about" });
     if (IS_MOBILE && navigator.share) {
@@ -2987,7 +2987,7 @@
   function wireAboutShareButtons() {
     if (aboutShareWired) return;
     aboutShareWired = true;
-    const shareUrl = "https://www.lobsterislobster.online";
+    const shareUrl = "https://lobsterislobster.online";
     const text = buildAboutShareText();
 
     const waBtn = document.getElementById("aboutShareWhatsapp");
@@ -3271,7 +3271,7 @@
       showAboutPage();
     });
 
-    const shareUrl = "https://www.lobsterislobster.online";
+    const shareUrl = "https://lobsterislobster.online";
     const text = buildShareText();
     document.getElementById("mobileShareWhatsapp").addEventListener("click", () => {
       openShareLink("whatsapp", `https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`);
