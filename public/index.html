@@ -408,12 +408,12 @@
     color: #171a21;
   }
   .mobile-results-sentence b { font-weight: 400; }
-  .mobile-results-rarest {
+  .mobile-results-population {
     font-size: 0.95rem;
     font-weight: 300;
     color: #6b7280;
   }
-  .mobile-results-rarest b { color: #171a21; font-weight: 400; }
+  .mobile-results-population b { color: #171a21; font-weight: 400; }
   .mobile-results-btn-primary {
     font-size: 1rem;
     color: #ffffff;
@@ -782,13 +782,13 @@
     margin-bottom: 20px;
   }
   .results-sentence b { font-weight: 400; }
-  .results-rarest {
+  .results-population {
     font-size: 1.05rem;
     font-weight: 300;
     color: #6b7280;
     margin-bottom: 30px;
   }
-  .results-rarest b {
+  .results-population b {
     color: #171a21;
     font-weight: 400;
   }
@@ -1172,6 +1172,55 @@
     return choices[Math.floor(Math.random() * choices.length)];
   }
 
+  // ---------- estatística de "quanto da população mundial te entenderia" ----------
+  // números aproximados de falantes (L1+L2) em milhões, por língua — estimativas
+  // públicas arredondadas, não uma fonte demográfica rigorosa. O cálculo do
+  // percentual é uma SOMA INGÊNUA (não deduplicada) dos falantes de cada língua
+  // acertada dividida pela população mundial: alguém que fala 3 línguas é
+  // contado 3 vezes, então o percentual final é só uma aproximação divertida
+  // pro card de compartilhamento, não um dado demográfico real
+  const SPEAKERS_MILLIONS = {
+    "Mandarin Chinese": 1140, "Hindi": 610, "Spanish": 560, "French": 310,
+    "Standard Arabic": 274, "Bengali": 273, "Portuguese": 260, "Russian": 255,
+    "Urdu": 232, "Indonesian": 199, "German": 135, "Japanese": 125,
+    "Swahili": 100, "Marathi": 99, "Telugu": 96, "Turkish": 88, "Tamil": 86,
+    "Cantonese": 85, "Vietnamese": 85, "Filipino": 82, "Korean": 82,
+    "Persian": 77, "Hausa": 79, "Javanese": 68, "Italian": 68, "Punjabi": 113,
+    "Gujarati": 57, "Amharic": 57, "Yoruba": 46, "Igbo": 31, "Sindhi": 33,
+    "Nepali": 32, "Burmese": 33, "Thai": 61, "Polish": 45, "Ukrainian": 40,
+    "Romanian": 24, "Dutch": 25, "Greek": 13, "Zulu": 27, "Xhosa": 19,
+    "Malay": 77, "Sinhala": 19, "Khmer": 18, "Lao": 30, "Somali": 22,
+    "Uzbek": 34, "Azerbaijani": 23, "Kazakh": 18,
+    "Albanian": 7.5, "Armenian": 6.7, "Basque": 0.75, "Belarusian": 5,
+    "Bosnian": 3, "Bulgarian": 8, "Catalan": 10, "Cebuano": 21,
+    "Chichewa": 14, "Corsican": 0.15, "Croatian": 5.5, "Czech": 10.7,
+    "Danish": 6, "Esperanto": 0.1, "Estonian": 1.1, "Finnish": 5.4,
+    "Frisian": 0.47, "Galician": 2.4, "Georgian": 3.7, "Haitian Creole": 12,
+    "Hawaiian": 0.024, "Hebrew": 9, "Hmong": 4, "Hungarian": 13,
+    "Icelandic": 0.37, "Kannada": 64, "Kinyarwanda": 12, "Kurdish": 30,
+    "Kyrgyz": 5.3, "Latin": 0.05, "Latvian": 1.5, "Lithuanian": 2.8,
+    "Luxembourgish": 0.4, "Macedonian": 1.6, "Malagasy": 25, "Malayalam": 38,
+    "Maltese": 0.5, "Maori": 0.19, "Mongolian": 5.7, "Norwegian": 5.3,
+    "Oriya": 38, "Pashto": 40, "Samoan": 0.51, "Scottish Gaelic": 0.057,
+    "Serbian": 12, "Sesotho": 5.6, "Shona": 14, "Slovak": 5.2,
+    "Slovenian": 2.5, "Sundanese": 32
+  };
+  const WORLD_POPULATION_MILLIONS = 8100;
+
+  // % (inteiro, entre 1 e 99 pra sempre parecer "quase todo mundo" ou "quase
+  // ninguém" sem nunca virar 0% ou 100% — o texto ao redor já deixa claro que
+  // é uma estimativa) de quanto da população mundial entenderia a palavra,
+  // dada a soma ingênua descrita acima
+  function computePopulationPercent(correctNames) {
+    const totalMillions = correctNames.reduce((sum, name) => sum + (SPEAKERS_MILLIONS[name] || 0), 0);
+    const pct = Math.round((totalMillions / WORLD_POPULATION_MILLIONS) * 100);
+    return Math.min(99, Math.max(1, pct));
+  }
+
+  function capitalize(s) {
+    return s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  }
+
   const MAX_WRONG = 3;
   const ENGLISH_COLOR = "#171a21";
 
@@ -1246,7 +1295,7 @@
   // se não bater mais, é uma cadeia órfã de uma partida anterior e ela para
   // sozinha, em vez de inflar o placar da partida nova
   let gameToken = 0;
-  let roundLog = []; // { name, correct } por rodada — usado pra "rarest catch" no resultado
+  let roundLog = []; // { name, correct } por rodada — usado pra calcular o % de "população que te entenderia" no resultado
   let startTime = Date.now();
   let timerInterval = null;
 
@@ -2685,34 +2734,6 @@
     return "keepPracticing";
   }
 
-  // ranking global de "popularidade" — top10 primeiro, depois o resto do
-  // lake médio (LANG_META), depois as 50 mais raras (INSANE_META)
-  const GLOBAL_RANK_ORDER = [
-    ...LANG_META.filter((l) => TOP10_NAMES.includes(l.name)).map((l) => l.name),
-    ...LANG_META.filter((l) => !TOP10_NAMES.includes(l.name)).map((l) => l.name),
-    ...INSANE_META.map((l) => l.name)
-  ];
-  function rankOf(name) {
-    return GLOBAL_RANK_ORDER.indexOf(name);
-  }
-
-  // pool de línguas de cada nível, na ordem "comum -> raro" — usado pra achar
-  // a mais rara ENTRE AS QUE VOCÊ ACERTOU relativa ao próprio nível jogado.
-  // isso importa porque o pool do Easy (alfabeto latino) inclui várias línguas
-  // que rankeiam como "raras" no ranking global (ex: islandês, eslovaco) — um
-  // corte global sempre disparava no Easy, então a raridade certa é relativa
-  // ao que era possível sortear naquele nível, não ao jogo inteiro
-  function poolNamesForLevel(level) {
-    if (level === "easy") return EASY_POOL_NAMES;
-    if (level === "medium") {
-      return [
-        ...LANG_META.filter((l) => TOP10_NAMES.includes(l.name)).map((l) => l.name),
-        ...LANG_META.filter((l) => !TOP10_NAMES.includes(l.name)).map((l) => l.name)
-      ];
-    }
-    return GLOBAL_RANK_ORDER; // hard / insane: pool completo, mesma ordem do ranking global
-  }
-
   const REASON_SENTENCE = {
     completed: (c, t, lvl, time) =>
       `You named <b>${c}</b> of <b>${t}</b> languages on the <b>${lvl}</b> level, in <b>${time}</b>.`,
@@ -2723,91 +2744,169 @@
   };
 
   // ---------- card de compartilhamento (PNG via Canvas) ----------
-  // cores e posições dos pontinhos são sorteadas na hora, não refletem o
-  // histórico real da partida — decisão deliberada pra simplificar (não
-  // precisa guardar qual cor cada rodada ganhou, só quantas foram certas)
-  function drawShareCard(canvas, correctCount, totalRounds, level, elapsedStr, rarest) {
+
+  // quebra um texto simples (um único peso de fonte) em linhas que cabem em
+  // maxWidth — assume que ctx.font já está setado com a fonte certa
+  function wrapCanvasText(ctx, text, maxWidth) {
+    const words = text.split(" ");
+    const lines = [];
+    let current = "";
+    words.forEach((word) => {
+      const test = current ? `${current} ${word}` : word;
+      if (current && ctx.measureText(test).width > maxWidth) {
+        lines.push(current);
+        current = word;
+      } else {
+        current = test;
+      }
+    });
+    if (current) lines.push(current);
+    return lines;
+  }
+
+  // quebra uma lista de palavras (cada uma com sua própria flag "bold") em
+  // linhas que cabem em maxWidth, pra permitir uma frase com trechos em
+  // negrito — Canvas não tem suporte nativo a HTML/rich text, então o layout
+  // é calculado palavra por palavra
+  function layoutRichWords(ctx, words, maxWidth, fontRegular, fontBold) {
+    ctx.font = fontRegular;
+    const spaceWidth = ctx.measureText(" ").width;
+    const lines = [];
+    let line = [];
+    let lineWidth = 0;
+    words.forEach(({ w, bold }) => {
+      ctx.font = bold ? fontBold : fontRegular;
+      const width = ctx.measureText(w).width;
+      const extra = (line.length ? spaceWidth : 0) + width;
+      if (line.length && lineWidth + extra > maxWidth) {
+        lines.push({ words: line, width: lineWidth });
+        line = [];
+        lineWidth = 0;
+      }
+      line.push({ w, bold, width });
+      lineWidth += (line.length > 1 ? spaceWidth : 0) + width;
+    });
+    if (line.length) lines.push({ words: line, width: lineWidth });
+    return lines;
+  }
+
+  // desenha as linhas produzidas por layoutRichWords, centralizadas em cx —
+  // retorna o y logo depois da última linha, pra encadear o próximo bloco
+  function drawRichLines(ctx, lines, cx, startY, lineHeight, fontRegular, fontBold, color) {
+    ctx.fillStyle = color;
+    ctx.textAlign = "left";
+    let y = startY;
+    lines.forEach((line) => {
+      ctx.font = fontRegular;
+      const spaceWidth = ctx.measureText(" ").width;
+      let x = cx - line.width / 2;
+      line.words.forEach(({ w, bold, width }) => {
+        ctx.font = bold ? fontBold : fontRegular;
+        ctx.fillText(w, x, y);
+        x += width + spaceWidth;
+      });
+      y += lineHeight;
+    });
+    ctx.textAlign = "center";
+    return y;
+  }
+
+  // desenha o card de compartilhamento: a mesma frase de resultado do jogo
+  // (com número/nível/tempo em negrito), um anel cujo arco preenchido varre
+  // as cores de destaque do jogo, e dentro dele o percentual + a frase de
+  // "quanto da população do planeta te entenderia" — mesmo design finalizado
+  // no mockup, agora desenhado de verdade em Canvas 2D
+  function drawShareCard(canvas, correctCount, totalRounds, level, elapsedStr, word, percent) {
     const scale = 2;
     const W = 400 * scale;
-    const showDots = level !== "insane";
-    const H = 724 * scale; // mesma proporção em todos os níveis — importa pro compartilhamento (Insta/TikTok)
+    const H = 520 * scale;
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext("2d");
     const fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+    const textColor = "#171a21";
 
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, W, H);
-
     ctx.textAlign = "center";
-    let y = 165 * scale;
+    ctx.textBaseline = "alphabetic";
 
-    ctx.fillStyle = "#171a21";
-    ctx.font = `300 ${26 * scale}px ${fontFamily}`;
-    ctx.fillText("You named correctly", W / 2, y);
+    // frase de cabeçalho — mesmo texto/frase usado na tela de resultado,
+    // só que sem HTML: os trechos que eram <b> viram tokens com bold:true
+    const headerRegular = `300 ${22 * scale}px ${fontFamily}`;
+    const headerBold = `600 ${22 * scale}px ${fontFamily}`;
+    const headerWords = [
+      { w: "You", bold: false }, { w: "named", bold: false },
+      { w: String(correctCount), bold: true },
+      { w: "of", bold: false },
+      { w: String(totalRounds), bold: true },
+      { w: "languages", bold: false }, { w: "on", bold: false }, { w: "the", bold: false },
+      { w: capitalize(level), bold: true },
+      { w: "level,", bold: false }, { w: "in", bold: false },
+      { w: `${elapsedStr}.`, bold: true }
+    ];
+    const headerMaxWidth = 320 * scale;
+    const headerLines = layoutRichWords(ctx, headerWords, headerMaxWidth, headerRegular, headerBold);
+    const headerLineHeight = 30 * scale;
+    let y = drawRichLines(ctx, headerLines, W / 2, 76 * scale, headerLineHeight, headerRegular, headerBold, textColor);
 
-    y += 48 * scale;
-    ctx.font = `700 ${34 * scale}px ${fontFamily}`;
-    ctx.fillText(`${correctCount} out of ${totalRounds}`, W / 2, y);
+    // anel — arco cinza de fundo, arco colorido por cima varrendo as cores
+    // de destaque do jogo (fallback sólido se createConicGradient não existir),
+    // depois o buraco branco que transforma o disco preenchido num anel
+    const cx = W / 2;
+    const outerR = 126 * scale;
+    const innerR = 98 * scale;
+    const ringCenterY = y + 14 * scale + outerR;
+    const fraction = Math.max(0, Math.min(1, percent / 100));
+    const startAngle = -Math.PI / 2;
 
-    y += 44 * scale;
-    ctx.font = `300 ${26 * scale}px ${fontFamily}`;
-    ctx.fillText("languages", W / 2, y);
+    ctx.beginPath();
+    ctx.arc(cx, ringCenterY, outerR, 0, Math.PI * 2);
+    ctx.fillStyle = "#e5e7eb";
+    ctx.fill();
 
-    // pontinhos — cor e posição sorteadas, só a QUANTIDADE de certos é real.
-    // no insane (96 rounds) a grade inteira some: 96 pontinhos minúsculos
-    // não comunicam nada de relance, fica só numérico + texto, mais limpo
-    y += 60 * scale;
-    if (showDots) {
-      const perRow = Math.min(totalRounds, 6);
-      const rows = Math.ceil(totalRounds / perRow);
-      const maxGridHeight = 260 * scale;
-      let gap = 22 * scale;
-      let dotR = 8 * scale;
-      if (rows * gap > maxGridHeight) {
-        gap = maxGridHeight / rows;
-        dotR = Math.max(gap * 0.3, 2 * scale);
+    if (fraction > 0) {
+      let fillStyle;
+      if (typeof ctx.createConicGradient === "function") {
+        const gradient = ctx.createConicGradient(startAngle, cx, ringCenterY);
+        gradient.addColorStop(0, "#3474D3");
+        gradient.addColorStop(0.33, "#3f8a68");
+        gradient.addColorStop(0.66, "#B44B69");
+        gradient.addColorStop(1, "#542E75");
+        fillStyle = gradient;
+      } else {
+        fillStyle = "#3474D3"; // navegadores sem suporte a conic gradient
       }
-
-      const flags = Array.from({ length: totalRounds }, (_, i) => i < correctCount);
-      for (let i = flags.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [flags[i], flags[j]] = [flags[j], flags[i]];
-      }
-
-      let idx = 0;
-      for (let row = 0; row < rows; row++) {
-        const cy = y + row * gap;
-        const itemsInRow = Math.min(perRow, totalRounds - row * perRow);
-        const rowStartX = W / 2 - ((itemsInRow - 1) * gap) / 2;
-        for (let col = 0; col < itemsInRow; col++, idx++) {
-          const cx = rowStartX + col * gap;
-          ctx.beginPath();
-          ctx.arc(cx, cy, dotR, 0, Math.PI * 2);
-          ctx.fillStyle = flags[idx] ? RATING_DOT_COLORS[Math.floor(Math.random() * RATING_DOT_COLORS.length)] : "#d1d5db";
-          ctx.fill();
-        }
-      }
-      y += (rows - 1) * gap + 60 * scale;
-    } else {
-      y += 220 * scale; // sem a grade, empurra o texto de baixo pro meio do card, em vez de deixar tudo colado no topo
+      ctx.beginPath();
+      ctx.moveTo(cx, ringCenterY);
+      ctx.arc(cx, ringCenterY, outerR, startAngle, startAngle + Math.PI * 2 * fraction);
+      ctx.closePath();
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
     }
 
-    ctx.fillStyle = "#6b7280";
-    ctx.font = `300 ${18 * scale}px ${fontFamily}`;
-    ctx.fillText(`Level ${level} - ${elapsedStr}`, W / 2, y);
+    ctx.beginPath();
+    ctx.arc(cx, ringCenterY, innerR, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
 
-    if (rarest) {
-      y += 28 * scale;
-      ctx.fillText(`Rarest catch: ${rarest}`, W / 2, y);
-    }
+    // percentual + frase, os dois centralizados dentro do buraco branco
+    ctx.fillStyle = textColor;
+    ctx.font = `700 ${37 * scale}px ${fontFamily}`;
+    ctx.fillText(`${percent}%`, cx, ringCenterY - 2 * scale);
 
-    ctx.fillStyle = "#171a21";
+    ctx.font = `400 ${13 * scale}px ${fontFamily}`;
+    const captionLines = wrapCanvasText(ctx, `of the people on the planet understand you in "${word}"`, 150 * scale);
+    let captionY = ringCenterY + 26 * scale;
+    captionLines.forEach((line) => {
+      ctx.fillText(line, cx, captionY);
+      captionY += 18 * scale;
+    });
+
+    ctx.fillStyle = textColor;
     ctx.font = `300 ${16 * scale}px ${fontFamily}`;
-    ctx.fillText("lobsterislobster.online", W / 2, H - 50 * scale);
+    ctx.fillText("lobsterislobster.online", cx, H - 36 * scale);
   }
-
-  const RATING_DOT_COLORS = ["#3f8a68", "#B44B69", "#3B5BA5", "#542E75", "#AE90E9", "#3474D3", "#D98CA0"];
 
   async function shareResultCard(channel = "result_button") {
     const properties = { ...analyticsRun?.properties, ...analyticsRun?.summary, channel };
@@ -2816,7 +2915,7 @@
     try {
       const data = computeResultsData("completed");
       const canvas = document.createElement("canvas");
-      drawShareCard(canvas, correctCount, totalRounds, currentLevel, data.elapsed, data.rarest);
+      drawShareCard(canvas, correctCount, totalRounds, currentLevel, data.elapsed, currentWord, data.percent);
       dataUrl = canvas.toDataURL("image/png");
     } catch (e) {
       captureEvent("result_share_failed", { ...properties, reason: "image_generation" });
@@ -2858,18 +2957,9 @@
     const chosen = options[Math.floor(Math.random() * options.length)];
 
     const correctNames = roundLog.filter((r) => r.correct).map((r) => r.name);
-    const levelPoolNames = poolNamesForLevel(currentLevel);
-    let rarest = null;
-    let rarestRank = -1;
-    correctNames.forEach((n) => {
-      const r = levelPoolNames.indexOf(n);
-      if (r > rarestRank) {
-        rarestRank = r;
-        rarest = n;
-      }
-    });
+    const percent = computePopulationPercent(correctNames);
 
-    return { elapsed, chosen, rarest, sentenceHTML: REASON_SENTENCE[reason](correctCount, totalRounds, currentLevel, elapsed) };
+    return { elapsed, chosen, percent, sentenceHTML: REASON_SENTENCE[reason](correctCount, totalRounds, currentLevel, elapsed) };
   }
 
   function showResultsBlock(reason) {
@@ -2881,7 +2971,6 @@
     }
     const data = computeResultsData(reason);
     const chosen = data.chosen;
-    const rarest = data.rarest;
 
     const block = document.createElement("div");
     block.className = "results-block";
@@ -2897,13 +2986,10 @@
     sentence.innerHTML = data.sentenceHTML;
     block.appendChild(sentence);
 
-    let rarestLine = null;
-    if (rarest) {
-      rarestLine = document.createElement("div");
-      rarestLine.className = "results-rarest reveal-item";
-      rarestLine.innerHTML = `rarest catch: <b>${rarest}</b>.`;
-      block.appendChild(rarestLine);
-    }
+    const populationLine = document.createElement("div");
+    populationLine.className = "results-population reveal-item";
+    populationLine.innerHTML = `you could say <b>"${currentWord}"</b> and <b>${data.percent}% of Earth's population</b> would understand you.`;
+    block.appendChild(populationLine);
 
     const actions = document.createElement("div");
     actions.className = "results-actions reveal-item";
@@ -2939,7 +3025,7 @@
 
     // revelação gradual e cadenciada — dá um ar de finalização depois do
     // ritmo mais rápido do jogo cronometrado, em vez de tudo aparecer de uma vez
-    const steps = [evalLine, sentence, rarestLine, actions].filter(Boolean);
+    const steps = [evalLine, sentence, populationLine, actions].filter(Boolean);
     steps.forEach((el, i) => {
       setTimeout(() => el.classList.add("visible"), 500 + i * 700);
     });
@@ -3325,7 +3411,7 @@
         <span class="mobile-results-meaning">means ${data.chosen.meaning} in ${data.chosen.lang.toLowerCase()}</span>
       </div>
       <div class="mobile-results-sentence">${data.sentenceHTML}</div>
-      ${data.rarest ? `<div class="mobile-results-rarest">rarest catch: <b>${data.rarest}</b>.</div>` : ""}
+      <div class="mobile-results-population">you could say <b>"${currentWord}"</b> and <b>${data.percent}% of Earth's population</b> would understand you.</div>
       <div class="mobile-results-actions">
         <button class="mobile-results-btn-primary" id="mobileShareBtn">Share your result →</button>
         <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">Play "${currentWord}" again</button>
