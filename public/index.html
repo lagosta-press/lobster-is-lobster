@@ -443,6 +443,21 @@
     padding-bottom: 1px;
     align-self: center;
   }
+  .mobile-results-level-switch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .mobile-results-level-switch-label {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: #9aa1ac;
+  }
+  .mobile-results-level-switch .level-mini-group {
+    justify-content: center;
+  }
 
   .bottom-panel {
     position: fixed;
@@ -786,6 +801,20 @@
     align-items: center;
     gap: 14px;
   }
+  .results-actions-row-secondary {
+    margin-top: 12px;
+  }
+  .results-level-switch {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .results-level-switch-label {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: #9aa1ac;
+  }
   .share-icon-row {
     display: flex;
     align-items: center;
@@ -933,17 +962,19 @@
 
   <div class="mobile-results" id="mobileResults"></div>
 
-  <textarea
-    id="mobileCardInput"
-    class="mobile-hidden-input"
-    rows="1"
-    inputmode="text"
-    autocomplete="off"
-    autocapitalize="off"
-    spellcheck="false"
-    enterkeyhint="go"
-    aria-label="Language answer"
-  ></textarea>
+  <form class="mobile-input-form" onsubmit="return false;">
+    <textarea
+      id="mobileCardInput"
+      class="mobile-hidden-input"
+      rows="1"
+      inputmode="text"
+      autocomplete="off"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="go"
+      aria-label="Language answer"
+    ></textarea>
+  </form>
 
   <button class="about-close" id="aboutCloseBtn" aria-label="Close">&times;</button>
 
@@ -963,10 +994,10 @@
     <div class="about-intro">
       Want to know more about Lagosta's projects? Leave your email here.
     </div>
-    <div class="about-email-row-big">
+    <form class="about-email-row-big" onsubmit="return false;">
       <input type="email" class="about-email-input-big" id="newsletterEmail" placeholder="you@email.com" />
-      <button class="about-email-submit-big" id="newsletterSubmit">→</button>
-    </div>
+      <button type="button" class="about-email-submit-big" id="newsletterSubmit">→</button>
+    </form>
 
     <a href="#" class="about-back" id="backToGameLink">BACK TO THE GAME</a>
 
@@ -1134,6 +1165,13 @@
   };
 
   const WORD_LIST = ["dog","cat","water","love","house","sun","book","friend","coffee","lobster","tree","fish","bird","milk","bread","mother","father","star","mountain","fire"];
+
+  // sorteia uma palavra diferente da atual (e nunca "lobster" — reservada ao tutorial)
+  function pickAnotherWord() {
+    const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
+    return choices[Math.floor(Math.random() * choices.length)];
+  }
+
   const MAX_WRONG = 3;
   const ENGLISH_COLOR = "#171a21";
 
@@ -2872,7 +2910,10 @@
     actions.innerHTML = `
       <div class="results-actions-row">
         <button class="btn-share-result" id="shareResultBtn">Share your result →</button>
-        <button class="btn-play-again" id="playAgainBtn">Play again</button>
+      </div>
+      <div class="results-actions-row results-actions-row-secondary">
+        <button class="btn-play-again" id="playAgainBtn">Play "${currentWord}" again</button>
+        <button class="btn-play-again" id="tryDifferentWordBtn">Try a different word</button>
       </div>
       <div class="share-icon-row">
         <button class="share-icon-btn" id="shareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
@@ -2880,6 +2921,15 @@
         <button class="share-icon-btn" id="shareBluesky" aria-label="Share on Bluesky">${SHARE_ICONS.bluesky}</button>
         <button class="share-icon-btn" id="shareInstagram" aria-label="Share on Instagram">${SHARE_ICONS.instagram}</button>
         <button class="share-icon-btn" id="shareTiktok" aria-label="Share on TikTok">${SHARE_ICONS.tiktok}</button>
+      </div>
+      <div class="results-level-switch">
+        <div class="results-level-switch-label" id="resultsLevelSwitchLabel"></div>
+        <div class="level-mini-group" id="resultsLevelSwitchGroup">
+          <button class="level-mini-btn" data-level="easy">Easy</button>
+          <button class="level-mini-btn" data-level="medium">Medium</button>
+          <button class="level-mini-btn" data-level="hard">Hard</button>
+          <button class="level-mini-btn" data-level="insane">Insane</button>
+        </div>
       </div>
     `;
     block.appendChild(actions);
@@ -2900,6 +2950,16 @@
     document.getElementById("shareResultBtn").addEventListener("click", () => shareResultCard());
     document.getElementById("playAgainBtn").addEventListener("click", () => {
       initGame(currentWord, currentLevel, true, "play_again");
+    });
+    document.getElementById("tryDifferentWordBtn").addEventListener("click", () => {
+      initGame(pickAnotherWord(), currentLevel, true, "new_word");
+    });
+    document.getElementById("resultsLevelSwitchLabel").textContent = LEVEL_PANEL_TEXT[currentLevel];
+    document.querySelectorAll("#resultsLevelSwitchGroup .level-mini-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.level === currentLevel);
+      btn.addEventListener("click", () => {
+        initGame(pickAnotherWord(), btn.dataset.level, true, "level_change");
+      });
     });
     wireShareIconButtons();
   }
@@ -3029,6 +3089,18 @@
   }
 
   let mobileInputWired = false;
+  // liga/desliga o "blur = confirma a resposta" (ver listener de blur logo
+  // abaixo) — true nos blur() que nós mesmos disparamos pra fechar o
+  // teclado (abrir menu/about/resultado), pra não confundir isso com o
+  // toque no ✓ nativo do Safari, que é o caso real que queremos cobrir
+  let suppressBlurSubmit = false;
+  function mobileBlurInputSilently(input) {
+    if (!input) return;
+    suppressBlurSubmit = true;
+    input.blur();
+    suppressBlurSubmit = false;
+  }
+
   function mobileEnsureInput() {
     const input = document.getElementById("mobileCardInput");
     if (!mobileInputWired) {
@@ -3076,6 +3148,18 @@
         // Enter can accept composed text without submitting an answer.
         if (e.key === "Enter" && !composing && !e.isComposing && e.keyCode !== 229) {
           e.preventDefault();
+          handleGuess(input.value);
+        }
+      });
+      // no iOS, o Safari mostra sua própria barra nativa (setas + ✓) acima do
+      // teclado sempre que um campo de texto está focado — não temos como
+      // removê-la, e o ✓ ali só fecha o teclado (não confirma nada por si só,
+      // é chrome do sistema, não é nosso). pra quem toca nele achando que é
+      // "confirmar": se já tinha algo digitado, tratamos esse blur como um
+      // envio, igual ao Enter — evita que a resposta pareça ter "sumido"
+      input.addEventListener("blur", () => {
+        if (suppressBlurSubmit || composing) return;
+        if (!isResolving && input.value.trim().length > 0) {
           handleGuess(input.value);
         }
       });
@@ -3147,9 +3231,12 @@
     feedback.style.color = "#c7cbd1";
 
     const input = document.getElementById("mobileCardInput");
+    // limpa o valor na hora (não só depois dos 700ms) — evita que um blur
+    // fora de hora (ex: toque no ✓ nativo do Safari enquanto o "✗" ainda
+    // pisca) reenvie essa mesma tentativa errada de novo
+    input.value = "";
     updateProgress();
     setTimeout(() => {
-      input.value = "";
       mobileRenderBlank("");
       feedback.textContent = "";
     }, 700);
@@ -3213,7 +3300,7 @@
     // solta o foco do campo de digitação — sem isso, o teclado continuava
     // aberto nessa tela mesmo sem ter mais nada pra digitar
     const input = document.getElementById("mobileCardInput");
-    if (input) input.blur();
+    mobileBlurInputSilently(input);
   }
 
   function mobileSelectLevelFromEnd(level) {
@@ -3229,7 +3316,7 @@
     // solta o foco do campo de digitação — mesmo motivo do fim de tutorial:
     // o resultado não tem nada pra digitar, o teclado não devia continuar aberto
     const activeInput = document.getElementById("mobileCardInput");
-    if (activeInput) activeInput.blur();
+    mobileBlurInputSilently(activeInput);
     const data = computeResultsData(reason);
     const el = document.getElementById("mobileResults");
     el.innerHTML = `
@@ -3241,14 +3328,23 @@
       ${data.rarest ? `<div class="mobile-results-rarest">rarest catch: <b>${data.rarest}</b>.</div>` : ""}
       <div class="mobile-results-actions">
         <button class="mobile-results-btn-primary" id="mobileShareBtn">Share your result →</button>
-        <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">Play again</button>
-        <a href="#" class="mobile-results-about-link" id="mobileResultsNewWord">Try another word →</a>
+        <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">Play "${currentWord}" again</button>
+        <button class="mobile-results-btn-secondary" id="mobileResultsNewWord">Try a different word</button>
         <div class="share-icon-row" style="justify-content:center; margin-top:4px;">
           <button class="share-icon-btn" id="mobileShareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
           <button class="share-icon-btn" id="mobileShareX" aria-label="Share on X">${SHARE_ICONS.x}</button>
           <button class="share-icon-btn" id="mobileShareBluesky" aria-label="Share on Bluesky">${SHARE_ICONS.bluesky}</button>
           <button class="share-icon-btn" id="mobileShareInstagram" aria-label="Share on Instagram">${SHARE_ICONS.instagram}</button>
           <button class="share-icon-btn" id="mobileShareTiktok" aria-label="Share on TikTok">${SHARE_ICONS.tiktok}</button>
+        </div>
+        <div class="mobile-results-level-switch">
+          <div class="mobile-results-level-switch-label" id="mobileResultsLevelLabel"></div>
+          <div class="level-mini-group" id="mobileResultsLevelGroup">
+            <button class="level-mini-btn" data-level="easy">Easy</button>
+            <button class="level-mini-btn" data-level="medium">Medium</button>
+            <button class="level-mini-btn" data-level="hard">Hard</button>
+            <button class="level-mini-btn" data-level="insane">Insane</button>
+          </div>
         </div>
         <a href="#" class="mobile-results-about-link" id="mobileResultsAbout">About</a>
       </div>
@@ -3262,9 +3358,15 @@
     document.getElementById("mobileResultsNewWord").addEventListener("click", (e) => {
       e.preventDefault();
       el.classList.remove("active");
-      const choices = WORD_LIST.filter((w) => w !== currentWord && w !== "lobster");
-      const nextWord = choices[Math.floor(Math.random() * choices.length)];
-      initGame(nextWord, currentLevel, true, "new_word");
+      initGame(pickAnotherWord(), currentLevel, true, "new_word");
+    });
+    document.getElementById("mobileResultsLevelLabel").textContent = LEVEL_PANEL_TEXT[currentLevel];
+    document.querySelectorAll("#mobileResultsLevelGroup .level-mini-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.level === currentLevel);
+      btn.addEventListener("click", () => {
+        el.classList.remove("active");
+        initGame(pickAnotherWord(), btn.dataset.level, true, "level_change");
+      });
     });
     document.getElementById("mobileResultsAbout").addEventListener("click", (e) => {
       e.preventDefault();
@@ -3313,7 +3415,7 @@
     document.getElementById("mobileMenuOverlay").classList.add("visible");
     captureEvent("menu_opened");
     const activeInput = document.getElementById("mobileCardInput");
-    if (activeInput) activeInput.blur(); // sem teclado aberto atrás do menu
+    mobileBlurInputSilently(activeInput); // sem teclado aberto atrás do menu
   });
   document.getElementById("mobileMenuClose").addEventListener("click", () => {
     document.getElementById("mobileMenuOverlay").classList.remove("visible");
@@ -3377,7 +3479,7 @@
       document.getElementById("mobileResults").classList.remove("active");
       document.getElementById("mobileLevelEnd").classList.remove("active");
       const activeInput = document.getElementById("mobileCardInput");
-      if (activeInput) activeInput.blur(); // sem teclado aberto atrás do About
+      mobileBlurInputSilently(activeInput); // sem teclado aberto atrás do About
     } else {
       document.getElementById("gameWrap").style.display = "none";
       document.getElementById("gameClockWrap").style.display = "none";
