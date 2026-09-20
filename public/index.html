@@ -1206,13 +1206,17 @@
     "Slovenian": 2.5, "Sundanese": 32
   };
   const WORLD_POPULATION_MILLIONS = 8100;
+  // o inglês não é uma língua-alvo (é a língua de partida do jogo — a
+  // palavra aparece nela o tempo todo), mas quem joga entende a palavra
+  // em inglês por definição, então entra na soma sempre, mesmo com 0 acertos
+  const ENGLISH_SPEAKERS_MILLIONS = 1500;
 
   // % (inteiro, entre 1 e 99 pra sempre parecer "quase todo mundo" ou "quase
   // ninguém" sem nunca virar 0% ou 100% — o texto ao redor já deixa claro que
   // é uma estimativa) de quanto da população mundial entenderia a palavra,
-  // dada a soma ingênua descrita acima
+  // dada a soma ingênua descrita acima (línguas acertadas + inglês)
   function computePopulationPercent(correctNames) {
-    const totalMillions = correctNames.reduce((sum, name) => sum + (SPEAKERS_MILLIONS[name] || 0), 0);
+    const totalMillions = correctNames.reduce((sum, name) => sum + (SPEAKERS_MILLIONS[name] || 0), ENGLISH_SPEAKERS_MILLIONS);
     const pct = Math.round((totalMillions / WORLD_POPULATION_MILLIONS) * 100);
     return Math.min(99, Math.max(1, pct));
   }
