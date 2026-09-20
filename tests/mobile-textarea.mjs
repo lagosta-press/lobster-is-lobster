@@ -14,7 +14,8 @@ function setup() {
   const input = new EventTarget();
   Object.assign(input, {
     value: '', selectionStart: 0, selectionEnd: 0,
-    setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; }
+    setSelectionRange(start, end) { this.selectionStart = start; this.selectionEnd = end; },
+    blur() { this.dispatchEvent(new Event('blur')); }
   });
   const guesses = [];
   let displayed = '';
@@ -105,6 +106,35 @@ check('late input leaves round feedback unchanged', () => {
   app.input.value = 'late edit';
   app.emit('input');
   assert.equal(app.displayed, 'french');
+});
+
+check('blur with typed text submits it, like Safari\'s native ✓ was tapped', () => {
+  const app = setup();
+  app.input.value = 'french';
+  app.emit('blur');
+  assert.deepEqual(app.guesses, ['french']);
+});
+
+check('blur with an empty field submits nothing', () => {
+  const app = setup();
+  app.input.value = '';
+  app.emit('blur');
+  assert.deepEqual(app.guesses, []);
+});
+
+check('blur mid-resolution does not double-submit', () => {
+  const app = setup();
+  app.input.value = 'french';
+  app.context.isResolving = true;
+  app.emit('blur');
+  assert.deepEqual(app.guesses, []);
+});
+
+check('our own silent blur (menu/about/results) never submits', () => {
+  const app = setup();
+  app.input.value = 'french';
+  vm.runInContext('mobileBlurInputSilently(document.getElementById())', app.context);
+  assert.deepEqual(app.guesses, []);
 });
 
 console.log(`${checks} checks passed.`);
