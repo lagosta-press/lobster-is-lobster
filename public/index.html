@@ -272,7 +272,6 @@
     font-weight: 300;
     color: #4b5563;
     min-height: 1.3em;
-    white-space: pre-line; /* permite a quebra de linha entre as duas frases da primeira rodada do tutorial */
   }
   .mobile-tap-hint.visible {
     display: block;
@@ -1934,13 +1933,6 @@
           hook.className = "tutorial-note";
           hook.textContent = "guess the language each word gets translated into";
           getHintBlock(line).appendChild(hook);
-
-          // aviso de "errar rende dica" logo de cara, antes da primeira
-          // tentativa — sem isso, muita gente hesitava e não chutava nada
-          const encourage = document.createElement("div");
-          encourage.className = "tutorial-note";
-          encourage.textContent = "don't be shy — every wrong answer gets you a hint";
-          getHintBlock(line).appendChild(encourage);
         }
 
         // no tutorial, a rodada difícil de propósito (Basco) ganha um aviso
@@ -3292,9 +3284,7 @@
     // somem assim que uma dica de verdade substituir esse texto (revealNextHint)
     document.getElementById("mobileGeoHint").textContent =
       gamePhase === "tutorial" && challengeIndex === 1
-        // aviso de "errar rende dica" já entra aqui, antes da primeira
-        // tentativa — sem isso, muita gente hesitava e não chutava nada
-        ? "guess the language each word gets translated into\ndon't be shy — every wrong answer gets you a hint"
+        ? "guess the language each word gets translated into"
         : gamePhase === "tutorial" && promptLang.name === TUTORIAL_HARD_NAME
         ? "get this one wrong, and you'll get a hint"
         : "";
