@@ -272,6 +272,7 @@
     font-weight: 300;
     color: #4b5563;
     min-height: 1.3em;
+    white-space: pre-line; /* permite a quebra de linha entre as duas frases da primeira rodada do tutorial */
   }
   .mobile-tap-hint.visible {
     display: block;
@@ -1241,8 +1242,8 @@
   const EASY_FAMILIAR_NAMES = EASY_POOL_NAMES;
 
   // total de rodadas (línguas + inglês) por nível — usado só pro placar mostrar o progresso
-  const LEVEL_TOTALS = { easy: 12, medium: 12, hard: 12, insane: 96 };
-  const TIME_LIMIT_SEC = 150; // countdown fixo pra easy/medium/hard (2:30) — insane não usa isso (cronômetro sobe)
+  const LEVEL_TOTALS = { easy: 10, medium: 10, hard: 10, insane: 96 };
+  const TIME_LIMIT_SEC = 180; // countdown fixo pra easy/medium/hard (3:00) — insane não usa isso (cronômetro sobe)
 
   // sequência fixa (não sorteada) das 2 perguntas de teste antes de escolher
   // a dificuldade: Espanhol primeiro — quase todo mundo acerta, cria
@@ -1375,39 +1376,39 @@
 
     if (level === "easy") {
       pool = ALL_META.filter((l) => EASY_POOL_NAMES.includes(l.name));
-      drawCount = 11; // + inglês de graça = 12
+      drawCount = 9; // + inglês de graça = 10
     } else if (level === "hard") {
       pool = ALL_META; // mesmo lake completo do insano, só que com bem menos rounds
-      drawCount = 11; // + inglês de graça = 12
+      drawCount = 9; // + inglês de graça = 10
     } else if (level === "insane") {
       pool = ALL_META;
       drawCount = 95; // + inglês de graça = 96 — sobra só 3 línguas de fora do pool de 99 a cada partida
     } else {
       pool = LANG_META; // lake do médio = só as 49 línguas mais faladas, não as 50 raras do insano
-      drawCount = 11; // + inglês de graça = 12
+      drawCount = 9; // + inglês de graça = 10
     }
 
     pool = pool.filter((l) => !isDuplicateOfWord(word, l.name));
 
     let drawn;
     if (level === "easy") {
-      // garante um "chão comum" bem maior — de 9 a 10 das línguas realmente
+      // garante um "chão comum" bem maior — de 7 a 8 das línguas realmente
       // reconhecíveis do pool (não só top10), pra maioria da partida ser
       // familiar e sobrar só 1-2 rodadas genuinamente desafiadoras
       const familiarAvailable = shuffle(pool.filter((l) => EASY_FAMILIAR_NAMES.includes(l.name)));
-      const guaranteedCount = Math.min(9 + Math.floor(Math.random() * 2), familiarAvailable.length, drawCount);
+      const guaranteedCount = Math.min(7 + Math.floor(Math.random() * 2), familiarAvailable.length, drawCount);
       const guaranteed = familiarAvailable.slice(0, guaranteedCount);
       const rest = pool.filter((l) => !guaranteed.includes(l));
       const fillerCount = Math.max(drawCount - guaranteed.length, 0);
       const filler = shuffle([...rest]).slice(0, fillerCount);
       drawn = shuffle([...guaranteed, ...filler]);
     } else if (level === "medium") {
-      // garante de 5 a 7 línguas comuns (top10, mistura scripts latinos e
+      // garante de 4 a 6 línguas comuns (top10, mistura scripts latinos e
       // não-latinos de propósito) no sorteio — evita que o médio vire "quase
       // um mini-hard" só porque o resto do pool de 49 é majoritariamente de
       // scripts não-latinos; o resto do sorteio segue aleatório
       const commonsAvailable = shuffle(pool.filter((l) => TOP10_NAMES.includes(l.name)));
-      const guaranteedCommonCount = Math.min(5 + Math.floor(Math.random() * 3), commonsAvailable.length); // 5, 6 ou 7
+      const guaranteedCommonCount = Math.min(4 + Math.floor(Math.random() * 3), commonsAvailable.length); // 4, 5 ou 6
       const guaranteedCommon = commonsAvailable.slice(0, guaranteedCommonCount);
       // + 1 ou 2 línguas latinas "fáceis" (mesmo pool do Easy) fora do top10,
       // pra suavizar a transição fácil -> médio sem tirar espaço dos scripts
@@ -1933,6 +1934,13 @@
           hook.className = "tutorial-note";
           hook.textContent = "guess the language each word gets translated into";
           getHintBlock(line).appendChild(hook);
+
+          // aviso de "errar rende dica" logo de cara, antes da primeira
+          // tentativa — sem isso, muita gente hesitava e não chutava nada
+          const encourage = document.createElement("div");
+          encourage.className = "tutorial-note";
+          encourage.textContent = "don't be shy — every wrong answer gets you a hint";
+          getHintBlock(line).appendChild(encourage);
         }
 
         // no tutorial, a rodada difícil de propósito (Basco) ganha um aviso
@@ -2521,18 +2529,18 @@
   // ---------- transição tutorial -> escolha de dificuldade ----------
 
   const LEVEL_INFO = {
-    easy: { title: "1 · Easy · 12 rounds", desc: "Roman alphabet only — languages that read like English. 2 minutes on the clock." },
-    medium: { title: "2 · Medium · 12 rounds", desc: "A mix of scripts — some familiar, some not. 2 minutes on the clock." },
-    hard: { title: "3 · Hard · 12 rounds", desc: "Full language pool — the rare ones show up too. 2 minutes on the clock." },
+    easy: { title: "1 · Easy · 10 rounds", desc: "Roman alphabet only — languages that read like English. 3 minutes on the clock." },
+    medium: { title: "2 · Medium · 10 rounds", desc: "A mix of scripts — some familiar, some not. 3 minutes on the clock." },
+    hard: { title: "3 · Hard · 10 rounds", desc: "Full language pool — the rare ones show up too. 3 minutes on the clock." },
     insane: { title: "4 · Insane · 96 rounds", desc: "Full pool, 3 tries per language. Miss all 3 or try to skip and you're out. Watch your correct count live — the time only shows at the end." }
   };
 
   // texto exato de cada linha do painel de baixo — um por nível, cada um
   // com sua própria estrutura (não é um template único preenchido por dados)
   const LEVEL_PANEL_TEXT = {
-    easy: "Easy · 12 rounds · common languages · roman alphabet only",
-    medium: "Medium · 12 rounds · common languages · mixed scripts",
-    hard: "Hard · 12 rounds · rare scripts included",
+    easy: "Easy · 10 rounds · common languages · roman alphabet only",
+    medium: "Medium · 10 rounds · common languages · mixed scripts",
+    hard: "Hard · 10 rounds · rare scripts included",
     insane: "Insane · 96 rounds · 1 error you're out · no skip"
   };
 
@@ -3284,7 +3292,9 @@
     // somem assim que uma dica de verdade substituir esse texto (revealNextHint)
     document.getElementById("mobileGeoHint").textContent =
       gamePhase === "tutorial" && challengeIndex === 1
-        ? "guess the language each word gets translated into"
+        // aviso de "errar rende dica" já entra aqui, antes da primeira
+        // tentativa — sem isso, muita gente hesitava e não chutava nada
+        ? "guess the language each word gets translated into\ndon't be shy — every wrong answer gets you a hint"
         : gamePhase === "tutorial" && promptLang.name === TUTORIAL_HARD_NAME
         ? "get this one wrong, and you'll get a hint"
         : "";
