@@ -1246,14 +1246,14 @@
 
   // sequência fixa (não sorteada) das 2 perguntas de teste antes de escolher
   // a dificuldade: Espanhol primeiro — quase todo mundo acerta, cria
-  // confiança — depois Basco, propositalmente difícil (não tem parentesco
-  // com nenhuma outra língua), pra mostrar na prática que errar rende dica
-  // e que dá pra pular
-  const TUTORIAL_NAMES = ["Spanish", "Basque"];
-  // Basco só existe em INSANE_META (não em LANG_META) — por isso busca em
-  // ALL_META, que junta as duas listas
+  // confiança — depois Mandarim, propositalmente difícil (escrita não-latina,
+  // sem parentesco óbvio pra quem fala línguas europeias), pra mostrar na
+  // prática que errar rende dica e que dá pra pular
+  const TUTORIAL_NAMES = ["Spanish", "Mandarin Chinese"];
+  // busca em ALL_META (LANG_META + INSANE_META) pra funcionar com qualquer
+  // um dos dois conjuntos, mesmo que os dois nomes acima estejam em LANG_META
   const TUTORIAL_META = TUTORIAL_NAMES.map((name) => ALL_META.find((l) => l.name === name));
-  const TUTORIAL_HARD_NAME = "Basque";
+  const TUTORIAL_HARD_NAME = "Mandarin Chinese";
 
   // ---------- estado ----------
   const COLORS = ["#3f8a68","#B44B69","#3B5BA5","#542E75","#AE90E9","#3474D3","#D98CA0"];
@@ -1935,7 +1935,7 @@
           getHintBlock(line).appendChild(hook);
         }
 
-        // no tutorial, a rodada difícil de propósito (Basco) ganha um aviso
+        // no tutorial, a rodada difícil de propósito (Mandarim) ganha um aviso
         // imediato explicando a mecânica de dica, em vez de deixar a pessoa
         // descobrir sozinha só depois de errar
         if (gamePhase === "tutorial" && promptLang.name === TUTORIAL_HARD_NAME) {
@@ -3280,7 +3280,7 @@
     document.getElementById("mobileCardFeedback").textContent = "";
     // na primeira rodada do tutorial (Espanhol), mostra a frase de instrução
     // ali em cima do "tap anywhere..."/"press enter" — na rodada difícil de
-    // propósito (Basco), mostra o aviso de que errar rende dica; ambos
+    // propósito (Mandarim), mostra o aviso de que errar rende dica; ambos
     // somem assim que uma dica de verdade substituir esse texto (revealNextHint)
     document.getElementById("mobileGeoHint").textContent =
       gamePhase === "tutorial" && challengeIndex === 1
