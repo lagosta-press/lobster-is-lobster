@@ -1580,23 +1580,6 @@
     next();
   }
 
-  // deixa a palavra já selecionada quando aparece, pra quem quiser copiar
-  // (ex: pra colar no Google) só apertar Ctrl/Cmd+C direto, sem precisar
-  // acertar o duplo-clique — importante pra palavras com mais de um termo
-  // ou em scripts não-latinos, onde dar duplo-clique só pega parte do texto
-  function selectWordText(el) {
-    if (!el) return;
-    try {
-      const range = document.createRange();
-      range.selectNodeContents(el);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
-    } catch (e) {
-      /* seleção programática bloqueada nesse navegador/contexto — sem problema, só não vem pré-selecionada */
-    }
-  }
-
   function fadeOutAndClear(container) {
     if (!container) return; // linha já não tem mais esse elemento (ex: digitação muito rápida em sequência) — nada a fazer
     const children = Array.from(container.children);
@@ -1939,9 +1922,6 @@
 
         createBlankInput(line);
         scrollToLine(line);
-        // foco vai pro input de resposta, mas a seleção de texto na página é
-        // independente de foco de formulário — fica visível e copiável
-        selectWordText(line.querySelector(".word"));
 
         // na primeiríssima rodada do tutorial (Espanhol), a frase de
         // instrução entra no bloco de dicas — adicionada ANTES do
@@ -3329,9 +3309,6 @@
     // (fora de um toque direto da pessoa) não funciona; o teclado precisa
     // ficar aberto o tempo todo, a trava de repetição é só lógica (isResolving)
     input.focus();
-    // mesmo motivo do desktop: deixa a palavra já selecionada pra quem quiser
-    // copiar (ex: pra pesquisar no Google) sem precisar acertar o toque longo
-    selectWordText(promptEl);
   }
 
   function mobileHandleWrongAttempt(guess) {
