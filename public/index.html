@@ -2958,11 +2958,10 @@
     return y;
   }
 
-  // desenha o card de compartilhamento: a mesma frase de resultado do jogo
-  // (com número/nível/tempo em negrito), um anel cujo arco preenchido varre
-  // as cores de destaque do jogo, e dentro dele o percentual + a frase de
-  // "quanto da população do planeta te entenderia" — mesmo design finalizado
-  // no mockup, agora desenhado de verdade em Canvas 2D
+  // desenha o card de compartilhamento: a frase de resultado do jogo (número/
+  // nível/tempo em negrito), um anel de contorno preto cujo arco preenchido
+  // varre os pastéis do jogo, com o percentual + "quanto da população do
+  // planeta te entenderia" dentro, e o endereço no rodapé
   function drawShareCard(canvas, correctCount, totalRounds, level, elapsedStr, word, percent) {
     const scale = 2;
     const W = 400 * scale;
@@ -2971,88 +2970,59 @@
     canvas.height = H;
     const ctx = canvas.getContext("2d");
     const fontFamily = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-    const textColor = "#171a21";
-
+    const ink = "#171a21";
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, W, H);
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
 
-    // frase de cabeçalho — mesmo texto/frase usado na tela de resultado,
-    // só que sem HTML: os trechos que eram <b> viram tokens com bold:true
-    const headerRegular = `300 ${22 * scale}px ${fontFamily}`;
-    const headerBold = `600 ${22 * scale}px ${fontFamily}`;
+    // frase do resultado, mais fina e maior (mesma voz da tela de resultado)
+    const headerRegular = `300 ${28 * scale}px ${fontFamily}`;
+    const headerBold = `700 ${28 * scale}px ${fontFamily}`;
     const headerWords = [
       { w: "You", bold: false }, { w: "named", bold: false },
-      { w: String(correctCount), bold: true },
-      { w: "of", bold: false },
-      { w: String(totalRounds), bold: true },
-      { w: "languages", bold: false }, { w: "on", bold: false }, { w: "the", bold: false },
-      { w: capitalize(level), bold: true },
-      { w: "level,", bold: false }, { w: "in", bold: false },
-      { w: `${elapsedStr}.`, bold: true }
+      { w: String(correctCount), bold: true }, { w: "of", bold: false },
+      { w: String(totalRounds), bold: true }, { w: "languages", bold: false },
+      { w: "on", bold: false }, { w: "the", bold: false },
+      { w: capitalize(level), bold: true }, { w: "level,", bold: false },
+      { w: "in", bold: false }, { w: `${elapsedStr}.`, bold: true }
     ];
-    const headerMaxWidth = 320 * scale;
-    const headerLines = layoutRichWords(ctx, headerWords, headerMaxWidth, headerRegular, headerBold);
-    const headerLineHeight = 30 * scale;
-    let y = drawRichLines(ctx, headerLines, W / 2, 76 * scale, headerLineHeight, headerRegular, headerBold, textColor);
+    const lines = layoutRichWords(ctx, headerWords, 330 * scale, headerRegular, headerBold);
+    let y = drawRichLines(ctx, lines, W / 2, 64 * scale, 36 * scale, headerRegular, headerBold, ink);
 
-    // anel — arco cinza de fundo, arco colorido por cima varrendo as cores
-    // de destaque do jogo (fallback sólido se createConicGradient não existir),
-    // depois o buraco branco que transforma o disco preenchido num anel
+    // anel estilo "adesivo": contorno preto grosso, arco pastel varrendo as cores do jogo
     const cx = W / 2;
-    const outerR = 126 * scale;
-    const innerR = 98 * scale;
-    const ringCenterY = y + 14 * scale + outerR;
-    const fraction = Math.max(0, Math.min(1, percent / 100));
-    const startAngle = -Math.PI / 2;
-
-    ctx.beginPath();
-    ctx.arc(cx, ringCenterY, outerR, 0, Math.PI * 2);
-    ctx.fillStyle = "#e5e7eb";
-    ctx.fill();
-
-    if (fraction > 0) {
-      let fillStyle;
-      if (typeof ctx.createConicGradient === "function") {
-        const gradient = ctx.createConicGradient(startAngle, cx, ringCenterY);
-        gradient.addColorStop(0, "#3f8a68");
-        gradient.addColorStop(0.33, "#A67C00");
-        gradient.addColorStop(0.66, "#C2587F");
-        gradient.addColorStop(1, "#4A86B5");
-        fillStyle = gradient;
-      } else {
-        fillStyle = "#3f8a68"; // navegadores sem suporte a conic gradient
-      }
-      ctx.beginPath();
-      ctx.moveTo(cx, ringCenterY);
-      ctx.arc(cx, ringCenterY, outerR, startAngle, startAngle + Math.PI * 2 * fraction);
-      ctx.closePath();
-      ctx.fillStyle = fillStyle;
-      ctx.fill();
+    const outerR = 120 * scale, innerR = 92 * scale;
+    const cy = y + 10 * scale + outerR;
+    const frac = Math.max(0, Math.min(1, percent / 100));
+    const a0 = -Math.PI / 2;
+    ctx.beginPath(); ctx.arc(cx, cy, outerR, 0, Math.PI * 2); ctx.fillStyle = "#f3f4f6"; ctx.fill();
+    if (frac > 0) {
+      const g = ctx.createConicGradient(a0, cx, cy);
+      g.addColorStop(0, "#DCCF4C"); g.addColorStop(0.35 * frac, "#F0B58C");
+      g.addColorStop(0.7 * frac, "#DC87A6"); g.addColorStop(Math.max(frac, 0.01), "#A2B35A");
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, outerR, a0, a0 + Math.PI * 2 * frac); ctx.closePath();
+      ctx.fillStyle = g; ctx.fill();
     }
+    ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, Math.PI * 2); ctx.fillStyle = "#ffffff"; ctx.fill();
+    ctx.lineWidth = 3 * scale; ctx.strokeStyle = ink;
+    ctx.beginPath(); ctx.arc(cx, cy, outerR, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, Math.PI * 2); ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(cx, ringCenterY, innerR, 0, Math.PI * 2);
-    ctx.fillStyle = "#ffffff";
-    ctx.fill();
-
-    // percentual + frase, os dois centralizados dentro do buraco branco
-    ctx.fillStyle = textColor;
-    ctx.font = `700 ${37 * scale}px ${fontFamily}`;
-    ctx.fillText(`${percent}%`, cx, ringCenterY - 2 * scale);
-
+    ctx.fillStyle = ink;
+    ctx.font = `800 ${40 * scale}px ${fontFamily}`;
+    ctx.fillText(`${percent}%`, cx, cy - 2 * scale);
     ctx.font = `400 ${13 * scale}px ${fontFamily}`;
-    const captionLines = wrapCanvasText(ctx, `of the people on the planet understand you in "${word}"`, 150 * scale);
-    let captionY = ringCenterY + 26 * scale;
-    captionLines.forEach((line) => {
-      ctx.fillText(line, cx, captionY);
-      captionY += 18 * scale;
+    let cyy = cy + 24 * scale;
+    wrapCanvasText(ctx, `of the people on the planet understand you in "${word}"`, 140 * scale).forEach((l) => {
+      ctx.fillText(l, cx, cyy); cyy += 17 * scale;
     });
 
-    ctx.fillStyle = textColor;
-    ctx.font = `300 ${16 * scale}px ${fontFamily}`;
-    ctx.fillText("lobsterislobster.online", cx, H - 36 * scale);
+    // rodapé: só o endereço, discreto
+    ctx.fillStyle = ink;
+    ctx.font = `400 ${12 * scale}px ${fontFamily}`;
+    ctx.fillText("www.lobsterislobster.online", cx, H - 28 * scale);
   }
 
   async function shareResultCard(channel = "result_button") {
