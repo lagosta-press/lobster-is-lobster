@@ -33,6 +33,15 @@
 </script>
 <style>
   * { box-sizing: border-box; }
+  :root {
+    /* altura da barra rolante do rodapé — os elementos fixos de baixo
+       (painel do desktop, rodapé do mobile) sobem essa altura pra não ficarem
+       por baixo dela */
+    --ticker-h: 35px;
+  }
+  @media (max-width: 700px) {
+    :root { --ticker-h: 30px; }
+  }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -198,7 +207,7 @@
   }
   .mobile-clock.visible { opacity: 1; }
   .mobile-clock.urgent {
-    color: #B44B69;
+    color: #C2587F;
     animation: clockPulse 1s ease-in-out infinite;
   }
   .mobile-menu-btn {
@@ -278,7 +287,7 @@
   }
   .mobile-footer {
     margin-top: 28px;
-    padding: 0 24px 28px;
+    padding: 0 24px calc(28px + var(--ticker-h));
     text-align: center;
   }
   .mobile-counter {
@@ -358,13 +367,21 @@
     align-items: center;
     justify-content: center;
     gap: 28px;
-    padding: 40px;
+    padding: 40px 40px calc(40px + var(--ticker-h));
     background: #ffffff;
     z-index: 30;
     text-align: center;
   }
   .mobile-level-end.active, .mobile-results.active {
     display: flex;
+  }
+  @media (max-height: 700px) {
+    /* celular baixo (iPhone SE, 360x640...): a barra rolante come ~34px do
+       rodapé, então aperta o respiro entre os blocos pra o resultado/fim de
+       nível não passar por baixo dela */
+    .mobile-level-end, .mobile-results {
+      gap: 16px;
+    }
   }
   .mobile-level-end-text {
     font-size: 1.7rem;
@@ -393,46 +410,38 @@
   .mobile-level-end-btn:hover { background: #e5e7eb; }
 
   .mobile-results-eval {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.2;
+  }
+  .mobile-results-sentence {
     font-size: 2.3rem;
     font-weight: 100;
     line-height: 1.2;
-  }
-  .mobile-results-meaning {
-    color: #9aa1ac;
-    font-weight: 300;
-  }
-  .mobile-results-sentence {
-    font-size: 1.2rem;
-    font-weight: 100;
-    line-height: 1.4;
     color: #171a21;
   }
   .mobile-results-sentence b { font-weight: 400; }
-  .mobile-results-population {
+  .mobile-results-btn-primary, .mobile-results-btn-secondary {
+    font-family: inherit;
     font-size: 0.95rem;
-    font-weight: 300;
-    color: #6b7280;
-  }
-  .mobile-results-population b { color: #171a21; font-weight: 400; }
-  .mobile-results-btn-primary {
-    font-size: 1rem;
-    color: #ffffff;
-    background: #171a21;
-    border: none;
-    border-radius: 999px;
-    padding: 14px 20px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .mobile-results-btn-secondary {
-    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
     color: #171a21;
-    background: none;
-    border: 1.5px solid #d1d5db;
+    border: 2px solid #171a21;
     border-radius: 999px;
-    padding: 14px 20px;
+    padding: 13px 20px;
     cursor: pointer;
-    font-family: inherit;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .mobile-results-btn-primary, .mobile-results-btn-secondary { background: #ffffff; }
+  .mobile-results-btn-primary:hover, .mobile-results-btn-primary:active { background: #DC87A6; }
+  #mobilePlayAgainBtn:hover, #mobilePlayAgainBtn:active { background: #DCCF4C; }
+  #mobileResultsNewWord:hover, #mobileResultsNewWord:active { background: #B9DDC3; }
+  .mobile-results-btn-primary:active, .mobile-results-btn-secondary:active {
+    transform: translateY(2px);
   }
   .mobile-results-about-link {
     margin-top: 6px;
@@ -463,7 +472,7 @@
     position: fixed;
     left: 0;
     right: 0;
-    bottom: 24px;
+    bottom: calc(24px + var(--ticker-h));
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -573,11 +582,11 @@
     animation: clockFlash 1s ease-out;
   }
   @keyframes clockFlash {
-    0% { color: #3B5BA5; transform: scale(1.08); }
+    0% { color: #3f8a68; transform: scale(1.08); }
     100% { color: #171a21; transform: scale(1); }
   }
   .game-clock.urgent {
-    color: #B44B69;
+    color: #C2587F;
     animation: clockPulse 1s ease-in-out infinite;
   }
   @keyframes clockPulse {
@@ -615,6 +624,95 @@
     color: #171a21;
     border-bottom-color: #171a21;
   }
+  /* barra rolante com o essencial do About — fixa no rodapé, em loop contínuo.
+     O conteúdo é duplicado por JS (setupTicker) pra o loop não ter "pulo" */
+  .ticker {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--ticker-h);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: #ffffff;
+    z-index: 35; /* acima das telas cheias do mobile (30), abaixo do menu (60) */
+    /* letreiro: grande, pesado, caixa alta, pouco texto */
+    font-size: 1.15rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #171a21;
+    letter-spacing: 0.03em;
+  }
+  @media (max-width: 700px) {
+    .ticker { font-size: 1rem; }
+  }
+  body.about-open .ticker {
+    display: none; /* a página About já tem tudo isso por extenso */
+  }
+  .ticker-track {
+    display: flex;
+    flex: none;
+    width: max-content;
+    height: 100%;
+    animation: tickerScroll 60s linear infinite;
+    will-change: transform;
+  }
+  @media (hover: hover) {
+    .ticker:hover .ticker-track {
+      animation-play-state: paused; /* dá pra parar pra ler / clicar num link */
+    }
+  }
+  @keyframes tickerScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-1 * var(--ticker-shift, 50%))); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ticker { overflow-x: auto; }
+    .ticker-track { animation: none; }
+  }
+  .ticker-group {
+    display: flex;
+    flex: none;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+  }
+  /* cada informação é um "vagão": bloco com a própria cor de fundo (--c), que
+     perto das bordas se mistura com a do vizinho (--p anterior, --n próximo).
+     Cada ponta já nasce na cor média das duas, então a emenda não tem corte. */
+  .ticker-group > [data-wagon] {
+    background: linear-gradient(to right,
+      color-mix(in srgb, var(--p), var(--c)) 0,
+      var(--c) 24px,
+      var(--c) calc(100% - 24px),
+      color-mix(in srgb, var(--c), var(--n)) 100%);
+    flex: none;
+    height: 100%;
+    line-height: var(--ticker-h); /* centra o texto na vertical sem virar flex (que engoliria os espaços ao lado dos links) */
+    padding: 0 32px;
+  }
+  .ticker a {
+    color: #171a21;
+    text-decoration: none;
+    border-bottom: 2px solid #171a21;
+  }
+  @media (hover: hover) {
+    .ticker a:hover { font-style: italic; }
+  }
+  .ticker-beta {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #171a21;
+    border: 1.5px solid #171a21;
+    border-radius: 999px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    line-height: 1.3; /* senão herda o line-height da barra (46px) e a pílula vira um círculo gigante */
+    vertical-align: 2px;
+  }
   .about-page {
     display: none;
     max-width: 840px;
@@ -632,7 +730,7 @@
     margin-bottom: 30px;
   }
   .about-intro a {
-    color: #3474D3;
+    color: #C2587F;
     text-decoration: none;
     border-bottom: 1px solid currentColor;
   }
@@ -716,7 +814,7 @@
     outline: none;
   }
   .about-email-input-big:focus {
-    border-color: #3474D3;
+    border-color: #C2587F;
   }
   .about-email-submit-big {
     font-family: inherit;
@@ -729,7 +827,7 @@
     cursor: pointer;
   }
   .about-email-submit-big:hover {
-    background: #3474D3;
+    background: #C2587F;
   }
   .level-word {
     cursor: pointer;
@@ -739,7 +837,7 @@
     transition: border-color 0.15s ease, color 0.15s ease;
   }
   .level-word:hover {
-    color: #3B5BA5;
+    color: #C2587F;
     border-bottom: 2px solid currentColor;
   }
   .level-desc-card {
@@ -764,34 +862,26 @@
   }
   .results-block {
     margin-top: 56px;
+    /* altura de uma tela: deixa a página rolar até o resultado encostar no topo,
+       sem as últimas linhas do jogo aparecendo por cima */
+    min-height: calc(100vh - 40px);
   }
   .eval-word {
-    font-size: clamp(3.2rem, 9vw, 6rem);
-    font-weight: 100;
-    line-height: 1.15;
-    margin-bottom: 26px;
-  }
-  .eval-meaning-inline {
-    color: #9aa1ac;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    margin-bottom: 14px;
   }
   .results-sentence {
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
-    line-height: 1.3;
+    font-size: clamp(3.2rem, 9vw, 6rem);
+    line-height: 1.15;
     font-weight: 100;
     color: #171a21;
-    margin-bottom: 20px;
+    margin-bottom: 36px;
   }
   .results-sentence b { font-weight: 400; }
-  .results-population {
-    font-size: 1.05rem;
-    font-weight: 300;
-    color: #6b7280;
-    margin-bottom: 30px;
-  }
-  .results-population b {
-    color: #171a21;
-    font-weight: 400;
-  }
   .results-actions {
     display: flex;
     flex-direction: column;
@@ -801,9 +891,8 @@
     align-items: center;
     gap: 14px;
   }
-  .results-actions-row-secondary {
-    margin-top: 12px;
-  }
+  .results-actions-row { flex-wrap: wrap; }
+  .results-actions-row + .share-icon-row { margin-top: 18px; }
   .results-level-switch {
     margin-top: 20px;
     display: flex;
@@ -842,36 +931,69 @@
     border-color: #171a21;
     background: #f1f2f4;
   }
-  .btn-share-result {
+  /* ---- botões do fim de jogo: pílulas pastel com contorno preto, letra bold em
+     caixa alta (mesma estética da barra do rodapé). Cada ação tem sua cor. ---- */
+  .btn-share-result, .btn-play-again {
     display: inline-block;
-    font-size: 1rem;
-    font-weight: 400;
-    color: #ffffff;
-    background: #171a21;
-    border: none;
-    border-radius: 999px;
-    padding: 13px 26px;
-    cursor: pointer;
     font-family: inherit;
-  }
-  .btn-share-result:hover {
-    background: #3474D3;
-  }
-  .btn-play-again {
-    display: inline-block;
-    font-size: 1rem;
-    font-weight: 400;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
     color: #171a21;
-    background: none;
-    border: 1.5px solid #d1d5db;
+    border: 2px solid #171a21;
     border-radius: 999px;
-    padding: 13px 26px;
+    padding: 12px 26px;
     cursor: pointer;
-    font-family: inherit;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
-  .btn-play-again:hover {
+  .btn-share-result, .btn-play-again { background: #ffffff; }
+  .btn-share-result:hover { background: #DC87A6; }
+  #playAgainBtn:hover { background: #DCCF4C; }
+  #tryDifferentWordBtn:hover { background: #B9DDC3; }
+  .btn-share-result:hover, .btn-play-again:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 0 #171a21;
+  }
+  .btn-share-result:active, .btn-play-again:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+  /* ícones de compartilhar do resultado: círculos pastel com contorno preto */
+  .results-actions .share-icon-btn, .mobile-results-actions .share-icon-btn {
+    border: 2px solid #171a21;
+    background: #ffffff;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .results-actions .share-icon-btn:nth-child(1):hover, .mobile-results-actions .share-icon-btn:nth-child(1):hover { background: #A2B35A; }
+  .results-actions .share-icon-btn:nth-child(2):hover, .mobile-results-actions .share-icon-btn:nth-child(2):hover { background: #F0C4D2; }
+  .results-actions .share-icon-btn:nth-child(3):hover, .mobile-results-actions .share-icon-btn:nth-child(3):hover { background: #F0B58C; }
+  .results-actions .share-icon-btn:nth-child(4):hover, .mobile-results-actions .share-icon-btn:nth-child(4):hover { background: #DC87A6; }
+  .results-actions .share-icon-btn:nth-child(5):hover, .mobile-results-actions .share-icon-btn:nth-child(5):hover { background: #DCCF4C; }
+  .results-actions .share-icon-btn:hover, .mobile-results-actions .share-icon-btn:hover {
     border-color: #171a21;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 0 #171a21;
   }
+  /* troca de nível do resultado: branco com contorno; o nível atual (e o
+     que está sob o mouse) ganha a cor pastel da sua dificuldade */
+  .results-level-switch .level-mini-btn, .mobile-results-level-switch .level-mini-btn {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #171a21;
+    background: #ffffff;
+    border: 2px solid #171a21;
+    padding: 4px 12px;
+  }
+  .mobile-results-level-switch .level-mini-btn { padding: 4px 9px; font-size: 0.7rem; }
+  .results-level-switch .level-mini-btn.active, .mobile-results-level-switch .level-mini-btn.active { background: #171a21; color: #ffffff; }
+  .results-level-switch .level-mini-btn[data-level="easy"]:hover, .mobile-results-level-switch .level-mini-btn[data-level="easy"]:hover { background: #B9DDC3; color: #171a21; }
+  .results-level-switch .level-mini-btn[data-level="medium"]:hover, .mobile-results-level-switch .level-mini-btn[data-level="medium"]:hover { background: #DCCF4C; color: #171a21; }
+  .results-level-switch .level-mini-btn[data-level="hard"]:hover, .mobile-results-level-switch .level-mini-btn[data-level="hard"]:hover { background: #F0B58C; color: #171a21; }
+  .results-level-switch .level-mini-btn[data-level="insane"]:hover, .mobile-results-level-switch .level-mini-btn[data-level="insane"]:hover { background: #DC87A6; color: #171a21; }
+
   .reveal-item {
     opacity: 0;
     transform: translateY(10px);
@@ -911,6 +1033,23 @@
   </div>
 
   <div id="scrollSpacer" style="height: 35vh;"></div>
+
+  <!-- barra rolante: resumo curto do About, em "vagões" — cada item é um bloco
+       pastel (mostarda, rosa, azul-céu, verde-oliva, pêssego, menta, rosa claro —
+       7 vagões, 7 cores) com texto preto por cima. Vizinhos sempre diferentes,
+       inclusive na emenda do fim com o começo -->
+  <div class="ticker" id="ticker" role="region" aria-label="About Lobster is lobster">
+    <div class="ticker-track" id="tickerTrack">
+      <div class="ticker-group" id="tickerGroup">
+        <span data-wagon style="--c:#DCCF4C;--p:#F0C4D2;--n:#DC87A6">Lobster is lobster <span class="ticker-beta">BETA</span></span>
+        <span data-wagon style="--c:#DC87A6;--p:#DCCF4C;--n:#A2B35A">By <a href="https://www.lagosta.press" target="_blank" rel="noopener">Lagosta Press</a></span>
+        <span data-wagon style="--c:#A2B35A;--p:#DC87A6;--n:#F0B58C"><a href="mailto:hello@lagosta.press">Send us your suggestions</a></span>
+        <span data-wagon style="--c:#F0B58C;--p:#A2B35A;--n:#B9DDC3"><a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener">Instagram</a></span>
+        <span data-wagon style="--c:#B9DDC3;--p:#F0B58C;--n:#F0C4D2"><a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener">Buy us a coffee</a></span>
+        <span data-wagon style="--c:#F0C4D2;--p:#B9DDC3;--n:#DCCF4C"><a href="#" data-ticker-about>About</a></span>
+      </div>
+    </div>
+  </div>
 
   <div class="mobile-game" id="mobileGame">
     <div class="mobile-topbar">
@@ -983,13 +1122,13 @@
       Lobster is lobster is a project by Lagosta Press.<span class="beta-badge">BETA</span>
     </div>
     <div class="about-intro">
-      <a href="mailto:hello@lagosta.press" style="color:#3474D3">hello@lagosta.press</a>
+      <a href="mailto:hello@lagosta.press" style="color:#4A86B5">hello@lagosta.press</a>
     </div>
     <div class="about-intro">
-      <a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener" style="color:#542E75">instagram</a>
+      <a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener" style="color:#A67C00">instagram</a>
     </div>
     <div class="about-intro">
-      <a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener" style="color:#B44B69">Buy us a Coffee</a>
+      <a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener" style="color:#C2587F">Buy us a Coffee</a>
     </div>
     <div class="about-intro">
       Want to know more about Lagosta's projects? Leave your email here.
@@ -1002,7 +1141,7 @@
     <a href="#" class="about-back" id="backToGameLink">BACK TO THE GAME</a>
 
     <div class="about-para muted">
-      This game idea came as an experiment for a publishing house's own website, Lagosta Press — and ended up too fun to leave there, so we gave it a home of its own to make it accessible to more people. The plan is to keep building it and making it better, so please send us your suggestions. It's a work by Eduardo Menezes with a huge collaboration from <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#3B5BA5">Joel Souza</a>, as well as a handful of friends who tested the mechanics. Thanks to all of them.
+      This game idea came as an experiment for a publishing house's own website, Lagosta Press — and ended up too fun to leave there, so we gave it a home of its own to make it accessible to more people. The plan is to keep building it and making it better, so please send us your suggestions. It's a work by Eduardo Menezes with a huge collaboration from <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#8A63B0">Joel Souza</a>, as well as a handful of friends who tested the mechanics. Thanks to all of them.
     </div>
 
     <div class="about-para muted" style="text-align:center; margin-bottom:6px;">
@@ -1256,7 +1395,11 @@
   const TUTORIAL_HARD_NAME = "Mandarin Chinese";
 
   // ---------- estado ----------
-  const COLORS = ["#3f8a68","#B44B69","#3B5BA5","#542E75","#AE90E9","#3474D3","#D98CA0"];
+  // 3 famílias (verde, rosa, amarelo queimado), todas escuras o bastante pra
+  // funcionar como TEXTO fino sobre o fundo branco (contraste >= 3 pra 1, que é o
+  // piso pra texto grande). Os tons pastel da referência ficam só nos fundos
+  // (barra do rodapé), onde o texto por cima é preto.
+  const COLORS = ["#3f8a68","#C2587F","#A67C00","#4A86B5","#8A63B0"];
   let lastColor = null;
   function pickColor() {
     const choices = COLORS.filter((c) => c !== lastColor);
@@ -2712,16 +2855,16 @@
       { word: "Formidável!", lang: "Portuguese", meaning: "amazing", color: "#3f8a68" }
     ],
     veryGood: [
-      { word: "Bravo!", lang: "French", meaning: "very good", color: "#3474D3" },
-      { word: "¡Muy bien!", lang: "Spanish", meaning: "very good", color: "#3474D3" },
-      { word: "Sehr gut!", lang: "German", meaning: "very good", color: "#3474D3" },
-      { word: "Molto bene!", lang: "Italian", meaning: "very good", color: "#3474D3" }
+      { word: "Bravo!", lang: "French", meaning: "very good", color: "#A67C00" },
+      { word: "¡Muy bien!", lang: "Spanish", meaning: "very good", color: "#A67C00" },
+      { word: "Sehr gut!", lang: "German", meaning: "very good", color: "#A67C00" },
+      { word: "Molto bene!", lang: "Italian", meaning: "very good", color: "#A67C00" }
     ],
     good: [
-      { word: "Bien!", lang: "French", meaning: "good", color: "#542E75" },
-      { word: "Gut!", lang: "German", meaning: "good", color: "#542E75" },
-      { word: "Bene!", lang: "Italian", meaning: "good", color: "#542E75" },
-      { word: "Bom!", lang: "Portuguese", meaning: "good", color: "#542E75" }
+      { word: "Bien!", lang: "French", meaning: "good", color: "#C2587F" },
+      { word: "Gut!", lang: "German", meaning: "good", color: "#C2587F" },
+      { word: "Bene!", lang: "Italian", meaning: "good", color: "#C2587F" },
+      { word: "Bom!", lang: "Portuguese", meaning: "good", color: "#C2587F" }
     ],
     keepPracticing: [
       { word: "Ganbatte!", lang: "Japanese", meaning: "keep trying", color: "#9aa1ac" },
@@ -2873,13 +3016,13 @@
       let fillStyle;
       if (typeof ctx.createConicGradient === "function") {
         const gradient = ctx.createConicGradient(startAngle, cx, ringCenterY);
-        gradient.addColorStop(0, "#3474D3");
-        gradient.addColorStop(0.33, "#3f8a68");
-        gradient.addColorStop(0.66, "#B44B69");
-        gradient.addColorStop(1, "#542E75");
+        gradient.addColorStop(0, "#3f8a68");
+        gradient.addColorStop(0.33, "#A67C00");
+        gradient.addColorStop(0.66, "#C2587F");
+        gradient.addColorStop(1, "#4A86B5");
         fillStyle = gradient;
       } else {
-        fillStyle = "#3474D3"; // navegadores sem suporte a conic gradient
+        fillStyle = "#3f8a68"; // navegadores sem suporte a conic gradient
       }
       ctx.beginPath();
       ctx.moveTo(cx, ringCenterY);
@@ -2973,6 +3116,9 @@
       mobileShowResults(reason);
       return;
     }
+    // a linha "Medium · 10 rounds…" do rodapé só faz sentido durante o jogo
+    // (o resultado já tem seus próprios botões de nível)
+    document.getElementById("bottomPanel").classList.remove("visible");
     const data = computeResultsData(reason);
     const chosen = data.chosen;
 
@@ -2982,7 +3128,7 @@
     const evalLine = document.createElement("div");
     evalLine.className = "eval-word reveal-item";
     evalLine.style.color = chosen.color;
-    evalLine.innerHTML = `${chosen.word} <span class="eval-meaning-inline">means ${chosen.meaning} in ${chosen.lang.toLowerCase()}</span>`;
+    evalLine.textContent = chosen.word;
     block.appendChild(evalLine);
 
     const sentence = document.createElement("div");
@@ -2990,20 +3136,13 @@
     sentence.innerHTML = data.sentenceHTML;
     block.appendChild(sentence);
 
-    const populationLine = document.createElement("div");
-    populationLine.className = "results-population reveal-item";
-    populationLine.innerHTML = `you could say <b>"${currentWord}"</b> and <b>${data.percent}% of Earth's population</b> would understand you.`;
-    block.appendChild(populationLine);
-
     const actions = document.createElement("div");
     actions.className = "results-actions reveal-item";
     actions.innerHTML = `
       <div class="results-actions-row">
-        <button class="btn-share-result" id="shareResultBtn">Share your result →</button>
-      </div>
-      <div class="results-actions-row results-actions-row-secondary">
         <button class="btn-play-again" id="playAgainBtn">Play "${currentWord}" again</button>
         <button class="btn-play-again" id="tryDifferentWordBtn">Try a different word</button>
+        <button class="btn-share-result" id="shareResultBtn">Share your result →</button>
       </div>
       <div class="share-icon-row">
         <button class="share-icon-btn" id="shareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
@@ -3013,7 +3152,6 @@
         <button class="share-icon-btn" id="shareTiktok" aria-label="Share on TikTok">${SHARE_ICONS.tiktok}</button>
       </div>
       <div class="results-level-switch">
-        <div class="results-level-switch-label" id="resultsLevelSwitchLabel"></div>
         <div class="level-mini-group" id="resultsLevelSwitchGroup">
           <button class="level-mini-btn" data-level="easy">Easy</button>
           <button class="level-mini-btn" data-level="medium">Medium</button>
@@ -3029,7 +3167,7 @@
 
     // revelação gradual e cadenciada — dá um ar de finalização depois do
     // ritmo mais rápido do jogo cronometrado, em vez de tudo aparecer de uma vez
-    const steps = [evalLine, sentence, populationLine, actions].filter(Boolean);
+    const steps = [evalLine, sentence, actions].filter(Boolean);
     steps.forEach((el, i) => {
       setTimeout(() => el.classList.add("visible"), 500 + i * 700);
     });
@@ -3044,7 +3182,6 @@
     document.getElementById("tryDifferentWordBtn").addEventListener("click", () => {
       initGame(pickAnotherWord(), currentLevel, true, "new_word");
     });
-    document.getElementById("resultsLevelSwitchLabel").textContent = LEVEL_PANEL_TEXT[currentLevel];
     document.querySelectorAll("#resultsLevelSwitchGroup .level-mini-btn").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.level === currentLevel);
       btn.addEventListener("click", () => {
@@ -3411,11 +3548,9 @@
     const el = document.getElementById("mobileResults");
     el.innerHTML = `
       <div class="mobile-results-eval" style="color:${data.chosen.color}">
-        ${data.chosen.word}<br>
-        <span class="mobile-results-meaning">means ${data.chosen.meaning} in ${data.chosen.lang.toLowerCase()}</span>
+        ${data.chosen.word}
       </div>
       <div class="mobile-results-sentence">${data.sentenceHTML}</div>
-      <div class="mobile-results-population">you could say <b>"${currentWord}"</b> and <b>${data.percent}% of Earth's population</b> would understand you.</div>
       <div class="mobile-results-actions">
         <button class="mobile-results-btn-primary" id="mobileShareBtn">Share your result →</button>
         <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">Play "${currentWord}" again</button>
@@ -3579,6 +3714,7 @@
     }
     document.getElementById("aboutCloseBtn").classList.add("visible");
     document.getElementById("aboutPage").classList.add("visible");
+    document.body.classList.add("about-open"); // esconde a barra rolante do rodapé
     wireAboutShareButtons();
     window.scrollTo({ top: 0 });
   }
@@ -3586,6 +3722,7 @@
   function hideAboutPage() {
     document.getElementById("aboutPage").classList.remove("visible");
     document.getElementById("aboutCloseBtn").classList.remove("visible");
+    document.body.classList.remove("about-open");
     if (IS_MOBILE) {
       if (aboutPreviousMobileScreen === "game") {
         document.getElementById("mobileGame").classList.add("active");
@@ -3626,6 +3763,47 @@
   });
   document.getElementById("aboutCloseBtn").addEventListener("click", () => {
     hideAboutPage();
+  });
+
+  // ---------- barra rolante do rodapé ----------
+  // duplica o grupo de itens até cobrir a tela + 1 grupo, e anima o trilho
+  // exatamente a largura de 1 grupo — aí o loop emenda sem "pulo" em qualquer
+  // largura de tela. Velocidade constante (px/s), não duração fixa.
+  const TICKER_SPEED_PX_PER_S = 55;
+  function setupTicker() {
+    const track = document.getElementById("tickerTrack");
+    const group = document.getElementById("tickerGroup");
+    if (!track || !group) return;
+    const groupW = group.getBoundingClientRect().width;
+    if (!groupW) return; // ex: About aberto (barra escondida) — mantém o que já estava calculado
+    track.querySelectorAll(".ticker-clone").forEach((n) => n.remove());
+    const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return; // sem animação: o CSS deixa a barra rolável à mão, sem duplicar o texto
+    const copies = Math.ceil(window.innerWidth / groupW) + 1;
+    for (let i = 1; i < copies; i++) {
+      const clone = group.cloneNode(true);
+      clone.removeAttribute("id");
+      clone.classList.add("ticker-clone");
+      clone.setAttribute("aria-hidden", "true");
+      clone.querySelectorAll("a").forEach((a) => a.setAttribute("tabindex", "-1"));
+      track.appendChild(clone);
+    }
+    track.style.setProperty("--ticker-shift", groupW + "px");
+    track.style.animationDuration = groupW / TICKER_SPEED_PX_PER_S + "s";
+  }
+  // o item "Leave your email in About" abre a página About, igual ao link do topo
+  // (delegação no trilho, porque os grupos duplicados também têm esse link)
+  document.getElementById("tickerTrack").addEventListener("click", (e) => {
+    const link = e.target.closest("[data-ticker-about]");
+    if (!link) return;
+    e.preventDefault();
+    showAboutPage();
+  });
+  setupTicker();
+  let tickerResizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(tickerResizeTimer);
+    tickerResizeTimer = setTimeout(setupTicker, 200);
   });
 
   // TODO: troque pelo ID numérico do formulário criado no Kit (fica na URL
