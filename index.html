@@ -612,18 +612,6 @@
       display: none;
     }
   }
-  .about-link {
-    font-size: 0.9rem;
-    color: #6b7280;
-    text-decoration: none;
-    border-bottom: 1px solid #d1d5db;
-    padding-bottom: 1px;
-    cursor: pointer;
-  }
-  .about-link:hover {
-    color: #171a21;
-    border-bottom-color: #171a21;
-  }
   /* barra rolante com o essencial do About — fixa no rodapé, em loop contínuo.
      O conteúdo é duplicado por JS (setupTicker) pra o loop não ter "pulo" */
   .ticker {
@@ -1012,7 +1000,6 @@
   </div>
 
   <div class="top-right-block" id="topRightBlock">
-    <a href="#" class="about-link" id="aboutLink">About</a>
   </div>
 
   <div class="wrap" id="gameWrap">
@@ -3723,10 +3710,6 @@
     }
   }
 
-  document.getElementById("aboutLink").addEventListener("click", (e) => {
-    e.preventDefault();
-    showAboutPage();
-  });
   document.getElementById("backToGameLink").addEventListener("click", (e) => {
     e.preventDefault();
     hideAboutPage();
