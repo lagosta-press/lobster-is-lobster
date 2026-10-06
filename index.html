@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -600,6 +600,15 @@
     letter-spacing: 0.01em;
     margin-top: 6px;
   }
+  .lang-switch { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; letter-spacing: 0.08em; }
+  .lang-btn { background: none; border: 0; padding: 3px 4px; margin: 0; font: inherit; letter-spacing: inherit; color: #9aa1ac; cursor: pointer; transition: color 0.15s; }
+  .lang-btn.active { color: #171a21; cursor: default; }
+  .lang-btn:not(.active):hover { color: #171a21; font-style: italic; }
+  .lang-sep { color: #c7cbd1; }
+  .mobile-menu-panel .lang-switch { align-self: center; justify-content: center; font-size: 15px; margin: 6px 0; }
+  .mobile-level-end .lang-switch { position: absolute; left: 0; right: 0; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); justify-content: center; font-size: 15px; }
+  .mobile-results-lang { display: flex; justify-content: center; margin-top: 10px; }
+  .mobile-results-lang .lang-switch { font-size: 15px; }
   .top-right-block {
     position: fixed;
     top: 20px;
@@ -999,8 +1008,7 @@
     <div class="game-clock" id="gameClock"></div>
   </div>
 
-  <div class="top-right-block" id="topRightBlock">
-  </div>
+  <div class="top-right-block" id="topRightBlock"></div>
 
   <div class="wrap" id="gameWrap">
     <div class="flow" id="flow"></div>
@@ -1009,7 +1017,7 @@
   <div class="bottom-panel" id="bottomPanel">
     <div class="bottom-panel-line" id="levelPanelDetails"></div>
     <span class="bottom-panel-sep">·</span>
-    <a href="#" class="new-word-link" id="newWordLink">Try another word →</a>
+    <a href="#" class="new-word-link" id="newWordLink" data-i18n="tryNewWord">Try another word →</a>
     <span class="bottom-panel-sep">·</span>
     <div class="level-mini-group">
       <button class="level-mini-btn" data-level="easy">Easy</button>
@@ -1025,7 +1033,7 @@
        pastel (mostarda, rosa, azul-céu, verde-oliva, pêssego, menta, rosa claro —
        7 vagões, 7 cores) com texto preto por cima. Vizinhos sempre diferentes,
        inclusive na emenda do fim com o começo -->
-  <div class="ticker" id="ticker" role="region" aria-label="About Lobster is lobster">
+  <div class="ticker" id="ticker" role="region" aria-label="About Lobster is lobster" data-i18n-aria="tk.aria">
     <div class="ticker-track" id="tickerTrack">
       <div class="ticker-group" id="tickerGroup">
         <span data-wagon style="--c:#DCCF4C;--p:#F0C4D2;--n:#DC87A6">Lobster is lobster <span class="ticker-beta">BETA</span></span>
@@ -1041,7 +1049,7 @@
   <div class="mobile-game" id="mobileGame">
     <div class="mobile-topbar">
       <div class="mobile-clock" id="mobileClock"></div>
-      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">&#9776;</button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu" data-i18n-aria="menu">&#9776;</button>
     </div>
 
     <div class="mobile-stage">
@@ -1051,28 +1059,28 @@
         <span class="mobile-card-blank" id="mobileCardBlank"></span>
         <div class="mobile-card-feedback" id="mobileCardFeedback"></div>
         <div class="mobile-geo-hint" id="mobileGeoHint"></div>
-        <div class="mobile-tap-hint" id="mobileTapHint">tap anywhere to type your answer →</div>
+        <div class="mobile-tap-hint" id="mobileTapHint" data-i18n="tapHint">tap anywhere to type your answer →</div>
       </div>
     </div>
 
     <div class="mobile-footer">
       <div class="mobile-counter" id="mobileCounter"></div>
-      <button class="mobile-skip-btn" id="mobileSkipBtn">skip →</button>
+      <button class="mobile-skip-btn" id="mobileSkipBtn" data-i18n="skipBtn">skip →</button>
     </div>
   </div>
 
   <div class="mobile-menu-overlay" id="mobileMenuOverlay">
     <div class="mobile-menu-panel">
-      <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close">&times;</button>
+      <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close" data-i18n-aria="close">&times;</button>
       <div class="mobile-menu-line" id="mobileMenuLevelInfo"></div>
-      <a href="#" class="mobile-menu-link" id="mobileMenuNewWord">Try another word →</a>
+      <a href="#" class="mobile-menu-link" id="mobileMenuNewWord" data-i18n="tryNewWord">Try another word →</a>
       <div class="mobile-menu-levels">
         <button class="level-mini-btn" data-level="easy">Easy</button>
         <button class="level-mini-btn" data-level="medium">Medium</button>
         <button class="level-mini-btn" data-level="hard">Hard</button>
         <button class="level-mini-btn" data-level="insane">Insane</button>
       </div>
-      <a href="#" class="mobile-menu-link" id="mobileMenuAbout">About</a>
+      <a href="#" class="mobile-menu-link" id="mobileMenuAbout" data-i18n="about">About</a>
     </div>
   </div>
 
@@ -1098,40 +1106,40 @@
       autocapitalize="off"
       spellcheck="false"
       enterkeyhint="go"
-      aria-label="Language answer"
+      aria-label="Language answer" data-i18n-aria="answerAria"
     ></textarea>
   </form>
 
-  <button class="about-close" id="aboutCloseBtn" aria-label="Close">&times;</button>
+  <button class="about-close" id="aboutCloseBtn" aria-label="Close" data-i18n-aria="close">&times;</button>
 
   <div class="about-page" id="aboutPage">
-    <div class="about-intro">
+    <div class="about-intro" data-i18n-html="about.intro">
       Lobster is lobster is a project by Lagosta Press.<span class="beta-badge">BETA</span>
     </div>
     <div class="about-intro">
       <a href="mailto:hello@lagosta.press" style="color:#4A86B5">hello@lagosta.press</a>
     </div>
     <div class="about-intro">
-      <a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener" style="color:#A67C00">instagram</a>
+      <a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener" style="color:#A67C00" data-i18n="about.instagram">instagram</a>
     </div>
     <div class="about-intro">
-      <a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener" style="color:#C2587F">Buy us a Coffee</a>
+      <a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener" style="color:#C2587F" data-i18n="about.coffee">Buy us a Coffee</a>
     </div>
-    <div class="about-intro">
+    <div class="about-intro" data-i18n="about.news">
       Want to know more about Lagosta's projects? Leave your email here.
     </div>
     <form class="about-email-row-big" onsubmit="return false;">
-      <input type="email" class="about-email-input-big" id="newsletterEmail" placeholder="you@email.com" />
+      <input type="email" class="about-email-input-big" id="newsletterEmail" placeholder="you@email.com" data-i18n-ph="about.emailPh" />
       <button type="button" class="about-email-submit-big" id="newsletterSubmit">→</button>
     </form>
 
-    <a href="#" class="about-back" id="backToGameLink">BACK TO THE GAME</a>
+    <a href="#" class="about-back" id="backToGameLink" data-i18n="about.back">BACK TO THE GAME</a>
 
-    <div class="about-para muted">
+    <div class="about-para muted" data-i18n-html="about.para">
       This game idea came as an experiment for a publishing house's own website, Lagosta Press — and ended up too fun to leave there, so we gave it a home of its own to make it accessible to more people. The plan is to keep building it and making it better, so please send us your suggestions. It's a work by Eduardo Menezes with a huge collaboration from <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#8A63B0">Joel Souza</a>, as well as a handful of friends who tested the mechanics. Thanks to all of them.
     </div>
 
-    <div class="about-para muted" style="text-align:center; margin-bottom:6px;">
+    <div class="about-para muted" style="text-align:center; margin-bottom:6px;" data-i18n-html="about.lagosta">
       Lagosta is <span style="color:#D98CA0">lobster</span> in Portuguese, by the way.
     </div>
 
@@ -1139,7 +1147,7 @@
       <a href="https://lobsterislobster.online" target="_blank" rel="noopener" style="color:#3f8a68">lobsterislobster.online</a>
     </div>
 
-    <div class="about-para muted about-share-label" style="text-align:center;">
+    <div class="about-para muted about-share-label" style="text-align:center;" data-i18n="about.shareLabel">
       SHARE THE GAME
     </div>
     <div class="about-share-icons">
@@ -1157,7 +1165,1054 @@
   </div>
 
 <script id="game-script">
+  // ---------- idiomas (EN · PT · ES) ----------
+  // Cada idioma tem: "src" (a língua em que as palavras aparecem — a "língua de
+  // partida", dada de graça, que NÃO é uma resposta possível), "s" (textos da
+  // interface), "langs" (nome e variantes aceitas de cada língua-resposta; as
+  // chaves são os nomes internos em inglês, usados também na análise de dados),
+  // "geo"/"cultural" (dicas), "skip" (palavras que pulam a rodada).
+  // O inglês é a referência; PT e ES caem pro inglês se faltar alguma chave.
+  const I18N = {};
+
+  I18N.en = {
+    htmlLang: "en",
+    src: "English",
+    skip: ["next", "jump", "skip"],
+    s: {
+      title: "Lobster is Lobster — Guess the Language",
+      desc: "A word appears. You guess which language it was translated into. Free, no sign-up, a new word every round — from easy (Spanish, French, Portuguese...) to insane.",
+      tryNewWord: "Try another word →",
+      "lvl.easy": "Easy", "lvl.medium": "Medium", "lvl.hard": "Hard", "lvl.insane": "Insane",
+      "lw.easy": "1 easy", "lw.medium": "2 medium", "lw.hard": "3 hard", "lw.insane": "4 insane",
+      tapHint: "tap anywhere to type your answer →",
+      pressEnter: "⏎ press enter to submit",
+      skipBtn: "skip →",
+      about: "About",
+      close: "Close",
+      menu: "Menu",
+      answerAria: "Language answer",
+      "tk.aria": "About Lobster is lobster",
+      "tk.w1": 'Lobster is lobster <span class="ticker-beta">BETA</span>',
+      "tk.w2": 'By <a href="https://www.lagosta.press" target="_blank" rel="noopener">Lagosta Press</a>',
+      "tk.w3": '<a href="mailto:hello@lagosta.press">Send us your suggestions</a>',
+      "tk.w4": '<a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener">Instagram</a>',
+      "tk.w5": '<a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener">Buy us a coffee</a>',
+      "tk.w6": '<a href="#" data-ticker-about>About</a>',
+      "about.intro": 'Lobster is lobster is a project by Lagosta Press.<span class="beta-badge">BETA</span>',
+      "about.instagram": "instagram",
+      "about.coffee": "Buy us a Coffee",
+      "about.news": "Want to know more about Lagosta's projects? Leave your email here.",
+      "about.emailPh": "you@email.com",
+      "about.back": "BACK TO THE GAME",
+      "about.para": 'This game idea came as an experiment for a publishing house\'s own website, Lagosta Press — and ended up too fun to leave there, so we gave it a home of its own to make it accessible to more people. The plan is to keep building it and making it better, so please send us your suggestions. It\'s a work by Eduardo Menezes with a huge collaboration from <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#8A63B0">Joel Souza</a>, as well as a handful of friends who tested the mechanics. Thanks to all of them.',
+      "about.lagosta": 'Lagosta is <span style="color:#D98CA0">lobster</span> in Portuguese, by the way.',
+      "about.shareLabel": "SHARE THE GAME",
+      "news.invalid": "that doesn't look like an email",
+      "news.ok": "thanks! check your inbox to confirm",
+      "news.err": "something went wrong — try again",
+      firstTail: " is {base} in english",
+      connector: " is {base} in ",
+      connectorAlso: " is also {base} in ",
+      and: " and ",
+      "tut.guess": "guess the language each word gets translated into",
+      "tut.hard": "get this one wrong, and you'll get a hint",
+      hint: "hint {n}: {text}",
+      "hint.exhausted": "sorry, that's all the hints I have",
+      "hint.skip": 'type "{word}" to move on',
+      "hint.answer": "type your answer, press enter",
+      "hint.letter": 'the answer starts with a "{letter}"',
+      "hint.letterAn": 'the answer starts with an "{letter}"',
+      "lvlinfo.easy.t": "1 · Easy · 10 rounds",
+      "lvlinfo.easy.d": "Roman alphabet only — languages that read like English. 3 minutes on the clock.",
+      "lvlinfo.medium.t": "2 · Medium · 10 rounds",
+      "lvlinfo.medium.d": "A mix of scripts — some familiar, some not. 3 minutes on the clock.",
+      "lvlinfo.hard.t": "3 · Hard · 10 rounds",
+      "lvlinfo.hard.d": "Full language pool — the rare ones show up too. 3 minutes on the clock.",
+      "lvlinfo.insane.t": "4 · Insane · 96 rounds",
+      "lvlinfo.insane.d": "Full pool, 3 tries per language. Miss all 3 or try to skip and you're out. Watch your correct count live — the time only shows at the end.",
+      "panel.easy": "Easy · 10 rounds · common languages · roman alphabet only",
+      "panel.medium": "Medium · 10 rounds · common languages · mixed scripts",
+      "panel.hard": "Hard · 10 rounds · rare scripts included",
+      "panel.insane": "Insane · 96 rounds · 1 error you're out · no skip",
+      "intro.welcome": "welcome back.",
+      "intro.tutorialDone": "nice work — that was the tutorial. let's really play.",
+      "intro.choose": "choose a level to start:",
+      "intro.click": "click one, or type its number: ",
+      "end.welcome": "Welcome back. Pick a level to start playing:",
+      "end.tutorialDone": "Nice work — that was the tutorial. Let's really play. Pick a level:",
+      playAgain: 'Play "{base}" again',
+      tryDifferent: "Try a different word",
+      share: "Share your result →",
+      "reason.completed": "You named <b>{c}</b> of <b>{t}</b> languages on the <b>{lvl}</b> level, in <b>{time}</b>.",
+      "reason.timeUp": "Time ran out — you named <b>{c}</b> of <b>{t}</b> languages on the <b>{lvl}</b> level.",
+      "reason.mistake": "You named <b>{c}</b> of <b>{t}</b> languages on <b>{lvl}</b> before the run ended, in <b>{time}</b>.",
+      "share.text": "I named {c} of {t} languages on {lvl} in Lobster is Lobster — can you beat me?",
+      "share.generic": "Guess the language: a quick, addictive word game. Give it a try!",
+      "share.caption": 'of the people on the planet understand you in "{word}"',
+      "share.aria": "Share on {name}"
+    },
+    // palavras de avaliação extras (nenhuma no inglês: todas já são de outras línguas)
+    ratingExtra: null,
+    langs: null, // inglês usa os nomes e aliases originais de LANG_META/INSANE_META
+    geo: null,
+    cultural: null
+  };
+
+  I18N.pt = {
+    htmlLang: "pt-BR",
+    src: "Portuguese",
+    tutorial: ["Spanish", "Mandarin Chinese"],
+    skip: ["pular", "próxima", "próximo", "passar", "next", "skip"],
+    s: {
+      title: "Lobster is Lobster — Adivinhe o idioma",
+      desc: "Uma palavra aparece. Você adivinha para qual idioma ela foi traduzida. Grátis, sem cadastro, uma palavra nova a cada rodada — do fácil (espanhol, francês, inglês...) ao insano.",
+      tryNewWord: "Outra palavra →",
+      "lvl.easy": "Fácil", "lvl.medium": "Médio", "lvl.hard": "Difícil", "lvl.insane": "Insano",
+      "lw.easy": "1 fácil", "lw.medium": "2 médio", "lw.hard": "3 difícil", "lw.insane": "4 insano",
+      tapHint: "toque em qualquer lugar para digitar →",
+      pressEnter: "⏎ aperte enter para enviar",
+      skipBtn: "pular →",
+      about: "Sobre",
+      close: "Fechar",
+      menu: "Menu",
+      answerAria: "Resposta: idioma",
+      "tk.aria": "Sobre o Lobster is lobster",
+      "tk.w1": 'Lobster is lobster <span class="ticker-beta">BETA</span>',
+      "tk.w2": 'Por <a href="https://www.lagosta.press" target="_blank" rel="noopener">Lagosta Press</a>',
+      "tk.w3": '<a href="mailto:hello@lagosta.press">Mande sua sugestão</a>',
+      "tk.w4": '<a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener">Instagram</a>',
+      "tk.w5": '<a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener">Me pague um café</a>',
+      "tk.w6": '<a href="#" data-ticker-about>Sobre</a>',
+      "about.intro": 'Lobster is lobster é um projeto da Lagosta Press.<span class="beta-badge">BETA</span>',
+      "about.instagram": "instagram",
+      "about.coffee": "Me pague um café",
+      "about.news": "Quer saber mais sobre os projetos da Lagosta? Deixe seu e-mail aqui.",
+      "about.emailPh": "voce@email.com",
+      "about.back": "VOLTAR AO JOGO",
+      "about.para": 'A ideia deste jogo nasceu como um experimento para o site de uma editora, a Lagosta Press — e ficou divertida demais para ficar lá, então demos a ela uma casa própria, para chegar a mais gente. A ideia é continuar construindo e melhorando, então mande suas sugestões. É um trabalho de Eduardo Menezes, com uma colaboração enorme de <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#8A63B0">Joel Souza</a>, e de um punhado de amigos que testaram as mecânicas. Obrigado a todos.',
+      "about.lagosta": 'Lagosta é <span style="color:#D98CA0">lobster</span> em inglês, aliás.',
+      "about.shareLabel": "COMPARTILHE O JOGO",
+      "news.invalid": "isso não parece um e-mail",
+      "news.ok": "obrigado! confirme no seu e-mail",
+      "news.err": "algo deu errado — tente de novo",
+      firstTail: " é {base} em português",
+      connector: " é {base} em ",
+      connectorAlso: " também é {base} em ",
+      and: " e ",
+      "tut.guess": "adivinhe para qual idioma cada palavra foi traduzida",
+      "tut.hard": "errou esta? você ganha uma dica",
+      hint: "dica {n}: {text}",
+      "hint.exhausted": "desculpe, essas são todas as dicas que eu tenho",
+      "hint.skip": 'digite "{word}" para seguir em frente',
+      "hint.answer": "digite sua resposta e aperte enter",
+      "hint.letter": 'a resposta começa com "{letter}"',
+      "hint.letterAn": 'a resposta começa com "{letter}"',
+      "lvlinfo.easy.t": "1 · Fácil · 10 rodadas",
+      "lvlinfo.easy.d": "Só alfabeto latino — idiomas que você consegue ler. 3 minutos no relógio.",
+      "lvlinfo.medium.t": "2 · Médio · 10 rodadas",
+      "lvlinfo.medium.d": "Uma mistura de escritas — algumas familiares, outras nem tanto. 3 minutos no relógio.",
+      "lvlinfo.hard.t": "3 · Difícil · 10 rodadas",
+      "lvlinfo.hard.d": "Todos os idiomas — os raros também aparecem. 3 minutos no relógio.",
+      "lvlinfo.insane.t": "4 · Insano · 96 rodadas",
+      "lvlinfo.insane.d": "Todos os idiomas, 3 tentativas por idioma. Errou as 3 ou tentou pular, está fora. Acompanhe seus acertos ao vivo — o tempo só aparece no fim.",
+      "panel.easy": "Fácil · 10 rodadas · idiomas comuns · só alfabeto latino",
+      "panel.medium": "Médio · 10 rodadas · idiomas comuns · escritas variadas",
+      "panel.hard": "Difícil · 10 rodadas · inclui escritas raras",
+      "panel.insane": "Insano · 96 rodadas · 1 erro e você sai · sem pular",
+      "intro.welcome": "bem-vindo de volta.",
+      "intro.tutorialDone": "mandou bem — esse foi o tutorial. agora vamos jogar de verdade.",
+      "intro.choose": "escolha um nível para começar:",
+      "intro.click": "clique em um, ou digite o número: ",
+      "end.welcome": "Bem-vindo de volta. Escolha um nível para jogar:",
+      "end.tutorialDone": "Mandou bem — esse foi o tutorial. Agora vamos jogar de verdade. Escolha um nível:",
+      playAgain: 'Jogar "{base}" de novo',
+      tryDifferent: "Tentar outra palavra",
+      share: "Compartilhar resultado →",
+      "reason.completed": "Você acertou <b>{c}</b> de <b>{t}</b> idiomas no nível <b>{lvl}</b>, em <b>{time}</b>.",
+      "reason.timeUp": "O tempo acabou — você acertou <b>{c}</b> de <b>{t}</b> idiomas no nível <b>{lvl}</b>.",
+      "reason.mistake": "Você acertou <b>{c}</b> de <b>{t}</b> idiomas no nível <b>{lvl}</b> antes de a rodada acabar, em <b>{time}</b>.",
+      "share.text": "Acertei {c} de {t} idiomas no nível {lvl} do Lobster is Lobster — consegue me superar?",
+      "share.generic": "Adivinhe o idioma: um jogo de palavras rápido e viciante. Experimente!",
+      "share.caption": 'das pessoas do planeta entenderiam você dizendo "{word}"',
+      "share.aria": "Compartilhar no {name}"
+    },
+    ratingExtra: {
+      excellent: [{ word: "Incrível!", lang: "Portuguese" }],
+      veryGood: [{ word: "Mandou bem!", lang: "Portuguese" }],
+      good: [{ word: "Boa!", lang: "Portuguese" }],
+      keepPracticing: [{ word: "Força!", lang: "Portuguese" }]
+    },
+    langs: {
+      "Mandarin Chinese": ["Mandarim", ["mandarim", "chinês", "chines", "chinês mandarim"]],
+      "Hindi": ["Hindi", ["hindi", "híndi"]],
+      "Spanish": ["Espanhol", ["espanhol", "castelhano"]],
+      "French": ["Francês", ["francês"]],
+      "Standard Arabic": ["Árabe", ["árabe", "árabe padrão"]],
+      "Bengali": ["Bengali", ["bengali", "bengalês"]],
+      "Portuguese": ["Português", ["português"]],
+      "Russian": ["Russo", ["russo"]],
+      "Urdu": ["Urdu", ["urdu"]],
+      "Indonesian": ["Indonésio", ["indonésio", "indonésia"]],
+      "German": ["Alemão", ["alemão"]],
+      "Japanese": ["Japonês", ["japonês"]],
+      "Swahili": ["Suaíli", ["suaíli", "swahili", "kiswahili"]],
+      "Marathi": ["Marati", ["marati", "marathi"]],
+      "Telugu": ["Telugu", ["telugu", "telugo"]],
+      "Turkish": ["Turco", ["turco"]],
+      "Tamil": ["Tâmil", ["tâmil", "tamil"]],
+      "Cantonese": ["Cantonês", ["cantonês"]],
+      "Vietnamese": ["Vietnamita", ["vietnamita"]],
+      "Filipino": ["Filipino", ["filipino", "tagalo", "tagalog", "filipinas"]],
+      "Korean": ["Coreano", ["coreano"]],
+      "Persian": ["Persa", ["persa", "farsi", "iraniano"]],
+      "Hausa": ["Hauçá", ["hauçá", "hausa"]],
+      "Javanese": ["Javanês", ["javanês"]],
+      "Italian": ["Italiano", ["italiano"]],
+      "Punjabi": ["Punjabi", ["punjabi", "panjabi"]],
+      "Gujarati": ["Guzerate", ["guzerate", "gujarati", "gujerati"]],
+      "Amharic": ["Amárico", ["amárico", "etíope", "etiópia"]],
+      "Yoruba": ["Iorubá", ["iorubá", "yoruba"]],
+      "Igbo": ["Igbo", ["igbo", "ibo"]],
+      "Sindhi": ["Sindi", ["sindi", "sindhi"]],
+      "Nepali": ["Nepalês", ["nepalês", "nepali"]],
+      "Burmese": ["Birmanês", ["birmanês", "birmanes", "burmês"]],
+      "Thai": ["Tailandês", ["tailandês", "thai"]],
+      "Polish": ["Polonês", ["polonês"]],
+      "Ukrainian": ["Ucraniano", ["ucraniano"]],
+      "Romanian": ["Romeno", ["romeno"]],
+      "Dutch": ["Holandês", ["holandês", "neerlandês", "holanda"]],
+      "Greek": ["Grego", ["grego"]],
+      "Zulu": ["Zulu", ["zulu"]],
+      "Xhosa": ["Xhosa", ["xhosa", "xosa"]],
+      "Malay": ["Malaio", ["malaio"]],
+      "Sinhala": ["Cingalês", ["cingalês", "sinhala", "sinhalês"]],
+      "Khmer": ["Khmer", ["khmer", "kmer", "cambojano"]],
+      "Lao": ["Laosiano", ["laosiano", "lao"]],
+      "Somali": ["Somali", ["somali", "somalí"]],
+      "Uzbek": ["Uzbeque", ["uzbeque", "usbeque", "uzbek"]],
+      "Azerbaijani": ["Azerbaijano", ["azerbaijano", "azeri", "azerbaidjano"]],
+      "Kazakh": ["Cazaque", ["cazaque", "kazakh"]],
+      "Albanian": ["Albanês", ["albanês"]],
+      "Armenian": ["Armênio", ["armênio"]],
+      "Basque": ["Basco", ["basco"]],
+      "Belarusian": ["Bielorrusso", ["bielorrusso", "bielorusso"]],
+      "Bosnian": ["Bósnio", ["bósnio"]],
+      "Bulgarian": ["Búlgaro", ["búlgaro"]],
+      "Catalan": ["Catalão", ["catalão"]],
+      "Cebuano": ["Cebuano", ["cebuano"]],
+      "Chichewa": ["Chichewa", ["chichewa", "nianja", "nyanja"]],
+      "Corsican": ["Corso", ["corso", "córsega"]],
+      "Croatian": ["Croata", ["croata"]],
+      "Czech": ["Tcheco", ["tcheco", "tcheque", "checo"]],
+      "Danish": ["Dinamarquês", ["dinamarquês", "danês"]],
+      "Esperanto": ["Esperanto", ["esperanto"]],
+      "Estonian": ["Estoniano", ["estoniano", "estônio"]],
+      "Finnish": ["Finlandês", ["finlandês", "finês"]],
+      "Frisian": ["Frísio", ["frísio", "frisão"]],
+      "Galician": ["Galego", ["galego"]],
+      "Georgian": ["Georgiano", ["georgiano"]],
+      "Haitian Creole": ["Crioulo haitiano", ["crioulo haitiano", "crioulo", "haitiano"]],
+      "Hawaiian": ["Havaiano", ["havaiano"]],
+      "Hebrew": ["Hebraico", ["hebraico", "hebreu"]],
+      "Hmong": ["Hmong", ["hmong", "mong"]],
+      "Hungarian": ["Húngaro", ["húngaro"]],
+      "Icelandic": ["Islandês", ["islandês"]],
+      "Kannada": ["Canarês", ["canarês", "kannada", "canará"]],
+      "Kinyarwanda": ["Quiniaruanda", ["quiniaruanda", "kinyarwanda", "ruandês"]],
+      "Kurdish": ["Curdo", ["curdo"]],
+      "Kyrgyz": ["Quirguiz", ["quirguiz", "quirguize", "kirguiz"]],
+      "Latin": ["Latim", ["latim"]],
+      "Latvian": ["Letão", ["letão", "letônia", "letoniano", "letoniana"]],
+      "Lithuanian": ["Lituano", ["lituano"]],
+      "Luxembourgish": ["Luxemburguês", ["luxemburguês", "luxemburgo"]],
+      "Macedonian": ["Macedônio", ["macedônio"]],
+      "Malagasy": ["Malgaxe", ["malgaxe", "malgache", "malagasy"]],
+      "Malayalam": ["Malaiala", ["malaiala", "malayalam", "malaialam"]],
+      "Maltese": ["Maltês", ["maltês", "malta"]],
+      "Maori": ["Maori", ["maori", "maorí"]],
+      "Mongolian": ["Mongol", ["mongol", "mongólico"]],
+      "Norwegian": ["Norueguês", ["norueguês"]],
+      "Oriya": ["Oriá", ["oriá", "oriya", "odia"]],
+      "Pashto": ["Pachto", ["pachto", "pashto", "pachtun"]],
+      "Samoan": ["Samoano", ["samoano"]],
+      "Scottish Gaelic": ["Gaélico escocês", ["gaélico escocês", "gaélico"]],
+      "Serbian": ["Sérvio", ["sérvio"]],
+      "Sesotho": ["Sesoto", ["sesoto", "sesotho", "soto", "sotho"]],
+      "Shona": ["Xona", ["xona", "shona", "chona"]],
+      "Slovak": ["Eslovaco", ["eslovaco"]],
+      "Slovenian": ["Esloveno", ["esloveno"]],
+      "Sundanese": ["Sundanês", ["sundanês", "sundanese"]],
+      "English": ["Inglês", ["inglês"]]
+    }
+  };
+
+  I18N.es = {
+    htmlLang: "es",
+    src: "Spanish",
+    tutorial: ["English", "Mandarin Chinese"],
+    skip: ["saltar", "siguiente", "pasar", "next", "skip"],
+    s: {
+      title: "Lobster is Lobster — Adivina el idioma",
+      desc: "Aparece una palabra. Tú adivinas a qué idioma fue traducida. Gratis, sin registro, una palabra nueva en cada ronda — del fácil (portugués, francés, inglés...) al insano.",
+      tryNewWord: "Otra palabra →",
+      "lvl.easy": "Fácil", "lvl.medium": "Medio", "lvl.hard": "Difícil", "lvl.insane": "Insano",
+      "lw.easy": "1 fácil", "lw.medium": "2 medio", "lw.hard": "3 difícil", "lw.insane": "4 insano",
+      tapHint: "toca en cualquier lugar para escribir →",
+      pressEnter: "⏎ pulsa enter para enviar",
+      skipBtn: "saltar →",
+      about: "Acerca de",
+      close: "Cerrar",
+      menu: "Menú",
+      answerAria: "Respuesta: idioma",
+      "tk.aria": "Acerca de Lobster is lobster",
+      "tk.w1": 'Lobster is lobster <span class="ticker-beta">BETA</span>',
+      "tk.w2": 'Por <a href="https://www.lagosta.press" target="_blank" rel="noopener">Lagosta Press</a>',
+      "tk.w3": '<a href="mailto:hello@lagosta.press">Envíanos tu sugerencia</a>',
+      "tk.w4": '<a href="https://instagram.com/lagosta.press" target="_blank" rel="noopener">Instagram</a>',
+      "tk.w5": '<a href="https://ko-fi.com/lagostapress" target="_blank" rel="noopener">Invítanos un café</a>',
+      "tk.w6": '<a href="#" data-ticker-about>Acerca de</a>',
+      "about.intro": 'Lobster is lobster es un proyecto de Lagosta Press.<span class="beta-badge">BETA</span>',
+      "about.instagram": "instagram",
+      "about.coffee": "Invítanos un café",
+      "about.news": "¿Quieres saber más sobre los proyectos de Lagosta? Deja tu correo aquí.",
+      "about.emailPh": "tu@correo.com",
+      "about.back": "VOLVER AL JUEGO",
+      "about.para": 'La idea de este juego nació como un experimento para el sitio de una editorial, Lagosta Press — y resultó demasiado divertida para quedarse ahí, así que le dimos un hogar propio para que llegue a más gente. El plan es seguir construyéndolo y mejorándolo, así que envíanos tus sugerencias. Es un trabajo de Eduardo Menezes, con una enorme colaboración de <a href="https://joelsouza.com/" target="_blank" rel="noopener" style="color:#8A63B0">Joel Souza</a>, y de un puñado de amigos que probaron la mecánica. Gracias a todos.',
+      "about.lagosta": 'Lagosta significa <span style="color:#D98CA0">langosta</span> en portugués, por cierto.',
+      "about.shareLabel": "COMPARTE EL JUEGO",
+      "news.invalid": "eso no parece un correo",
+      "news.ok": "¡gracias! revisa tu bandeja para confirmar",
+      "news.err": "algo salió mal — inténtalo de nuevo",
+      firstTail: " es {base} en español",
+      connector: " es {base} en ",
+      connectorAlso: " también es {base} en ",
+      and: " y ",
+      "tut.guess": "adivina a qué idioma se traduce cada palabra",
+      "tut.hard": "si fallas esta, recibirás una pista",
+      hint: "pista {n}: {text}",
+      "hint.exhausted": "lo siento, esas son todas las pistas que tengo",
+      "hint.skip": 'escribe "{word}" para seguir',
+      "hint.answer": "escribe tu respuesta y pulsa enter",
+      "hint.letter": 'la respuesta empieza con "{letter}"',
+      "hint.letterAn": 'la respuesta empieza con "{letter}"',
+      "lvlinfo.easy.t": "1 · Fácil · 10 rondas",
+      "lvlinfo.easy.d": "Solo alfabeto latino — idiomas que puedes leer. 3 minutos en el reloj.",
+      "lvlinfo.medium.t": "2 · Medio · 10 rondas",
+      "lvlinfo.medium.d": "Una mezcla de escrituras — unas conocidas, otras no tanto. 3 minutos en el reloj.",
+      "lvlinfo.hard.t": "3 · Difícil · 10 rondas",
+      "lvlinfo.hard.d": "Todos los idiomas — también aparecen los raros. 3 minutos en el reloj.",
+      "lvlinfo.insane.t": "4 · Insano · 96 rondas",
+      "lvlinfo.insane.d": "Todos los idiomas, 3 intentos por idioma. Si fallas los 3 o intentas saltar, quedas fuera. Mira tus aciertos en vivo — el tiempo solo aparece al final.",
+      "panel.easy": "Fácil · 10 rondas · idiomas comunes · solo alfabeto latino",
+      "panel.medium": "Medio · 10 rondas · idiomas comunes · escrituras variadas",
+      "panel.hard": "Difícil · 10 rondas · incluye escrituras raras",
+      "panel.insane": "Insano · 96 rondas · 1 error y quedas fuera · sin saltar",
+      "intro.welcome": "bienvenido de nuevo.",
+      "intro.tutorialDone": "buen trabajo — ese fue el tutorial. ahora a jugar en serio.",
+      "intro.choose": "elige un nivel para empezar:",
+      "intro.click": "haz clic en uno, o escribe su número: ",
+      "end.welcome": "Bienvenido de nuevo. Elige un nivel para jugar:",
+      "end.tutorialDone": "Buen trabajo — ese fue el tutorial. Ahora a jugar en serio. Elige un nivel:",
+      playAgain: 'Jugar "{base}" otra vez',
+      tryDifferent: "Probar otra palabra",
+      share: "Compartir resultado →",
+      "reason.completed": "Acertaste <b>{c}</b> de <b>{t}</b> idiomas en el nivel <b>{lvl}</b>, en <b>{time}</b>.",
+      "reason.timeUp": "Se acabó el tiempo — acertaste <b>{c}</b> de <b>{t}</b> idiomas en el nivel <b>{lvl}</b>.",
+      "reason.mistake": "Acertaste <b>{c}</b> de <b>{t}</b> idiomas en el nivel <b>{lvl}</b> antes de que terminara la partida, en <b>{time}</b>.",
+      "share.text": "Acerté {c} de {t} idiomas en el nivel {lvl} de Lobster is Lobster — ¿puedes superarme?",
+      "share.generic": "Adivina el idioma: un juego de palabras rápido y adictivo. ¡Pruébalo!",
+      "share.caption": 'de las personas del planeta te entenderían diciendo "{word}"',
+      "share.aria": "Compartir en {name}"
+    },
+    ratingExtra: {
+      excellent: [{ word: "¡Genial!", lang: "Spanish" }],
+      veryGood: [{ word: "¡Muy bien!", lang: "Spanish" }],
+      good: [{ word: "¡Bien!", lang: "Spanish" }],
+      keepPracticing: [{ word: "¡Ánimo!", lang: "Spanish" }]
+    },
+    langs: {
+      "Mandarin Chinese": ["Chino mandarín", ["chino mandarín", "mandarín", "chino"]],
+      "Hindi": ["Hindi", ["hindi"]],
+      "Spanish": ["Español", ["español", "castellano"]],
+      "French": ["Francés", ["francés"]],
+      "Standard Arabic": ["Árabe", ["árabe", "árabe estándar"]],
+      "Bengali": ["Bengalí", ["bengalí", "bengali"]],
+      "Portuguese": ["Portugués", ["portugués"]],
+      "Russian": ["Ruso", ["ruso"]],
+      "Urdu": ["Urdu", ["urdu"]],
+      "Indonesian": ["Indonesio", ["indonesio"]],
+      "German": ["Alemán", ["alemán"]],
+      "Japanese": ["Japonés", ["japonés"]],
+      "Swahili": ["Suajili", ["suajili", "swahili", "suahili"]],
+      "Marathi": ["Maratí", ["maratí", "marathi"]],
+      "Telugu": ["Telugu", ["telugu"]],
+      "Turkish": ["Turco", ["turco"]],
+      "Tamil": ["Tamil", ["tamil"]],
+      "Cantonese": ["Cantonés", ["cantonés"]],
+      "Vietnamese": ["Vietnamita", ["vietnamita"]],
+      "Filipino": ["Filipino", ["filipino", "tagalo", "tagalog"]],
+      "Korean": ["Coreano", ["coreano"]],
+      "Persian": ["Persa", ["persa", "farsi", "iraní"]],
+      "Hausa": ["Hausa", ["hausa"]],
+      "Javanese": ["Javanés", ["javanés"]],
+      "Italian": ["Italiano", ["italiano"]],
+      "Punjabi": ["Panyabí", ["panyabí", "punjabí", "punjabi"]],
+      "Gujarati": ["Guyaratí", ["guyaratí", "gujarati"]],
+      "Amharic": ["Amárico", ["amárico"]],
+      "Yoruba": ["Yoruba", ["yoruba"]],
+      "Igbo": ["Igbo", ["igbo", "ibo"]],
+      "Sindhi": ["Sindhi", ["sindhi", "sindi"]],
+      "Nepali": ["Nepalí", ["nepalí", "nepali", "nepalés"]],
+      "Burmese": ["Birmano", ["birmano", "burmés"]],
+      "Thai": ["Tailandés", ["tailandés", "thai", "tai"]],
+      "Polish": ["Polaco", ["polaco"]],
+      "Ukrainian": ["Ucraniano", ["ucraniano"]],
+      "Romanian": ["Rumano", ["rumano", "rumano"]],
+      "Dutch": ["Neerlandés", ["neerlandés", "holandés"]],
+      "Greek": ["Griego", ["griego"]],
+      "Zulu": ["Zulú", ["zulú", "zulu"]],
+      "Xhosa": ["Xhosa", ["xhosa"]],
+      "Malay": ["Malayo", ["malayo"]],
+      "Sinhala": ["Cingalés", ["cingalés", "singalés", "sinhala"]],
+      "Khmer": ["Jemer", ["jemer", "khmer", "camboyano"]],
+      "Lao": ["Laosiano", ["laosiano", "lao"]],
+      "Somali": ["Somalí", ["somalí", "somali"]],
+      "Uzbek": ["Uzbeko", ["uzbeko", "uzbek", "uzbeco"]],
+      "Azerbaijani": ["Azerí", ["azerí", "azerbaiyano", "azeri"]],
+      "Kazakh": ["Kazajo", ["kazajo", "kazajio", "kazako"]],
+      "Albanian": ["Albanés", ["albanés"]],
+      "Armenian": ["Armenio", ["armenio"]],
+      "Basque": ["Euskera", ["euskera", "vasco", "euskara"]],
+      "Belarusian": ["Bielorruso", ["bielorruso"]],
+      "Bosnian": ["Bosnio", ["bosnio"]],
+      "Bulgarian": ["Búlgaro", ["búlgaro"]],
+      "Catalan": ["Catalán", ["catalán"]],
+      "Cebuano": ["Cebuano", ["cebuano"]],
+      "Chichewa": ["Chichewa", ["chichewa", "nyanja", "chewa"]],
+      "Corsican": ["Corso", ["corso"]],
+      "Croatian": ["Croata", ["croata"]],
+      "Czech": ["Checo", ["checo"]],
+      "Danish": ["Danés", ["danés"]],
+      "Esperanto": ["Esperanto", ["esperanto"]],
+      "Estonian": ["Estonio", ["estonio"]],
+      "Finnish": ["Finés", ["finés", "finlandés"]],
+      "Frisian": ["Frisón", ["frisón", "frisio"]],
+      "Galician": ["Gallego", ["gallego"]],
+      "Georgian": ["Georgiano", ["georgiano"]],
+      "Haitian Creole": ["Criollo haitiano", ["criollo haitiano", "criollo", "haitiano"]],
+      "Hawaiian": ["Hawaiano", ["hawaiano"]],
+      "Hebrew": ["Hebreo", ["hebreo"]],
+      "Hmong": ["Hmong", ["hmong", "mong"]],
+      "Hungarian": ["Húngaro", ["húngaro"]],
+      "Icelandic": ["Islandés", ["islandés"]],
+      "Kannada": ["Canarés", ["canarés", "kannada"]],
+      "Kinyarwanda": ["Kinyarwanda", ["kinyarwanda", "ruandés"]],
+      "Kurdish": ["Kurdo", ["kurdo"]],
+      "Kyrgyz": ["Kirguís", ["kirguís", "kirguiz", "kirguiso"]],
+      "Latin": ["Latín", ["latín"]],
+      "Latvian": ["Letón", ["letón"]],
+      "Lithuanian": ["Lituano", ["lituano"]],
+      "Luxembourgish": ["Luxemburgués", ["luxemburgués"]],
+      "Macedonian": ["Macedonio", ["macedonio"]],
+      "Malagasy": ["Malgache", ["malgache", "malagasy"]],
+      "Malayalam": ["Malayalam", ["malayalam", "malabar"]],
+      "Maltese": ["Maltés", ["maltés"]],
+      "Maori": ["Maorí", ["maorí", "maori"]],
+      "Mongolian": ["Mongol", ["mongol"]],
+      "Norwegian": ["Noruego", ["noruego"]],
+      "Oriya": ["Oriya", ["oriya", "odia"]],
+      "Pashto": ["Pastún", ["pastún", "pashto", "pashtún", "pastu"]],
+      "Samoan": ["Samoano", ["samoano"]],
+      "Scottish Gaelic": ["Gaélico escocés", ["gaélico escocés", "gaélico"]],
+      "Serbian": ["Serbio", ["serbio"]],
+      "Sesotho": ["Sesotho", ["sesotho", "sotho", "sesoto"]],
+      "Shona": ["Shona", ["shona"]],
+      "Slovak": ["Eslovaco", ["eslovaco"]],
+      "Slovenian": ["Esloveno", ["esloveno"]],
+      "Sundanese": ["Sundanés", ["sundanés"]],
+      "English": ["Inglés", ["inglés"]]
+    }
+  };
+  I18N.pt.geoExtra = { English: "uma língua germânica, falada no mundo inteiro" };
+  I18N.pt.culturalExtra = { English: ["a língua de Shakespeare e dos Beatles", "a língua franca da internet"] };
+  I18N.es.geoExtra = { English: "una lengua germánica, hablada en todo el mundo" };
+  I18N.es.culturalExtra = { English: ["el idioma de Shakespeare y de los Beatles", "la lengua franca de internet"] };
+
+  // dicas traduzidas (chave = texto em inglês)
+  I18N.pt.geo = {
+   "an East Asian language": "uma língua do Leste Asiático",
+   "spoken across South Asia": "falada em todo o Sul da Ásia",
+   "spoken in Southeast Asia": "falada no Sudeste Asiático",
+   "spoken in the Middle East": "falada no Oriente Médio",
+   "a Turkic language of Central Asia": "uma língua de origem turcomana da Ásia Central",
+   "spoken in the Caucasus region": "falada na região do Cáucaso",
+   "an African language": "uma língua africana",
+   "spoken on the island of Madagascar": "falada na ilha de Madagascar",
+   "a Romance language of Europe": "uma língua românica da Europa",
+   "spoken mainly in Scandinavia": "falada principalmente na Escandinávia",
+   "a Germanic language of Western Europe": "uma língua germânica da Europa Ocidental",
+   "a Slavic language of Eastern Europe": "uma língua eslava do Leste Europeu",
+   "a Slavic language of the Balkans": "uma língua eslava dos Bálcãs",
+   "a Baltic language": "uma língua báltica",
+   "spoken in Greece": "falada na Grécia",
+   "spoken in the Balkans": "falada nos Bálcãs",
+   "a Uralic language, unrelated to its neighbors": "uma língua urálica, sem parentesco com as vizinhas",
+   "spoken on a small island in the Mediterranean": "falada numa pequena ilha do Mediterrâneo",
+   "a language isolate spoken in Spain, unrelated to any other language": "uma língua isolada falada na Espanha, sem parentesco com nenhuma outra",
+   "spoken in the Pacific Islands": "falada nas ilhas do Pacífico",
+   "a creole language spoken in the Caribbean": "uma língua crioula falada no Caribe",
+   "a constructed language, invented rather than evolved naturally": "uma língua construída, inventada em vez de ter evoluído naturalmente",
+   "an ancient language, no longer spoken natively": "uma língua antiga, que já não é falada como língua materna",
+   "a Celtic language of Scotland": "uma língua céltica da Escócia"
+  };
+  I18N.pt.cultural = {
+   "the language of Sun Tzu's The Art of War": "a língua de A Arte da Guerra, de Sun Tzu",
+   "handy for ordering tea in Beijing": "útil para pedir chá em Pequim",
+   "the language most classic kung-fu movies were shot in": "a língua em que a maioria dos filmes clássicos de kung fu foi rodada",
+   "will get you far in Hong Kong": "vai te levar longe em Hong Kong",
+   "the language behind basically every anime": "a língua por trás de basicamente todo anime",
+   "sushi, sumo, karate — pick your favorite export": "sushi, sumô, caratê — escolha seu produto de exportação favorito",
+   "loving or hating it, the language of K-pop": "amando ou odiando, a língua do K-pop",
+   "the language of most K-dramas": "a língua da maioria dos doramas coreanos",
+   "the language Genghis Khan spoke": "a língua que Gengis Khan falava",
+   "still spoken by a huge nomadic population": "ainda falada por uma enorme população nômade",
+   "watch a Bollywood movie without needing subtitles": "assista a um filme de Bollywood sem precisar de legendas",
+   "the language on a train to New Delhi": "a língua do trem para Nova Délhi",
+   "the language of Rabindranath Tagore, the first non-European Nobel laureate in Literature": "a língua de Rabindranath Tagore, o primeiro Nobel de Literatura não europeu",
+   "about 68% of speakers live in Bangladesh": "cerca de 68% dos falantes vivem em Bangladesh",
+   "spoken across southwest and central India": "falada no sudoeste e no centro da Índia",
+   "has more native speakers than Italian or Korean": "tem mais falantes nativos do que o italiano ou o coreano",
+   "the language behind India's other huge film industry, Tollywood": "a língua da outra grande indústria de cinema da Índia, Tollywood",
+   "spoken across southeastern India": "falada no sudeste da Índia",
+   "one of the oldest languages still spoken today": "uma das línguas mais antigas ainda faladas hoje",
+   "an official language of Singapore and Sri Lanka": "uma das línguas oficiais de Singapura e do Sri Lanka",
+   "the language bhangra music comes from": "a língua de onde vem a música bhangra",
+   "one of the ways Indians and Pakistanis can understand each other": "uma das formas de indianos e paquistaneses se entenderem",
+   "Mahatma Gandhi's mother tongue": "a língua materna de Mahatma Gandhi",
+   "also spoken by a huge share of Indians in the UK and the US": "também falada por uma enorme parcela de indianos no Reino Unido e nos EUA",
+   "the language of most classical Mughal-era poetry (yes, still a tough one)": "a língua da maior parte da poesia clássica da era mogol (sim, continua sendo difícil)",
+   "77% of Pakistanis will understand you": "77% dos paquistaneses vão te entender",
+   "spoken along the Indus River, in Pakistan": "falada ao longo do rio Indo, no Paquistão",
+   "one of the oldest living languages in South Asia": "uma das línguas vivas mais antigas do Sul da Ásia",
+   "spoken at the foot of Everest (or Sagarmatha)": "falada ao pé do Everest (ou Sagarmatha)",
+   "the language of the Sherpas": "a língua dos sherpas",
+   "the language of the tea island — old Ceylon": "a língua da ilha do chá — a antiga Ceilão",
+   "spoken on the beaches of Sri Lanka": "falada nas praias do Sri Lanka",
+   "spoken on India's east coast, near the Konark Sun Temple": "falada na costa leste da Índia, perto do Templo do Sol de Konark",
+   "the language of Bhubaneswar": "a língua de Bhubaneswar",
+   "the language of Bangalore, India's tech capital": "a língua de Bangalore, a capital tecnológica da Índia",
+   "has its own 'Kannada-wood' film industry": "tem sua própria indústria de cinema, a 'Kannada-wood'",
+   "a palindrome as a language name": "seu nome original, malayalam, se lê igual de trás para a frente",
+   "spoken in Kerala, land of backwaters and coconut curry": "falada em Kerala, terra dos canais e do curry de coco",
+   "the language dangdut music is sung in": "a língua em que se canta o dangdut",
+   "worth learning before a trip to Bali": "vale aprender antes de uma viagem a Bali",
+   "the language you'll hear under the Petronas Towers": "a língua que você ouve sob as Torres Petronas",
+   "good for haggling in Kuala Lumpur": "boa para pechinchar em Kuala Lumpur",
+   "the language behind the word \"pho\"": "a língua por trás da palavra \"pho\"",
+   "the language spoken in Ho Chi Minh City": "a língua falada em Ho Chi Minh",
+   "spoken in a country famous for its karaoke culture": "falada num país famoso pela cultura do karaokê",
+   "for ordering a halo-halo in style": "para pedir um halo-halo com estilo",
+   "straight from the island of Java": "direto da ilha de Java",
+   "has more native speakers than German": "tem mais falantes nativos do que o alemão",
+   "the language on the menu at your favorite pad thai spot": "a língua do cardápio do seu restaurante tailandês favorito",
+   "handy to know before picking a muay thai fight": "bom saber antes de escolher uma luta de muay thai",
+   "the language of Yangon's golden pagodas": "a língua dos pagodes dourados de Yangon",
+   "spoken along the Irrawaddy River": "falada ao longo do rio Irauádi",
+   "the language spoken around Angkor Wat": "a língua falada em volta de Angkor Wat",
+   "the language of Cambodia": "a língua do Camboja",
+   "the language of Vientiane, on the banks of the Mekong": "a língua de Vientiane, às margens do Mekong",
+   "close enough to Thai that you can follow along": "parecida o bastante com o tailandês para você acompanhar",
+   "spoken on the island of Cebu, in the Philippines": "falada na ilha de Cebu, nas Filipinas",
+   "has more native speakers than Tagalog in some regions": "em algumas regiões tem mais falantes nativos do que o tagalo",
+   "the language of Southeast Asia's mountain ranges": "a língua das cadeias de montanhas do Sudeste Asiático",
+   "had no writing system of its own until the 20th century": "não tinha sistema de escrita próprio até o século 20",
+   "spoken in Bandung, western Java": "falada em Bandung, no oeste de Java",
+   "Indonesia's second most-spoken native language": "a segunda língua nativa mais falada da Indonésia",
+   "you could listen to this language for 1001 nights": "dá para ouvir essa língua por mil e uma noites",
+   "will get you understood from Morocco to Iraq": "faz você ser entendido do Marrocos ao Iraque",
+   "the language the poet Rumi wrote in": "a língua em que o poeta Rumi escreveu",
+   "the language of Tehran and much of Iran and Afghanistan": "a língua de Teerã e de boa parte do Irã e do Afeganistão",
+   "the language of Kurdistan, spanning Turkey, Iraq, and Iran": "a língua do Curdistão, que se espalha por Turquia, Iraque e Irã",
+   "a people without a country of their own, but with an incredibly rich music scene": "um povo sem país próprio, mas com uma cena musical incrivelmente rica",
+   "spoken on both sides of the Afghanistan-Pakistan border": "falada dos dois lados da fronteira entre Afeganistão e Paquistão",
+   "one of Afghanistan's two official languages": "uma das duas línguas oficiais do Afeganistão",
+   "a language revived from mostly religious use into everyday speech": "uma língua que voltou de um uso quase só religioso para a fala do dia a dia",
+   "spoken in Israel": "falada em Israel",
+   "the language behind half the soap operas on TV": "a língua por trás de metade das novelas da TV",
+   "you'd speak it, but your mouth is full of baklava": "você falaria, mas está de boca cheia de baklava",
+   "the language of Baku, on the shores of the Caspian Sea": "a língua de Baku, às margens do Mar Cáspio",
+   "close enough to Turkish that knowing one gets you far with the other": "parecida o bastante com o turco para que saber uma te leve longe na outra",
+   "spoken along much of the old Silk Road": "falada ao longo de boa parte da antiga Rota da Seda",
+   "the language of Samarkand": "a língua de Samarcanda",
+   "the language of the Kazakh steppe": "a língua da estepe cazaque",
+   "spoken by horseback nomads for centuries": "falada por nômades a cavalo durante séculos",
+   "the language of the World Nomad Games": "a língua dos Jogos Mundiais Nômades",
+   "spoken in the Tian Shan mountains": "falada nas montanhas Tian Shan",
+   "written in one of the oldest alphabets still in use": "escrita num dos alfabetos mais antigos ainda em uso",
+   "the language of Tbilisi, straddling Europe and Asia": "a língua de Tbilisi, entre a Europa e a Ásia",
+   "written in its own unique alphabet since the year 405": "escrita em seu alfabeto único desde o ano 405",
+   "the language at the foot of Mount Ararat": "a língua ao pé do Monte Ararate",
+   "the language \"hakuna matata\" comes from": "a língua de onde vem \"hakuna matata\"",
+   "spoken from Kenya to Tanzania, right past Kilimanjaro": "falada do Quênia à Tanzânia, logo depois do Kilimanjaro",
+   "one of the most widely spoken languages in West Africa": "uma das línguas mais faladas da África Ocidental",
+   "you'd hear this in a big Nigerian market": "você ouviria isso num grande mercado da Nigéria",
+   "an influence you can hear in Beyoncé's Black Is King": "uma influência que dá para ouvir em Black Is King, da Beyoncé",
+   "spoken in Nigeria, and still alive in Brazil's candomblé temples": "falada na Nigéria e ainda viva nos terreiros de candomblé do Brasil",
+   "spoken in southeastern Nigeria": "falada no sudeste da Nigéria",
+   "the mother tongue of writer Chinua Achebe": "a língua materna do escritor Chinua Achebe",
+   "the language of Ethiopia, one of the only African countries never colonized": "a língua da Etiópia, um dos poucos países africanos nunca colonizados",
+   "the language of Addis Ababa": "a língua de Adis Abeba",
+   "a culture with a strong oral poetry tradition": "uma cultura com forte tradição de poesia oral",
+   "spoken across the Horn of Africa": "falada no Chifre da África",
+   "the language behind the opening chant of \"Circle of Life\" in The Lion King": "a língua do canto de abertura de \"Circle of Life\", em O Rei Leão",
+   "South Africa's most-spoken native language": "a língua nativa mais falada da África do Sul",
+   "famous for its click consonants": "famosa por suas consoantes de estalo",
+   "one of Nelson Mandela's mother tongues": "uma das línguas maternas de Nelson Mandela",
+   "the language of Lesotho, the kingdom in the sky": "a língua do Lesoto, o reino nas nuvens",
+   "spoken right in the middle of South Africa": "falada bem no meio da África do Sul",
+   "the language of most of Zimbabwe's population": "a língua da maior parte da população do Zimbábue",
+   "you'd hear this near Victoria Falls": "você ouviria isso perto das Cataratas Vitória",
+   "Malawi's national language": "a língua nacional do Malawi",
+   "spoken along the shores of Lake Malawi": "falada às margens do Lago Malawi",
+   "the language of Rwanda, the land of a thousand hills": "a língua de Ruanda, a terra das mil colinas",
+   "also spoken near the mountain gorillas": "também falada perto dos gorilas-das-montanhas",
+   "closer to languages of Borneo than to any language in Africa": "mais próxima das línguas de Bornéu do que de qualquer língua da África",
+   "the language of Madagascar, island of the lemurs": "a língua de Madagascar, a ilha dos lêmures",
+   "the language Don Quixote tilted at windmills in": "a língua em que Dom Quixote atacou os moinhos de vento",
+   "the language most reggaetón is sung in": "a língua em que se canta a maior parte do reggaeton",
+   "the language Victor Hugo made you cry in": "a língua em que Victor Hugo te fez chorar",
+   "your croissant pronunciation will be judged": "a sua pronúncia de croissant vai ser julgada",
+   "the language a good bossa nova sounds best in": "a língua em que uma boa bossa nova soa melhor",
+   "the language of Machado de Assis and Fernando Pessoa": "a língua de Machado de Assis e Fernando Pessoa",
+   "the language most opera divas are yelling in": "a língua em que a maioria das divas da ópera está gritando",
+   "the language for ordering 'un cappuccino, per favore' without butchering the accent": "a língua para pedir 'un cappuccino, per favore' sem massacrar o sotaque",
+   "the language spoken in Dracula's homeland": "a língua falada na terra do Drácula",
+   "the only Latin language surrounded entirely by Slavic neighbors": "a única língua latina cercada inteiramente por vizinhos eslavos",
+   "the language spoken in Barcelona": "a língua falada em Barcelona",
+   "the language you hear sung at Camp Nou": "a língua que se ouve cantada no Camp Nou",
+   "the language of northwest Spain, near Santiago de Compostela": "a língua do noroeste da Espanha, perto de Santiago de Compostela",
+   "a close cousin of Portuguese": "prima próxima do português",
+   "the language Napoleon grew up speaking": "a língua em que Napoleão cresceu falando",
+   "spoken on a French island right next to Italy": "falada numa ilha francesa colada na Itália",
+   "the language behind the word \"hygge\"": "a língua por trás da palavra \"hygge\"",
+   "the language of Copenhagen — and of Lego": "a língua de Copenhague — e da Lego",
+   "the language of the fjords": "a língua dos fiordes",
+   "handy for watching a Nordic noir series without subtitles": "útil para assistir a uma série nórdica noir sem legendas",
+   "a language so unchanged that locals can still read 1000-year-old sagas": "uma língua tão pouco mudada que os locais ainda leem sagas de mil anos atrás",
+   "the language of a country with more volcanoes than traffic lights": "a língua de um país com mais vulcões do que semáforos",
+   "the language philosophers ruin your day in": "a língua em que os filósofos estragam o seu dia",
+   "the language of Grimm's original, much darker fairy tales": "a língua dos contos de fadas originais e bem mais sombrios dos Grimm",
+   "the language Van Gogh wrote his letters in": "a língua em que Van Gogh escrevia suas cartas",
+   "the language of Amsterdam": "a língua de Amsterdã",
+   "the language of a country the size of a big city": "a língua de um país do tamanho de uma cidade grande",
+   "spoken by everyone working in Luxembourg's banks": "falada por todo mundo que trabalha nos bancos de Luxemburgo",
+   "considered the living language closest to Old English": "considerada a língua viva mais próxima do inglês antigo",
+   "spoken in the north of the Netherlands": "falada no norte dos Países Baixos",
+   "the language of extremely long, extremely sad novels": "a língua de romances extremamente longos e extremamente tristes",
+   "the language that put the first satellite into orbit": "a língua que colocou o primeiro satélite em órbita",
+   "the language of Marie Curie's home country": "a língua do país natal de Marie Curie",
+   "the language of Warsaw and Kraków": "a língua de Varsóvia e Cracóvia",
+   "the language of Kyiv": "a língua de Kiev",
+   "far more different from Russian than most people assume": "muito mais diferente do russo do que a maioria imagina",
+   "the language of Franz Kafka": "a língua de Franz Kafka",
+   "fancy a beer in Prague?": "que tal uma cerveja em Praga?",
+   "one of the languages of the former Czechoslovakia": "uma das línguas da antiga Tchecoslováquia",
+   "the language of Bratislava": "a língua de Bratislava",
+   "the language of Minsk": "a língua de Minsk",
+   "today spoken day-to-day by fewer people than Russian, even in its own country": "hoje falada no dia a dia por menos gente do que o russo, até no próprio país",
+   "the language that gave the world the necktie": "a língua que deu ao mundo a gravata",
+   "the language of the Dalmatian coast": "a língua da costa da Dalmácia",
+   "the language of Slovenia, between the Alps and the Adriatic": "a língua da Eslovênia, entre os Alpes e o Adriático",
+   "one of the few languages with its very own grammar just for \"the two of us\"": "uma das poucas línguas com gramática própria só para \"nós dois\"",
+   "the language of Belgrade": "a língua de Belgrado",
+   "written in both Cyrillic and the Latin alphabet": "escrita tanto em cirílico quanto em alfabeto latino",
+   "the language of Sarajevo": "a língua de Sarajevo",
+   "practically identical to Serbian and Croatian in everyday life": "praticamente idêntica ao sérvio e ao croata no dia a dia",
+   "a country where nodding your head can mean \"no\"": "um país onde balançar a cabeça para cima e para baixo pode significar \"não\"",
+   "the country where yogurt as we know it was born": "o país onde nasceu o iogurte como o conhecemos",
+   "the language of Skopje": "a língua de Escópia",
+   "the southernmost of all Slavic languages": "a mais meridional de todas as línguas eslavas",
+   "the language of Riga, on the Baltic coast": "a língua de Riga, na costa do Báltico",
+   "one of the oldest living languages in the Indo-European family": "uma das línguas vivas mais antigas da família indo-europeia",
+   "considered one of the closest living languages to ancient Sanskrit": "considerada uma das línguas vivas mais próximas do sânscrito antigo",
+   "the language of Vilnius": "a língua de Vilnius",
+   "the language the Odyssey was actually written in": "a língua em que a Odisseia foi de fato escrita",
+   "gave us the word \"democracy\"": "nos deu a palavra \"democracia\"",
+   "the language of Albania and Kosovo": "a língua da Albânia e de Kosovo",
+   "with no close relatives among Europe's other languages": "sem parentes próximos entre as outras línguas da Europa",
+   "the language of the country that invented the Rubik's Cube": "a língua do país que inventou o Cubo Mágico",
+   "so different from its neighbors that nobody around understands a word": "tão diferente das vizinhas que ninguém em volta entende uma palavra",
+   "the language of Nokia's home country": "a língua do país natal da Nokia",
+   "the language of Santa's homeland, according to legend": "a língua da terra do Papai Noel, segundo a lenda",
+   "the language of Tallinn": "a língua de Tallinn",
+   "closer to Finnish than to its Baltic neighbors": "mais próxima do finlandês do que de suas vizinhas bálticas",
+   "the only Semitic language written in the Latin alphabet": "a única língua semítica escrita em alfabeto latino",
+   "the language of an island right in the middle of the Mediterranean": "a língua de uma ilha bem no meio do Mediterrâneo",
+   "a language unrelated to any other on Earth": "uma língua sem parentesco com nenhuma outra da Terra",
+   "spoken on both sides of the Spain-France border": "falada dos dois lados da fronteira entre Espanha e França",
+   "the language behind the word \"aloha\"": "a língua por trás da palavra \"aloha\"",
+   "the language of surfing and the ukulele": "a língua do surfe e do ukulele",
+   "the language of rugby's haka": "a língua do haka do rúgbi",
+   "the indigenous language of New Zealand": "a língua indígena da Nova Zelândia",
+   "the language of the Samoan islands, in the South Pacific": "a língua das ilhas Samoa, no Pacífico Sul",
+   "the language behind the siva tau, Samoa's own haka": "a língua por trás do siva tau, o haka próprio de Samoa",
+   "born out of the only slave revolt that founded a nation": "nascida da única revolta de escravizados que fundou uma nação",
+   "the language of Haiti, blending French with African languages": "a língua do Haiti, que mistura o francês com línguas africanas",
+   "invented in the 1880s to be everyone's second language": "inventada na década de 1880 para ser a segunda língua de todo mundo",
+   "no country on Earth has this as its native language": "nenhum país do mundo tem esta como língua nativa",
+   "still the official language of the Vatican today": "ainda hoje a língua oficial do Vaticano",
+   "the language of the Roman emperors": "a língua dos imperadores romanos",
+   "the language behind a lot of the Gaelic in Outlander": "a língua por trás de boa parte do gaélico em Outlander",
+   "the language of the Scottish Highlands": "a língua das Terras Altas da Escócia"
+  };
+  I18N.es.geo = {
+   "an East Asian language": "una lengua del Asia oriental",
+   "spoken across South Asia": "se habla en todo el sur de Asia",
+   "spoken in Southeast Asia": "se habla en el sudeste asiático",
+   "spoken in the Middle East": "se habla en Oriente Medio",
+   "a Turkic language of Central Asia": "una lengua túrquica de Asia Central",
+   "spoken in the Caucasus region": "se habla en la región del Cáucaso",
+   "an African language": "una lengua africana",
+   "spoken on the island of Madagascar": "se habla en la isla de Madagascar",
+   "a Romance language of Europe": "una lengua romance de Europa",
+   "spoken mainly in Scandinavia": "se habla principalmente en Escandinavia",
+   "a Germanic language of Western Europe": "una lengua germánica de Europa occidental",
+   "a Slavic language of Eastern Europe": "una lengua eslava de Europa oriental",
+   "a Slavic language of the Balkans": "una lengua eslava de los Balcanes",
+   "a Baltic language": "una lengua báltica",
+   "spoken in Greece": "se habla en Grecia",
+   "spoken in the Balkans": "se habla en los Balcanes",
+   "a Uralic language, unrelated to its neighbors": "una lengua urálica, sin parentesco con sus vecinas",
+   "spoken on a small island in the Mediterranean": "se habla en una pequeña isla del Mediterráneo",
+   "a language isolate spoken in Spain, unrelated to any other language": "una lengua aislada de España, sin parentesco con ninguna otra",
+   "spoken in the Pacific Islands": "se habla en las islas del Pacífico",
+   "a creole language spoken in the Caribbean": "una lengua criolla del Caribe",
+   "a constructed language, invented rather than evolved naturally": "una lengua construida, inventada en lugar de evolucionar de forma natural",
+   "an ancient language, no longer spoken natively": "una lengua antigua, ya sin hablantes nativos",
+   "a Celtic language of Scotland": "una lengua celta de Escocia"
+  };
+  I18N.es.cultural = {
+   "the language of Sun Tzu's The Art of War": "la lengua de El arte de la guerra de Sun Tzu",
+   "handy for ordering tea in Beijing": "útil para pedir té en Pekín",
+   "the language most classic kung-fu movies were shot in": "la lengua en que se filmaron casi todas las películas clásicas de kung-fu",
+   "will get you far in Hong Kong": "te llevará lejos en Hong Kong",
+   "the language behind basically every anime": "la lengua detrás de prácticamente todo el anime",
+   "sushi, sumo, karate — pick your favorite export": "sushi, sumo, karate: elige tu exportación favorita",
+   "loving or hating it, the language of K-pop": "la ames o la odies, es la lengua del K-pop",
+   "the language of most K-dramas": "la lengua de la mayoría de los K-dramas",
+   "the language Genghis Khan spoke": "la lengua que hablaba Gengis Kan",
+   "still spoken by a huge nomadic population": "la sigue hablando una enorme población nómada",
+   "watch a Bollywood movie without needing subtitles": "mira una película de Bollywood sin necesitar subtítulos",
+   "the language on a train to New Delhi": "la lengua que oirás en un tren a Nueva Delhi",
+   "the language of Rabindranath Tagore, the first non-European Nobel laureate in Literature": "la lengua de Rabindranath Tagore, el primer Nobel de Literatura no europeo",
+   "about 68% of speakers live in Bangladesh": "cerca del 68 % de sus hablantes vive en Bangladés",
+   "spoken across southwest and central India": "se habla en el suroeste y el centro de la India",
+   "has more native speakers than Italian or Korean": "tiene más hablantes nativos que el italiano o el coreano",
+   "the language behind India's other huge film industry, Tollywood": "la lengua del otro gigante del cine indio, Tollywood",
+   "spoken across southeastern India": "se habla en el sureste de la India",
+   "one of the oldest languages still spoken today": "una de las lenguas más antiguas que aún se hablan",
+   "an official language of Singapore and Sri Lanka": "lengua oficial en Singapur y Sri Lanka",
+   "the language bhangra music comes from": "la lengua de donde viene la música bhangra",
+   "one of the ways Indians and Pakistanis can understand each other": "una de las formas en que indios y paquistaníes se entienden entre sí",
+   "Mahatma Gandhi's mother tongue": "la lengua materna de Mahatma Gandhi",
+   "also spoken by a huge share of Indians in the UK and the US": "también la habla una gran parte de los indios en el Reino Unido y Estados Unidos",
+   "the language of most classical Mughal-era poetry (yes, still a tough one)": "la lengua de casi toda la poesía clásica de la época mogol (sí, sigue siendo difícil)",
+   "77% of Pakistanis will understand you": "el 77 % de los paquistaníes te entenderá",
+   "spoken along the Indus River, in Pakistan": "se habla a lo largo del río Indo, en Pakistán",
+   "one of the oldest living languages in South Asia": "una de las lenguas vivas más antiguas del sur de Asia",
+   "spoken at the foot of Everest (or Sagarmatha)": "se habla a los pies del Everest (o Sagarmatha)",
+   "the language of the Sherpas": "la lengua de los sherpas",
+   "the language of the tea island — old Ceylon": "la lengua de la isla del té, la antigua Ceilán",
+   "spoken on the beaches of Sri Lanka": "se habla en las playas de Sri Lanka",
+   "spoken on India's east coast, near the Konark Sun Temple": "se habla en la costa oriental de la India, cerca del Templo del Sol de Konark",
+   "the language of Bhubaneswar": "la lengua de Bhubaneswar",
+   "the language of Bangalore, India's tech capital": "la lengua de Bangalore, la capital tecnológica de la India",
+   "has its own 'Kannada-wood' film industry": "tiene su propia industria de cine, el 'Sandalwood'",
+   "a palindrome as a language name": "un nombre de idioma capicúa: se lee igual al derecho y al revés",
+   "spoken in Kerala, land of backwaters and coconut curry": "se habla en Kerala, tierra de remansos y curry de coco",
+   "the language dangdut music is sung in": "la lengua en que se canta la música dangdut",
+   "worth learning before a trip to Bali": "vale la pena aprenderla antes de viajar a Bali",
+   "the language you'll hear under the Petronas Towers": "la lengua que oirás bajo las Torres Petronas",
+   "good for haggling in Kuala Lumpur": "buena para regatear en Kuala Lumpur",
+   "the language behind the word \"pho\"": "la lengua detrás de la palabra \"pho\"",
+   "the language spoken in Ho Chi Minh City": "la lengua que se habla en Ciudad Ho Chi Minh",
+   "spoken in a country famous for its karaoke culture": "se habla en un país famoso por su cultura del karaoke",
+   "for ordering a halo-halo in style": "para pedir un halo-halo con estilo",
+   "straight from the island of Java": "directo desde la isla de Java",
+   "has more native speakers than German": "tiene más hablantes nativos que el alemán",
+   "the language on the menu at your favorite pad thai spot": "la lengua del menú de tu restaurante favorito de pad thai",
+   "handy to know before picking a muay thai fight": "útil saberla antes de elegir una pelea de muay thai",
+   "the language of Yangon's golden pagodas": "la lengua de las pagodas doradas de Yangón",
+   "spoken along the Irrawaddy River": "se habla a lo largo del río Irawadi",
+   "the language spoken around Angkor Wat": "la lengua que se habla alrededor de Angkor Wat",
+   "the language of Cambodia": "la lengua de Camboya",
+   "the language of Vientiane, on the banks of the Mekong": "la lengua de Vientián, a orillas del Mekong",
+   "close enough to Thai that you can follow along": "tan parecida al tailandés que puedes seguir la conversación",
+   "spoken on the island of Cebu, in the Philippines": "se habla en la isla de Cebú, en Filipinas",
+   "has more native speakers than Tagalog in some regions": "en algunas regiones tiene más hablantes nativos que el tagalo",
+   "the language of Southeast Asia's mountain ranges": "la lengua de las cordilleras del sudeste asiático",
+   "had no writing system of its own until the 20th century": "no tuvo escritura propia hasta el siglo XX",
+   "spoken in Bandung, western Java": "se habla en Bandung, al oeste de Java",
+   "Indonesia's second most-spoken native language": "la segunda lengua nativa más hablada de Indonesia",
+   "you could listen to this language for 1001 nights": "podrías escucharla durante mil y una noches",
+   "will get you understood from Morocco to Iraq": "te hará entender desde Marruecos hasta Irak",
+   "the language the poet Rumi wrote in": "la lengua en que escribía el poeta Rumi",
+   "the language of Tehran and much of Iran and Afghanistan": "la lengua de Teherán y de gran parte de Irán y Afganistán",
+   "the language of Kurdistan, spanning Turkey, Iraq, and Iran": "la lengua del Kurdistán, que se extiende por Turquía, Irak e Irán",
+   "a people without a country of their own, but with an incredibly rich music scene": "un pueblo sin país propio, pero con una escena musical riquísima",
+   "spoken on both sides of the Afghanistan-Pakistan border": "se habla a ambos lados de la frontera entre Afganistán y Pakistán",
+   "one of Afghanistan's two official languages": "una de las dos lenguas oficiales de Afganistán",
+   "a language revived from mostly religious use into everyday speech": "una lengua revivida: de uso casi solo religioso a lengua de todos los días",
+   "spoken in Israel": "se habla en Israel",
+   "the language behind half the soap operas on TV": "la lengua detrás de la mitad de las telenovelas de la tele",
+   "you'd speak it, but your mouth is full of baklava": "la hablarías, pero tienes la boca llena de baklava",
+   "the language of Baku, on the shores of the Caspian Sea": "la lengua de Bakú, a orillas del mar Caspio",
+   "close enough to Turkish that knowing one gets you far with the other": "tan parecida al turco que saber una te lleva lejos con la otra",
+   "spoken along much of the old Silk Road": "se habla a lo largo de gran parte de la antigua Ruta de la Seda",
+   "the language of Samarkand": "la lengua de Samarcanda",
+   "the language of the Kazakh steppe": "la lengua de la estepa kazaja",
+   "spoken by horseback nomads for centuries": "la hablaron durante siglos nómadas a caballo",
+   "the language of the World Nomad Games": "la lengua de los Juegos Mundiales Nómadas",
+   "spoken in the Tian Shan mountains": "se habla en las montañas Tian Shan",
+   "written in one of the oldest alphabets still in use": "escrita en uno de los alfabetos más antiguos aún en uso",
+   "the language of Tbilisi, straddling Europe and Asia": "la lengua de Tiflis, a caballo entre Europa y Asia",
+   "written in its own unique alphabet since the year 405": "escrita en su propio alfabeto único desde el año 405",
+   "the language at the foot of Mount Ararat": "la lengua a los pies del monte Ararat",
+   "the language \"hakuna matata\" comes from": "la lengua de donde viene \"hakuna matata\"",
+   "spoken from Kenya to Tanzania, right past Kilimanjaro": "se habla desde Kenia hasta Tanzania, justo pasando el Kilimanjaro",
+   "one of the most widely spoken languages in West Africa": "una de las lenguas más habladas de África occidental",
+   "you'd hear this in a big Nigerian market": "la oirías en un gran mercado de Nigeria",
+   "an influence you can hear in Beyoncé's Black Is King": "una influencia que se escucha en Black Is King de Beyoncé",
+   "spoken in Nigeria, and still alive in Brazil's candomblé temples": "se habla en Nigeria y sigue viva en los templos de candomblé de Brasil",
+   "spoken in southeastern Nigeria": "se habla en el sureste de Nigeria",
+   "the mother tongue of writer Chinua Achebe": "la lengua materna del escritor Chinua Achebe",
+   "the language of Ethiopia, one of the only African countries never colonized": "la lengua de Etiopía, uno de los pocos países africanos jamás colonizados",
+   "the language of Addis Ababa": "la lengua de Adís Abeba",
+   "a culture with a strong oral poetry tradition": "una cultura con una fuerte tradición de poesía oral",
+   "spoken across the Horn of Africa": "se habla en todo el Cuerno de África",
+   "the language behind the opening chant of \"Circle of Life\" in The Lion King": "la lengua detrás del canto inicial de \"El ciclo sin fin\" en El rey león",
+   "South Africa's most-spoken native language": "la lengua nativa más hablada de Sudáfrica",
+   "famous for its click consonants": "famosa por sus consonantes de chasquido",
+   "one of Nelson Mandela's mother tongues": "una de las lenguas maternas de Nelson Mandela",
+   "the language of Lesotho, the kingdom in the sky": "la lengua de Lesoto, el reino en el cielo",
+   "spoken right in the middle of South Africa": "se habla justo en el centro de Sudáfrica",
+   "the language of most of Zimbabwe's population": "la lengua de la mayor parte de la población de Zimbabue",
+   "you'd hear this near Victoria Falls": "la oirías cerca de las cataratas Victoria",
+   "Malawi's national language": "la lengua nacional de Malaui",
+   "spoken along the shores of Lake Malawi": "se habla a orillas del lago Malaui",
+   "the language of Rwanda, the land of a thousand hills": "la lengua de Ruanda, la tierra de las mil colinas",
+   "also spoken near the mountain gorillas": "también se habla cerca de los gorilas de montaña",
+   "closer to languages of Borneo than to any language in Africa": "más cercana a las lenguas de Borneo que a cualquiera de África",
+   "the language of Madagascar, island of the lemurs": "la lengua de Madagascar, la isla de los lémures",
+   "the language Don Quixote tilted at windmills in": "la lengua en que Don Quijote arremetió contra los molinos de viento",
+   "the language most reggaetón is sung in": "la lengua en que se canta la mayor parte del reguetón",
+   "the language Victor Hugo made you cry in": "la lengua en que Victor Hugo te hizo llorar",
+   "your croissant pronunciation will be judged": "juzgarán cómo pronuncias \"croissant\"",
+   "the language a good bossa nova sounds best in": "la lengua en que mejor suena una bossa nova",
+   "the language of Machado de Assis and Fernando Pessoa": "la lengua de Machado de Assis y Fernando Pessoa",
+   "the language most opera divas are yelling in": "la lengua en que casi todas las divas de ópera gritan",
+   "the language for ordering 'un cappuccino, per favore' without butchering the accent": "la lengua para pedir 'un cappuccino, per favore' sin destrozar el acento",
+   "the language spoken in Dracula's homeland": "la lengua del país natal de Drácula",
+   "the only Latin language surrounded entirely by Slavic neighbors": "la única lengua latina rodeada por completo de vecinos eslavos",
+   "the language spoken in Barcelona": "la lengua que se habla en Barcelona",
+   "the language you hear sung at Camp Nou": "la lengua que se oye cantar en el Camp Nou",
+   "the language of northwest Spain, near Santiago de Compostela": "la lengua del noroeste de España, cerca de Santiago de Compostela",
+   "a close cousin of Portuguese": "prima hermana del portugués",
+   "the language Napoleon grew up speaking": "la lengua que hablaba Napoleón de niño",
+   "spoken on a French island right next to Italy": "se habla en una isla francesa pegada a Italia",
+   "the language behind the word \"hygge\"": "la lengua detrás de la palabra \"hygge\"",
+   "the language of Copenhagen — and of Lego": "la lengua de Copenhague, y de Lego",
+   "the language of the fjords": "la lengua de los fiordos",
+   "handy for watching a Nordic noir series without subtitles": "útil para ver una serie de noir nórdico sin subtítulos",
+   "a language so unchanged that locals can still read 1000-year-old sagas": "una lengua tan poco cambiada que sus hablantes aún leen sagas de hace mil años",
+   "the language of a country with more volcanoes than traffic lights": "la lengua de un país con más volcanes que semáforos",
+   "the language philosophers ruin your day in": "la lengua en que los filósofos te arruinan el día",
+   "the language of Grimm's original, much darker fairy tales": "la lengua de los cuentos originales, mucho más oscuros, de los hermanos Grimm",
+   "the language Van Gogh wrote his letters in": "la lengua en que Van Gogh escribía sus cartas",
+   "the language of Amsterdam": "la lengua de Ámsterdam",
+   "the language of a country the size of a big city": "la lengua de un país del tamaño de una gran ciudad",
+   "spoken by everyone working in Luxembourg's banks": "la hablan todos los que trabajan en los bancos de Luxemburgo",
+   "considered the living language closest to Old English": "considerada la lengua viva más cercana al inglés antiguo",
+   "spoken in the north of the Netherlands": "se habla en el norte de los Países Bajos",
+   "the language of extremely long, extremely sad novels": "la lengua de novelas larguísimas y tristísimas",
+   "the language that put the first satellite into orbit": "la lengua que puso el primer satélite en órbita",
+   "the language of Marie Curie's home country": "la lengua del país natal de Marie Curie",
+   "the language of Warsaw and Kraków": "la lengua de Varsovia y Cracovia",
+   "the language of Kyiv": "la lengua de Kiev",
+   "far more different from Russian than most people assume": "mucho más distinta del ruso de lo que la gente cree",
+   "the language of Franz Kafka": "la lengua de Franz Kafka",
+   "fancy a beer in Prague?": "¿se te antoja una cerveza en Praga?",
+   "one of the languages of the former Czechoslovakia": "una de las lenguas de la antigua Checoslovaquia",
+   "the language of Bratislava": "la lengua de Bratislava",
+   "the language of Minsk": "la lengua de Minsk",
+   "today spoken day-to-day by fewer people than Russian, even in its own country": "hoy la hablan a diario menos personas que el ruso, incluso en su propio país",
+   "the language that gave the world the necktie": "la lengua que le dio al mundo la corbata",
+   "the language of the Dalmatian coast": "la lengua de la costa dálmata",
+   "the language of Slovenia, between the Alps and the Adriatic": "la lengua de Eslovenia, entre los Alpes y el Adriático",
+   "one of the few languages with its very own grammar just for \"the two of us\"": "una de las pocas lenguas con una gramática propia solo para \"nosotros dos\"",
+   "the language of Belgrade": "la lengua de Belgrado",
+   "written in both Cyrillic and the Latin alphabet": "se escribe tanto en cirílico como en alfabeto latino",
+   "the language of Sarajevo": "la lengua de Sarajevo",
+   "practically identical to Serbian and Croatian in everyday life": "en el día a día es prácticamente idéntica a la serbia y la croata",
+   "a country where nodding your head can mean \"no\"": "un país donde asentir con la cabeza puede significar \"no\"",
+   "the country where yogurt as we know it was born": "el país donde nació el yogur tal como lo conocemos",
+   "the language of Skopje": "la lengua de Skopie",
+   "the southernmost of all Slavic languages": "la más meridional de todas las lenguas eslavas",
+   "the language of Riga, on the Baltic coast": "la lengua de Riga, en la costa del Báltico",
+   "one of the oldest living languages in the Indo-European family": "una de las lenguas vivas más antiguas de la familia indoeuropea",
+   "considered one of the closest living languages to ancient Sanskrit": "considerada una de las lenguas vivas más cercanas al sánscrito antiguo",
+   "the language of Vilnius": "la lengua de Vilna",
+   "the language the Odyssey was actually written in": "la lengua en que realmente se escribió la Odisea",
+   "gave us the word \"democracy\"": "nos dio la palabra \"democracia\"",
+   "the language of Albania and Kosovo": "la lengua de Albania y Kosovo",
+   "with no close relatives among Europe's other languages": "sin parientes cercanos entre las demás lenguas de Europa",
+   "the language of the country that invented the Rubik's Cube": "la lengua del país que inventó el cubo de Rubik",
+   "so different from its neighbors that nobody around understands a word": "tan distinta de sus vecinas que nadie alrededor entiende ni una palabra",
+   "the language of Nokia's home country": "la lengua del país de origen de Nokia",
+   "the language of Santa's homeland, according to legend": "la lengua de la tierra de Santa Claus, según la leyenda",
+   "the language of Tallinn": "la lengua de Tallin",
+   "closer to Finnish than to its Baltic neighbors": "más cercana al finés que a sus vecinas bálticas",
+   "the only Semitic language written in the Latin alphabet": "la única lengua semítica escrita con alfabeto latino",
+   "the language of an island right in the middle of the Mediterranean": "la lengua de una isla justo en medio del Mediterráneo",
+   "a language unrelated to any other on Earth": "una lengua sin parentesco con ninguna otra en la Tierra",
+   "spoken on both sides of the Spain-France border": "se habla a ambos lados de la frontera entre España y Francia",
+   "the language behind the word \"aloha\"": "la lengua detrás de la palabra \"aloha\"",
+   "the language of surfing and the ukulele": "la lengua del surf y del ukelele",
+   "the language of rugby's haka": "la lengua del haka del rugby",
+   "the indigenous language of New Zealand": "la lengua indígena de Nueva Zelanda",
+   "the language of the Samoan islands, in the South Pacific": "la lengua de las islas Samoa, en el Pacífico Sur",
+   "the language behind the siva tau, Samoa's own haka": "la lengua detrás del siva tau, el haka propio de Samoa",
+   "born out of the only slave revolt that founded a nation": "nació de la única revuelta de esclavos que fundó una nación",
+   "the language of Haiti, blending French with African languages": "la lengua de Haití, que mezcla el francés con lenguas africanas",
+   "invented in the 1880s to be everyone's second language": "inventada en la década de 1880 para ser la segunda lengua de todos",
+   "no country on Earth has this as its native language": "ningún país del mundo la tiene como lengua nativa",
+   "still the official language of the Vatican today": "sigue siendo la lengua oficial del Vaticano",
+   "the language of the Roman emperors": "la lengua de los emperadores romanos",
+   "the language behind a lot of the Gaelic in Outlander": "la lengua detrás de buena parte del gaélico de Outlander",
+   "the language of the Scottish Highlands": "la lengua de las Tierras Altas de Escocia"
+  };
+
+  // ---------- seleção e aplicação do idioma ----------
+  // prioridade: ?lang= na URL > escolha salva > idioma do navegador > inglês
+  const LANG_KEY = "lobsterIsLobster_lang";
+  const LANG_CODES = ["en", "pt"]; // "es" tem dados prontos, mas fica desligado até a revisão
+  const LANG_TITLES = { en: "English", pt: "Português", es: "Español" };
+  function detectLang() {
+    try {
+      if (typeof location !== "undefined" && location.search) {
+        const q = (new URLSearchParams(location.search).get("lang") || "").toLowerCase().slice(0, 2);
+        if (LANG_CODES.includes(q)) return q;
+      }
+    } catch (e) { /* segue pro próximo critério */ }
+    try {
+      const saved = localStorage.getItem(LANG_KEY);
+      if (saved && LANG_CODES.includes(saved)) return saved;
+    } catch (e) { /* localStorage bloqueado */ }
+    try {
+      const prefs = (typeof navigator !== "undefined" && (navigator.languages || [navigator.language])) || [];
+      for (const p of prefs) {
+        const code = String(p || "").toLowerCase().slice(0, 2);
+        if (LANG_CODES.includes(code)) return code;
+      }
+    } catch (e) { /* sem navigator */ }
+    return "en";
+  }
+  const LANG = detectLang();
+  const L = I18N[LANG];
+
+  // texto da interface na língua escolhida (cai pro inglês se faltar a chave)
+  function t(key, vars) {
+    let s = L.s[key];
+    if (s === undefined) s = I18N.en.s[key];
+    if (s === undefined) return key;
+    if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+    return s;
+  }
+  // nome do nível em minúsculas ("easy", "fácil", "fácil") — usado em frases
+  function levelName(level) {
+    return t("lvl." + level).toLowerCase();
+  }
+  // minúsculas e sem acento — pra comparar o que a pessoa digita com os
+  // nomes aceitos ("ingles" vale "inglês")
+  function foldText(s) {
+    return String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  }
+  // na versão PT/ES a língua de partida (portugues/espanhol) sai das
+  // respostas e o inglês entra no lugar dela
+  function swapSrc(list) {
+    return LANG === "en" ? list : list.map((n) => (n === L.src ? "English" : n));
+  }
+
+  function setLang(code) {
+    try { localStorage.setItem(LANG_KEY, code); } catch (e) { /* sem problema */ }
+    try {
+      const u = new URL(location.href);
+      u.searchParams.set("lang", code);
+      if (u.toString() === location.href) location.reload();
+      else location.href = u.toString();
+    } catch (e) { /* sem location (testes) */ }
+  }
+  function buildLangSwitch() {
+    const wrap = document.createElement("div");
+    wrap.className = "lang-switch";
+    LANG_CODES.forEach((code, i) => {
+      if (i > 0) {
+        const sep = document.createElement("span");
+        sep.className = "lang-sep";
+        sep.textContent = "·";
+        wrap.appendChild(sep);
+      }
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "lang-btn" + (code === LANG ? " active" : "");
+      b.textContent = code.toUpperCase();
+      b.title = LANG_TITLES[code];
+      b.setAttribute("aria-label", LANG_TITLES[code]);
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (code !== LANG) setLang(code);
+      });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  // aplica os textos da página estática (HTML) — roda uma vez, antes de tudo
+  function applyStaticI18n() {
+    try {
+      if (document.documentElement) document.documentElement.lang = L.htmlLang;
+      document.title = t("title");
+      if (typeof document.querySelector === "function") {
+        const md = document.querySelector('meta[name="description"]');
+        if (md) md.setAttribute("content", t("desc"));
+      }
+      document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+      document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+      document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.setAttribute("placeholder", t(el.dataset.i18nPh)); });
+      document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+      document.querySelectorAll(".level-mini-btn[data-level], .mobile-level-end-btn[data-level]").forEach((el) => {
+        el.textContent = t("lvl." + el.dataset.level);
+      });
+      document.querySelectorAll("#tickerGroup > [data-wagon]").forEach((el, i) => { el.innerHTML = t("tk.w" + (i + 1)); });
+      document.querySelectorAll(".about-share-icons .share-icon-btn").forEach((el) => {
+        const name = (el.getAttribute("aria-label") || "").replace(/^Share on /, "");
+        el.setAttribute("aria-label", t("share.aria", { name }));
+      });
+      const top = document.getElementById("topRightBlock");
+      if (top) top.appendChild(buildLangSwitch());
+      const menuPanel = document.querySelector && document.querySelector(".mobile-menu-panel");
+      const menuAbout = document.getElementById("mobileMenuAbout");
+      if (menuPanel && menuAbout) menuPanel.insertBefore(buildLangSwitch(), menuAbout);
+      const levelEnd = document.getElementById("mobileLevelEnd");
+      if (levelEnd) levelEnd.appendChild(buildLangSwitch());
+    } catch (e) {
+      /* a interface em inglês do HTML continua valendo */
+    }
+  }
+  applyStaticI18n();
+
   // ---------- dados ----------
+
 
   const LANG_META = [
     { name: "Mandarin Chinese", aliases: ["mandarin","chinese","mandarin chinese"] },
@@ -1211,7 +2266,7 @@
     { name: "Kazakh", aliases: ["kazakh","kazakhstan"] }
   ];
 
-  const TOP10_NAMES = ["Mandarin Chinese","Hindi","Spanish","French","Standard Arabic","Bengali","Portuguese","Russian","Urdu","Indonesian"];
+  const TOP10_NAMES = swapSrc(["Mandarin Chinese","Hindi","Spanish","French","Standard Arabic","Bengali","Portuguese","Russian","Urdu","Indonesian"]);
 
   // 50 línguas extras do nível insano
   const INSANE_META = [
@@ -1335,7 +2390,8 @@
   // o inglês não é uma língua-alvo (é a língua de partida do jogo — a
   // palavra aparece nela o tempo todo), mas quem joga entende a palavra
   // em inglês por definição, então entra na soma sempre, mesmo com 0 acertos
-  const ENGLISH_SPEAKERS_MILLIONS = 1500;
+  SPEAKERS_MILLIONS.English = 1500;
+  const ENGLISH_SPEAKERS_MILLIONS = { English: 1500, Portuguese: 260, Spanish: 560 }[L.src]; // falantes da língua de partida (dada de graça)
 
   // % (inteiro, entre 1 e 99 pra sempre parecer "quase todo mundo" ou "quase
   // ninguém" sem nunca virar 0% ou 100% — o texto ao redor já deixa claro que
@@ -1355,6 +2411,30 @@
   const ENGLISH_COLOR = "#171a21";
 
   // "lake" de línguas: pool maior de onde cada partida sorteia seu próprio conjunto
+  // ---- localização dos dados de idioma ----
+  // na versão PT/ES a língua de partida sai do pool de respostas e o inglês
+  // entra no lugar dela (mesma posição, pra manter a composição dos níveis)
+  const DISPLAY = {}; // nome interno (inglês) -> nome mostrado na língua da interface
+  if (LANG !== "en") {
+    WORD_LIST.forEach((w) => { WORDS[w].English = w; });
+    const srcIdx = LANG_META.findIndex((l) => l.name === L.src);
+    if (srcIdx >= 0) LANG_META[srcIdx] = { name: "English", aliases: ["english"] };
+  }
+  LANG_META.concat(INSANE_META).forEach((l) => {
+    const loc = L.langs && L.langs[l.name];
+    DISPLAY[l.name] = loc ? loc[0] : l.name;
+    const raw = loc ? [loc[0], ...loc[1], l.name, ...l.aliases] : l.aliases;
+    l.aliases = Array.from(new Set(raw.map(foldText)));
+  });
+  // a palavra mostrada de graça no topo da rodada: o inglês no EN, a palavra
+  // em português/espanhol nas outras versões
+  function baseOf(word) {
+    if (LANG === "en") return word;
+    return (WORDS[word] && WORDS[word][L.src]) || word;
+  }
+  function langLabel(l) {
+    return (DISPLAY[l.name] || l.name).toLowerCase();
+  }
   const ALL_META = LANG_META.concat(INSANE_META);
 
   // línguas do nível fácil: alfabeto latino E realmente reconhecíveis pela
@@ -1363,7 +2443,7 @@
   // Esloveno, Islandês etc.), então agora pool e "familiares" são a mesma lista
   const EASY_POOL_NAMES = [
     "Spanish","French","Portuguese","Italian","German","Dutch","Indonesian","Malay","Turkish","Vietnamese","Filipino","Polish","Romanian"
-  ];
+  ].map((n) => (LANG !== "en" && n === L.src ? "English" : n));
   const EASY_FAMILIAR_NAMES = EASY_POOL_NAMES;
 
   // total de rodadas (línguas + inglês) por nível — usado só pro placar mostrar o progresso
@@ -1375,7 +2455,7 @@
   // confiança — depois Mandarim, propositalmente difícil (escrita não-latina,
   // sem parentesco óbvio pra quem fala línguas europeias), pra mostrar na
   // prática que errar rende dica e que dá pra pular
-  const TUTORIAL_NAMES = ["Spanish", "Mandarin Chinese"];
+  const TUTORIAL_NAMES = L.tutorial || ["Spanish", "Mandarin Chinese"];
   // busca em ALL_META (LANG_META + INSANE_META) pra funcionar com qualquer
   // um dos dois conjuntos, mesmo que os dois nomes acima estejam em LANG_META
   const TUTORIAL_META = TUTORIAL_NAMES.map((name) => ALL_META.find((l) => l.name === name));
@@ -1442,6 +2522,7 @@
     try {
       window.posthog?.capture(event, {
         layout: IS_MOBILE ? "mobile" : "desktop",
+        language: LANG,
         ...analyticsRun?.properties,
         ...properties
       });
@@ -1490,7 +2571,7 @@
   // disponíveis normalmente pras outras palavras
   function isDuplicateOfWord(word, langName) {
     const translation = WORDS[word][langName];
-    return translation && translation.toLowerCase().trim() === word.toLowerCase().trim();
+    return translation && translation.toLowerCase().trim() === baseOf(word).toLowerCase().trim();
   }
 
   // "onramp": em quantas das primeiras perguntas o jogo prioriza uma língua
@@ -1575,7 +2656,7 @@
   }
 
   function normalize(s) {
-    return s.trim().toLowerCase();
+    return foldText(s);
   }
 
   // detecta se a palavra usa um script não-latino, pra dar um pouco mais
@@ -1613,14 +2694,14 @@
     const g = normalize(guess);
 
     // 1) correspondência exata
-    const exact = langs.find((l) => l.name.toLowerCase() === g || l.aliases.includes(g));
+    const exact = langs.find((l) => foldText(l.name) === g || l.aliases.includes(g));
     if (exact) return exact;
 
     // 2) correspondência com tolerância a erro de digitação
     let best = null;
     let bestDist = Infinity;
     langs.forEach((l) => {
-      const candidates = [l.name.toLowerCase(), ...l.aliases];
+      const candidates = [foldText(l.name), ...l.aliases];
       candidates.forEach((c) => {
         const d = levenshtein(g, c);
         const threshold = c.length <= 4 ? 1 : c.length <= 8 ? 2 : c.length <= 14 ? 3 : 4;
@@ -1794,7 +2875,7 @@
     if (IS_MOBILE) {
       const myToken = gameToken;
       document.getElementById("mobileGame").classList.add("active");
-      mobileShowAnnouncement("Lobster is lobster in english", 1800, () => {
+      mobileShowAnnouncement(capitalize(baseOf("lobster")) + t("firstTail", { base: baseOf("lobster") }), 1800, () => {
         if (myToken !== gameToken) return;
         nextChallenge();
       });
@@ -1810,8 +2891,8 @@
     typeSegments(
       intro,
       [
-        { text: "Lobster", className: "word", style: `color:${ENGLISH_COLOR}; font-weight:400` },
-        { text: " is lobster in english" }
+        { text: capitalize(baseOf("lobster")), className: "word", style: `color:${ENGLISH_COLOR}; font-weight:400` },
+        { text: t("firstTail", { base: baseOf("lobster") }) }
       ],
       () => {
         nextChallenge();
@@ -1879,7 +2960,7 @@
     if (resetFlow) flow.innerHTML = "";
     const intro = document.createElement("div");
     intro.className = "line";
-    const cap = word.charAt(0).toUpperCase() + word.slice(1);
+    const cap = capitalize(baseOf(word));
     flow.appendChild(intro);
     updateProgress();
     scrollToLine(intro);
@@ -1888,7 +2969,7 @@
       intro,
       [
         { text: cap, className: "word", style: `color:${ENGLISH_COLOR}; font-weight:400` },
-        { text: ` is ${word} in english` }
+        { text: t("firstTail", { base: baseOf(word) }) }
       ],
       () => {
         nextChallenge();
@@ -2042,7 +3123,7 @@
       line,
       [
         { text: promptLang.word, className: isNonLatin(promptLang.word) ? "word non-latin" : "word" },
-        { text: ` is ${currentWord} in ` }
+        { text: t("connector", { base: baseOf(currentWord) }) }
       ],
       () => {
         if (myToken !== gameToken) return; // um jogo novo já começou nesse meio-tempo
@@ -2061,7 +3142,7 @@
         if (gamePhase === "tutorial" && challengeIndex === 1) {
           const hook = document.createElement("div");
           hook.className = "tutorial-note";
-          hook.textContent = "guess the language each word gets translated into";
+          hook.textContent = t("tut.guess");
           getHintBlock(line).appendChild(hook);
         }
 
@@ -2071,14 +3152,16 @@
         if (gamePhase === "tutorial" && promptLang.name === TUTORIAL_HARD_NAME) {
           const note = document.createElement("div");
           note.className = "tutorial-note";
-          note.textContent = "get this one wrong, and you'll get a hint";
+          note.textContent = t("tut.hard");
           getHintBlock(line).appendChild(note);
         }
       }
     );
   }
 
-  const SKIP_WORDS = ["next", "jump", "skip"];
+  // palavras que pulam a rodada: as da língua da interface + as em inglês (sem acento)
+  const SKIP_SHOWN = LANG === "en" ? I18N.en.skip : L.skip.filter((w) => !I18N.en.skip.includes(w));
+  const SKIP_WORDS = Array.from(new Set([...L.skip, ...I18N.en.skip].map(foldText)));
   const IDLE_HINT_DELAY = 4375; // +75% — dá mais tempo pra pensar antes do "type next to move on"
   const IDLE_HINT_DELAY_FIRST = 2100; // idem, +75%, mas continua menor que o padrão pra ensinar o mecanismo cedo na primeiríssima vez
   let idleTimer = null;
@@ -2119,16 +3202,23 @@
   const GEO_HINT_BY_LANG = {};
   GEO_HINT_GROUPS.forEach((g) => g.langs.forEach((name) => (GEO_HINT_BY_LANG[name] = g.hint)));
   function getGeoHint(name) {
-    return GEO_HINT_BY_LANG[name] || null;
+    if (LANG !== "en" && L.geoExtra && L.geoExtra[name]) return L.geoExtra[name];
+    const h = GEO_HINT_BY_LANG[name];
+    if (!h) return null;
+    return (LANG !== "en" && L.geo && L.geo[h]) || h;
+  }
+  function getCulturalHints(name) {
+    if (LANG !== "en" && L.culturalExtra && L.culturalExtra[name]) return L.culturalExtra[name];
+    const list = CULTURAL_HINTS_BY_LANG[name] || [];
+    return LANG === "en" ? list : list.map((x) => (L.cultural && L.cultural[x]) || x);
   }
 
   // dica final, mais direta que as outras: a primeira letra do nome da
   // língua ("the answer starts with an R") — entra no MESMO sorteio que as
   // dicas de geografia e cultura, sem regra especial de ordem
   function getLetterHint(name) {
-    const letter = name.charAt(0).toUpperCase();
-    const article = "AEIOU".includes(letter) ? "an" : "a";
-    return `the answer starts with ${article} "${letter}"`;
+    const letter = (DISPLAY[name] || name).charAt(0).toUpperCase();
+    return t(LANG === "en" && "AEIOU".includes(letter) ? "hint.letterAn" : "hint.letter", { letter });
   }
 
   // pistas culturais (personalidades, música, cinema, comida, pontos
@@ -2246,7 +3336,7 @@
     const hints = [];
     const geo = getGeoHint(name);
     if (geo) hints.push(geo);
-    const cultural = CULTURAL_HINTS_BY_LANG[name] || [];
+    const cultural = getCulturalHints(name);
     hints.push(...cultural);
     hints.push(getLetterHint(name));
     // todas as dicas (geo, cultural, letra inicial) entram no mesmo sorteio,
@@ -2280,7 +3370,7 @@
       // logo acima do teclado, e texto acumulando ali acaba indo parar
       // atrás dele
       const el = document.getElementById("mobileGeoHint");
-      if (el) el.textContent = `hint ${hintsRevealedCount}: ${text}`;
+      if (el) el.textContent = t("hint", { n: hintsRevealedCount, text });
     } else if (currentLineEl) {
       // cada dica revelada vira uma linha nova, empilhada — a pessoa vê
       // todas as dicas já reveladas nessa rodada, não só a mais recente.
@@ -2289,7 +3379,7 @@
       const block = getHintBlock(currentLineEl);
       const hintLine = document.createElement("div");
       hintLine.className = "geo-hint";
-      hintLine.textContent = `hint ${hintsRevealedCount}: ${text}`;
+      hintLine.textContent = t("hint", { n: hintsRevealedCount, text });
       const skipEl = block.querySelector(".skip-hint");
       if (skipEl) {
         block.insertBefore(hintLine, skipEl);
@@ -2312,13 +3402,13 @@
   function showHintsExhausted() {
     if (IS_MOBILE) {
       const el = document.getElementById("mobileGeoHint");
-      if (el) el.textContent = "sorry, that's all the hints I have";
+      if (el) el.textContent = t("hint.exhausted");
     } else if (currentLineEl) {
       const block = getHintBlock(currentLineEl);
       if (block.querySelector(".hints-exhausted")) return;
       const msg = document.createElement("div");
       msg.className = "hints-exhausted";
-      msg.textContent = "sorry, that's all the hints I have";
+      msg.textContent = t("hint.exhausted");
       const skipEl = block.querySelector(".skip-hint");
       if (skipEl) {
         block.insertBefore(msg, skipEl);
@@ -2338,11 +3428,11 @@
 
   function showSkipHint(line) {
     if (line.querySelector(".skip-hint")) return;
-    const word = SKIP_WORDS[skipHintIndex % SKIP_WORDS.length];
+    const word = SKIP_SHOWN[skipHintIndex % SKIP_SHOWN.length];
     skipHintIndex++;
     const hint = document.createElement("div");
     hint.className = "skip-hint";
-    hint.textContent = `type "${word}" to move on`;
+    hint.textContent = t("hint.skip", { word });
     // entra como último filho do bloco — se mais dicas chegarem depois (via
     // resposta errada), revealNextHint() as insere ANTES dele, então o skip
     // continua sempre na última posição
@@ -2367,7 +3457,7 @@
         hasShownAnswerHint = true;
         const hint = document.createElement("div");
         hint.className = "skip-hint";
-        hint.textContent = "type your answer, press enter";
+        hint.textContent = t("hint.answer");
         getHintBlock(line).appendChild(hint);
         captureEvent("hint_shown", { hint_type: "answer_entry", round_number: challengeIndex });
       }, 800);
@@ -2470,6 +3560,15 @@
     document.addEventListener("touchend", focusActiveInputFromGesture);
   }
 
+  // idiomas aceitos que escrevem a palavra igual mas NÃO foram sorteados nesta
+  // partida: aparecem na tela junto com os outros, mas não entram na contagem
+  // (o total de rodadas é fixo), então o placar nunca passa de 100%
+  function undrawnSameWord(excludeName) {
+    return currentAcceptableGroup
+      .filter((l) => l.name !== excludeName && !currentGroup.some((g) => g.name === l.name))
+      .map((l) => ({ name: l.name, aliases: l.aliases, word: WORDS[currentWord][l.name], extra: true }));
+  }
+
   function resolveChallenge(primaryMatch, color, isForced, endReason) {
     isResolving = true;
     const myToken = gameToken;
@@ -2487,22 +3586,29 @@
     // além do pool sorteado (ex.: "13 línguas" numa partida de hard/12).
     // Em vez disso, mostramos um membro real do currentGroup como resposta;
     // o palpite da pessoa continua válido e correto, só não aparece na tela
+    // agora o palpite certo da pessoa é SEMPRE o que aparece primeiro (mesmo
+    // que não tenha sido sorteado); os demais idiomas com a mesma palavra
+    // vêm logo abaixo. Só os sorteados entram na contagem
     const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
-    const displayMatch = isPrimaryInGroup ? primaryMatch : currentGroup[0];
+    const displayMatch = isForced ? currentGroup[0] : primaryMatch;
+    const displayCounts = currentGroup.some((l) => l.name === displayMatch.name);
 
     const wordEl = currentLineEl.querySelector(".word");
     wordEl.style.color = color;
     wordEl.style.fontWeight = "400";
-    blankWrap.outerHTML = `<span class="lang-correct" style="color:${color}">${displayMatch.name.toLowerCase()}</span>`;
+    blankWrap.outerHTML = `<span class="lang-correct" style="color:${color}">${langLabel(displayMatch)}</span>`;
 
-    if (isForced) {
-      missedCount++;
-    } else {
-      correctCount++;
+    if (displayCounts) {
+      if (isForced) {
+        missedCount++;
+      } else {
+        correctCount++;
+      }
+      roundLog.push({ name: displayMatch.name, correct: !isForced });
     }
-    roundLog.push({ name: displayMatch.name, correct: !isForced });
 
-    const others = currentGroup.filter((l) => l.name !== displayMatch.name);
+    const others = currentGroup.filter((l) => l.name !== displayMatch.name)
+      .concat(isForced ? [] : undrawnSameWord(displayMatch.name));
     remaining = remaining.filter((l) => !currentGroup.includes(l));
     updateProgress();
 
@@ -2526,9 +3632,9 @@
         missedCount++;
       } else {
         c = pickColor();
-        correctCount++;
+        if (!other.extra) correctCount++;
       }
-      roundLog.push({ name: other.name, correct: !isForced });
+      if (!other.extra) roundLog.push({ name: other.name, correct: !isForced });
       updateProgress();
       const extraLine = document.createElement("div");
       extraLine.className = "line";
@@ -2538,8 +3644,8 @@
         extraLine,
         [
           { text: other.word, className: isNonLatin(other.word) ? "word non-latin" : "word", style: `color:${c}; font-weight:400` },
-          { text: ` is also ${currentWord} in ` },
-          { text: `${other.name.toLowerCase()}`, className: "lang-correct", style: `color:${c}` }
+          { text: t("connectorAlso", { base: baseOf(currentWord) }) },
+          { text: langLabel(other), className: "lang-correct", style: `color:${c}` }
         ],
         () => revealNextOther(i + 1)
       );
@@ -2562,7 +3668,7 @@
     hasShownAnswerHint = true;
 
     // skip vale nos outros níveis; no insane, tentar pular é desqualificação na hora
-    if (SKIP_WORDS.includes(guess.toLowerCase())) {
+    if (SKIP_WORDS.includes(foldText(guess))) {
       captureEvent("challenge_skipped", {
         round_number: challengeIndex,
         prompt_language: currentPromptLangName,
@@ -2651,19 +3757,19 @@
   // ---------- transição tutorial -> escolha de dificuldade ----------
 
   const LEVEL_INFO = {
-    easy: { title: "1 · Easy · 10 rounds", desc: "Roman alphabet only — languages that read like English. 3 minutes on the clock." },
-    medium: { title: "2 · Medium · 10 rounds", desc: "A mix of scripts — some familiar, some not. 3 minutes on the clock." },
-    hard: { title: "3 · Hard · 10 rounds", desc: "Full language pool — the rare ones show up too. 3 minutes on the clock." },
-    insane: { title: "4 · Insane · 96 rounds", desc: "Full pool, 3 tries per language. Miss all 3 or try to skip and you're out. Watch your correct count live — the time only shows at the end." }
+    easy: { title: t("lvlinfo.easy.t"), desc: t("lvlinfo.easy.d") },
+    medium: { title: t("lvlinfo.medium.t"), desc: t("lvlinfo.medium.d") },
+    hard: { title: t("lvlinfo.hard.t"), desc: t("lvlinfo.hard.d") },
+    insane: { title: t("lvlinfo.insane.t"), desc: t("lvlinfo.insane.d") }
   };
 
   // texto exato de cada linha do painel de baixo — um por nível, cada um
   // com sua própria estrutura (não é um template único preenchido por dados)
   const LEVEL_PANEL_TEXT = {
-    easy: "Easy · 10 rounds · common languages · roman alphabet only",
-    medium: "Medium · 10 rounds · common languages · mixed scripts",
-    hard: "Hard · 10 rounds · rare scripts included",
-    insane: "Insane · 96 rounds · 1 error you're out · no skip"
+    easy: t("panel.easy"),
+    medium: t("panel.medium"),
+    hard: t("panel.hard"),
+    insane: t("panel.insane")
   };
 
   function updateLevelPanel(level) {
@@ -2684,13 +3790,13 @@
     flow.appendChild(line1);
     scrollToLine(line1);
 
-    typeSegments(line1, [{ text: returning ? "welcome back." : "nice work — that was the tutorial. let's really play." }], () => {
+    typeSegments(line1, [{ text: returning ? t("intro.welcome") : t("intro.tutorialDone") }], () => {
       const line2 = document.createElement("div");
       line2.className = "line";
       flow.appendChild(line2);
       scrollToLine(line2);
 
-      typeSegments(line2, [{ text: "choose a level to start:" }], () => {
+      typeSegments(line2, [{ text: t("intro.choose") }], () => {
         const line3 = document.createElement("div");
         line3.className = "line";
         flow.appendChild(line3);
@@ -2699,13 +3805,13 @@
         typeSegments(
           line3,
           [
-            { text: "1 easy", className: "level-word", dataLevel: "easy" },
+            { text: t("lw.easy"), className: "level-word", dataLevel: "easy" },
             { text: ", " },
-            { text: "2 medium", className: "level-word", dataLevel: "medium" },
+            { text: t("lw.medium"), className: "level-word", dataLevel: "medium" },
             { text: ", " },
-            { text: "3 hard", className: "level-word", dataLevel: "hard" },
+            { text: t("lw.hard"), className: "level-word", dataLevel: "hard" },
             { text: ", " },
-            { text: "4 insane", className: "level-word", dataLevel: "insane" }
+            { text: t("lw.insane"), className: "level-word", dataLevel: "insane" }
           ],
           () => {
             attachLevelWordHandlers(line3);
@@ -2714,7 +3820,7 @@
             line4.className = "line";
             flow.appendChild(line4);
             scrollToLine(line4);
-            typeSegments(line4, [{ text: "click one, or type its number: " }], () => {
+            typeSegments(line4, [{ text: t("intro.click") }], () => {
               createLevelSelectInput(line4);
               scrollToLine(line4);
             });
@@ -2732,8 +3838,9 @@
     "3": "hard", "hard": "hard",
     "4": "insane", "insane": "insane"
   };
+  ["easy", "medium", "hard", "insane"].forEach((lv) => { LEVEL_CHOICE_MAP[foldText(t("lvl." + lv))] = lv; });
   function matchLevelChoice(raw) {
-    return LEVEL_CHOICE_MAP[raw.trim().toLowerCase()] || null;
+    return LEVEL_CHOICE_MAP[foldText(raw)] || null;
   }
 
   function selectLevel(level) {
@@ -2861,6 +3968,15 @@
     ]
   };
 
+  if (LANG !== "en") {
+    // sem palavras na língua de partida (seria "de graça") — entram as locais
+    Object.keys(RATING_WORDS).forEach((tier) => {
+      const color = RATING_WORDS[tier][0].color;
+      RATING_WORDS[tier] = RATING_WORDS[tier].filter((r) => r.lang !== L.src);
+      ((L.ratingExtra && L.ratingExtra[tier]) || []).forEach((r) => RATING_WORDS[tier].push({ ...r, color }));
+    });
+  }
+
   function pickTier(pct) {
     if (pct >= 90) return "excellent";
     if (pct >= 70) return "veryGood";
@@ -2869,12 +3985,9 @@
   }
 
   const REASON_SENTENCE = {
-    completed: (c, t, lvl, time) =>
-      `You named <b>${c}</b> of <b>${t}</b> languages on the <b>${lvl}</b> level, in <b>${time}</b>.`,
-    timeUp: (c, t, lvl) =>
-      `Time ran out — you named <b>${c}</b> of <b>${t}</b> languages on the <b>${lvl}</b> level.`,
-    mistake: (c, t, lvl, time) =>
-      `You named <b>${c}</b> of <b>${t}</b> languages on <b>${lvl}</b> before the run ended, in <b>${time}</b>.`
+    completed: (c, total, lvl, time) => t("reason.completed", { c, t: total, lvl: levelName(lvl), time }),
+    timeUp: (c, total, lvl) => t("reason.timeUp", { c, t: total, lvl: levelName(lvl) }),
+    mistake: (c, total, lvl, time) => t("reason.mistake", { c, t: total, lvl: levelName(lvl), time })
   };
 
   // ---------- card de compartilhamento (PNG via Canvas) ----------
@@ -2945,6 +4058,24 @@
     return y;
   }
 
+  // transforma "texto <b>negrito</b> texto" em palavras com flag de negrito
+  // (pontuação colada logo depois do negrito fica junto dele)
+  function richWordsFromHtml(html) {
+    const out = [];
+    html.split(/(<b>.*?<\/b>)/).forEach((part) => {
+      const bold = part.startsWith("<b>");
+      const text = bold ? part.slice(3, -4) : part;
+      if (!bold && out.length && out[out.length - 1].bold && text && !/^\s/.test(text)) {
+        const m = text.match(/^\S+/);
+        if (m) { out[out.length - 1].w += m[0]; }
+        text.slice(m ? m[0].length : 0).split(/\s+/).filter(Boolean).forEach((w) => out.push({ w, bold: false }));
+        return;
+      }
+      text.split(/\s+/).filter(Boolean).forEach((w) => out.push({ w, bold }));
+    });
+    return out;
+  }
+
   // desenha o card de compartilhamento: a frase de resultado do jogo (número/
   // nível/tempo em negrito), um anel de contorno preto cujo arco preenchido
   // varre os pastéis do jogo, com o percentual + "quanto da população do
@@ -2966,14 +4097,7 @@
     // frase do resultado, mais fina e maior (mesma voz da tela de resultado)
     const headerRegular = `300 ${28 * scale}px ${fontFamily}`;
     const headerBold = `700 ${28 * scale}px ${fontFamily}`;
-    const headerWords = [
-      { w: "You", bold: false }, { w: "named", bold: false },
-      { w: String(correctCount), bold: true }, { w: "of", bold: false },
-      { w: String(totalRounds), bold: true }, { w: "languages", bold: false },
-      { w: "on", bold: false }, { w: "the", bold: false },
-      { w: capitalize(level), bold: true }, { w: "level,", bold: false },
-      { w: "in", bold: false }, { w: `${elapsedStr}.`, bold: true }
-    ];
+    const headerWords = richWordsFromHtml(t("reason.completed", { c: correctCount, t: totalRounds, lvl: capitalize(t("lvl." + level)), time: elapsedStr }));
     const lines = layoutRichWords(ctx, headerWords, 330 * scale, headerRegular, headerBold);
     let y = drawRichLines(ctx, lines, W / 2, 64 * scale, 36 * scale, headerRegular, headerBold, ink);
 
@@ -3002,7 +4126,7 @@
     ctx.fillText(`${percent}%`, cx, cy - 2 * scale);
     ctx.font = `400 ${13 * scale}px ${fontFamily}`;
     let cyy = cy + 24 * scale;
-    wrapCanvasText(ctx, `of the people on the planet understand you in "${word}"`, 140 * scale).forEach((l) => {
+    wrapCanvasText(ctx, t("share.caption", { word: baseOf(word) }), 140 * scale).forEach((l) => {
       ctx.fillText(l, cx, cyy); cyy += 17 * scale;
     });
 
@@ -3097,23 +4221,23 @@
     actions.className = "results-actions reveal-item";
     actions.innerHTML = `
       <div class="results-actions-row">
-        <button class="btn-play-again" id="playAgainBtn">Play "${currentWord}" again</button>
-        <button class="btn-play-again" id="tryDifferentWordBtn">Try a different word</button>
-        <button class="btn-share-result" id="shareResultBtn">Share your result →</button>
+        <button class="btn-play-again" id="playAgainBtn">${t("playAgain", { base: baseOf(currentWord) })}</button>
+        <button class="btn-play-again" id="tryDifferentWordBtn">${t("tryDifferent")}</button>
+        <button class="btn-share-result" id="shareResultBtn">${t("share")}</button>
       </div>
       <div class="share-icon-row">
-        <button class="share-icon-btn" id="shareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
-        <button class="share-icon-btn" id="shareX" aria-label="Share on X">${SHARE_ICONS.x}</button>
-        <button class="share-icon-btn" id="shareBluesky" aria-label="Share on Bluesky">${SHARE_ICONS.bluesky}</button>
-        <button class="share-icon-btn" id="shareInstagram" aria-label="Share on Instagram">${SHARE_ICONS.instagram}</button>
-        <button class="share-icon-btn" id="shareTiktok" aria-label="Share on TikTok">${SHARE_ICONS.tiktok}</button>
+        <button class="share-icon-btn" id="shareWhatsapp" aria-label="${t('share.aria', { name: 'WhatsApp' })}">${SHARE_ICONS.whatsapp}</button>
+        <button class="share-icon-btn" id="shareX" aria-label="${t('share.aria', { name: 'X' })}">${SHARE_ICONS.x}</button>
+        <button class="share-icon-btn" id="shareBluesky" aria-label="${t('share.aria', { name: 'Bluesky' })}">${SHARE_ICONS.bluesky}</button>
+        <button class="share-icon-btn" id="shareInstagram" aria-label="${t('share.aria', { name: 'Instagram' })}">${SHARE_ICONS.instagram}</button>
+        <button class="share-icon-btn" id="shareTiktok" aria-label="${t('share.aria', { name: 'TikTok' })}">${SHARE_ICONS.tiktok}</button>
       </div>
       <div class="results-level-switch">
         <div class="level-mini-group" id="resultsLevelSwitchGroup">
-          <button class="level-mini-btn" data-level="easy">Easy</button>
-          <button class="level-mini-btn" data-level="medium">Medium</button>
-          <button class="level-mini-btn" data-level="hard">Hard</button>
-          <button class="level-mini-btn" data-level="insane">Insane</button>
+          <button class="level-mini-btn" data-level="easy">${t("lvl.easy")}</button>
+          <button class="level-mini-btn" data-level="medium">${t("lvl.medium")}</button>
+          <button class="level-mini-btn" data-level="hard">${t("lvl.hard")}</button>
+          <button class="level-mini-btn" data-level="insane">${t("lvl.insane")}</button>
         </div>
       </div>
     `;
@@ -3162,8 +4286,10 @@
     tiktok: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M14 3h3c.2 2 1.6 3.6 3.7 3.9v3c-1.4 0-2.7-.4-3.7-1.1v6.4c0 3.3-2.7 5.8-5.9 5.8S5.2 18.5 5.2 15.2c0-3.2 2.6-5.8 5.8-5.8.3 0 .6 0 .9.1v3.1a2.8 2.8 0 0 0-.9-.15 2.75 2.75 0 1 0 0 5.5c1.5 0 2.8-1.1 2.9-2.6V3z"/></svg>`
   };
 
+  const SHARE_URL = "https://lobsterislobster.online" + (LANG === "en" ? "" : "/?lang=" + LANG);
+
   function buildShareText() {
-    return `I named ${correctCount} of ${totalRounds} languages on ${currentLevel} in Lobster is Lobster — can you beat me?`;
+    return t("share.text", { c: correctCount, t: totalRounds, lvl: levelName(currentLevel) });
   }
 
   function openShareLink(channel, url) {
@@ -3174,7 +4300,7 @@
   }
 
   function wireShareIconButtons() {
-    const shareUrl = "https://lobsterislobster.online";
+    const shareUrl = SHARE_URL;
     const text = buildShareText();
 
     const waBtn = document.getElementById("shareWhatsapp");
@@ -3205,10 +4331,10 @@
   // então o texto é um convite genérico, não o placar de ninguém
   let aboutShareWired = false;
   function buildAboutShareText() {
-    return "Guess the language: a quick, addictive word game. Give it a try!";
+    return t("share.generic");
   }
   async function aboutShareGeneric(channel) {
-    const shareUrl = "https://lobsterislobster.online";
+    const shareUrl = SHARE_URL;
     const text = buildAboutShareText();
     captureEvent("game_share_requested", { channel, source: "about" });
     if (IS_MOBILE && navigator.share) {
@@ -3231,7 +4357,7 @@
   function wireAboutShareButtons() {
     if (aboutShareWired) return;
     aboutShareWired = true;
-    const shareUrl = "https://lobsterislobster.online";
+    const shareUrl = SHARE_URL;
     const text = buildAboutShareText();
 
     const waBtn = document.getElementById("aboutShareWhatsapp");
@@ -3307,7 +4433,7 @@
         if (hasShownAnswerHint) {
           const tapHint = document.getElementById("mobileTapHint");
           if (value.length > 0) {
-            tapHint.textContent = "⏎ press enter to submit";
+            tapHint.textContent = t("pressEnter");
             tapHint.classList.add("visible");
           } else {
             tapHint.classList.remove("visible");
@@ -3370,7 +4496,7 @@
     const promptEl = document.getElementById("mobileCardPrompt");
     promptEl.textContent = promptLang.word;
     promptEl.className = "mobile-card-prompt" + (isNonLatin(promptLang.word) ? " non-latin" : "");
-    document.getElementById("mobileCardConnector").textContent = ` is ${currentWord} in `;
+    document.getElementById("mobileCardConnector").textContent = t("connector", { base: baseOf(currentWord) });
     document.getElementById("mobileCardFeedback").textContent = "";
     // na primeira rodada do tutorial (Espanhol), mostra a frase de instrução
     // ali em cima do "tap anywhere..."/"press enter" — na rodada difícil de
@@ -3378,9 +4504,9 @@
     // somem assim que uma dica de verdade substituir esse texto (revealNextHint)
     document.getElementById("mobileGeoHint").textContent =
       gamePhase === "tutorial" && challengeIndex === 1
-        ? "guess the language each word gets translated into"
+        ? t("tut.guess")
         : gamePhase === "tutorial" && promptLang.name === TUTORIAL_HARD_NAME
-        ? "get this one wrong, and you'll get a hint"
+        ? t("tut.hard")
         : "";
     mobileRenderBlank("");
     document.getElementById("mobileCounter").textContent = `${challengeIndex}/${totalRounds}`;
@@ -3388,7 +4514,7 @@
     // antes do primeiríssimo toque, o teclado não abre sozinho (celular só
     // abre teclado com toque direto) — essa dica avisa que precisa tocar
     document.getElementById("mobileTapHint").classList.toggle("visible", !hasShownAnswerHint);
-    document.getElementById("mobileTapHint").textContent = "tap anywhere to type your answer →";
+    document.getElementById("mobileTapHint").textContent = t("tapHint");
 
     // no mobile o botão de skip já é sempre visível, então não existe
     // equivalente ao "type next" por inatividade — e agora nenhuma dica de
@@ -3439,24 +4565,28 @@
     // currentGroup, e NUNCA deve ser exibida/logada como resposta (inflava
     // o total de línguas mostradas além do pool sorteado). Mostra sempre
     // um membro real do currentGroup.
-    const isPrimaryInGroup = currentGroup.some((l) => l.name === primaryMatch.name);
-    const displayMatch = isPrimaryInGroup ? primaryMatch : currentGroup[0];
+    const displayMatch = isForced ? currentGroup[0] : primaryMatch;
+    const displayCounts = currentGroup.some((l) => l.name === displayMatch.name);
+    const others = currentGroup.filter((l) => l.name !== displayMatch.name);
+    const sameWordNames = [displayMatch, ...others, ...(isForced ? [] : undrawnSameWord(displayMatch.name))].map(langLabel);
 
     blank.innerHTML = "";
-    blank.textContent = displayMatch.name.toLowerCase();
+    blank.textContent = sameWordNames.length > 1
+      ? sameWordNames.slice(0, -1).join(", ") + t("and") + sameWordNames[sameWordNames.length - 1]
+      : sameWordNames[0];
     blank.className = "mobile-card-blank " + (isForced ? "lang-wrong" : "lang-correct");
     blank.style.color = isForced ? "" : color;
 
     feedback.textContent = isForced ? "✗" : "✓";
     feedback.style.color = isForced ? "#c7cbd1" : "#3f8a68";
 
-    const others = currentGroup.filter((l) => l.name !== displayMatch.name);
+    const countedNow = (displayCounts ? 1 : 0) + others.length;
     if (isForced) {
-      missedCount += 1 + others.length;
+      missedCount += countedNow;
     } else {
-      correctCount += 1 + others.length;
+      correctCount += countedNow;
     }
-    roundLog.push({ name: displayMatch.name, correct: !isForced });
+    if (displayCounts) roundLog.push({ name: displayMatch.name, correct: !isForced });
     others.forEach((o) => roundLog.push({ name: o.name, correct: !isForced }));
 
     remaining = remaining.filter((l) => !currentGroup.includes(l));
@@ -3471,15 +4601,15 @@
       } else {
         nextChallenge();
       }
-    }, isForced ? 900 : 700);
+    }, isForced ? 900 : sameWordNames.length > 1 ? 1300 : 700);
   }
 
   function mobileShowLevelEnd(returning) {
     document.getElementById("mobileGame").classList.remove("active");
     const el = document.getElementById("mobileLevelEnd");
     document.getElementById("mobileLevelEndText").textContent = returning
-      ? "Welcome back. Pick a level to start playing:"
-      : "Nice work — that was the tutorial. Let's really play. Pick a level:";
+      ? t("end.welcome")
+      : t("end.tutorialDone");
     el.classList.add("active");
     // solta o foco do campo de digitação — sem isso, o teclado continuava
     // aberto nessa tela mesmo sem ter mais nada pra digitar
@@ -3509,29 +4639,31 @@
       </div>
       <div class="mobile-results-sentence">${data.sentenceHTML}</div>
       <div class="mobile-results-actions">
-        <button class="mobile-results-btn-primary" id="mobileShareBtn">Share your result →</button>
-        <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">Play "${currentWord}" again</button>
-        <button class="mobile-results-btn-secondary" id="mobileResultsNewWord">Try a different word</button>
+        <button class="mobile-results-btn-primary" id="mobileShareBtn">${t("share")}</button>
+        <button class="mobile-results-btn-secondary" id="mobilePlayAgainBtn">${t("playAgain", { base: baseOf(currentWord) })}</button>
+        <button class="mobile-results-btn-secondary" id="mobileResultsNewWord">${t("tryDifferent")}</button>
         <div class="share-icon-row" style="justify-content:center; margin-top:4px;">
-          <button class="share-icon-btn" id="mobileShareWhatsapp" aria-label="Share on WhatsApp">${SHARE_ICONS.whatsapp}</button>
-          <button class="share-icon-btn" id="mobileShareX" aria-label="Share on X">${SHARE_ICONS.x}</button>
-          <button class="share-icon-btn" id="mobileShareBluesky" aria-label="Share on Bluesky">${SHARE_ICONS.bluesky}</button>
-          <button class="share-icon-btn" id="mobileShareInstagram" aria-label="Share on Instagram">${SHARE_ICONS.instagram}</button>
-          <button class="share-icon-btn" id="mobileShareTiktok" aria-label="Share on TikTok">${SHARE_ICONS.tiktok}</button>
+          <button class="share-icon-btn" id="mobileShareWhatsapp" aria-label="${t('share.aria', { name: 'WhatsApp' })}">${SHARE_ICONS.whatsapp}</button>
+          <button class="share-icon-btn" id="mobileShareX" aria-label="${t('share.aria', { name: 'X' })}">${SHARE_ICONS.x}</button>
+          <button class="share-icon-btn" id="mobileShareBluesky" aria-label="${t('share.aria', { name: 'Bluesky' })}">${SHARE_ICONS.bluesky}</button>
+          <button class="share-icon-btn" id="mobileShareInstagram" aria-label="${t('share.aria', { name: 'Instagram' })}">${SHARE_ICONS.instagram}</button>
+          <button class="share-icon-btn" id="mobileShareTiktok" aria-label="${t('share.aria', { name: 'TikTok' })}">${SHARE_ICONS.tiktok}</button>
         </div>
         <div class="mobile-results-level-switch">
           <div class="mobile-results-level-switch-label" id="mobileResultsLevelLabel"></div>
           <div class="level-mini-group" id="mobileResultsLevelGroup">
-            <button class="level-mini-btn" data-level="easy">Easy</button>
-            <button class="level-mini-btn" data-level="medium">Medium</button>
-            <button class="level-mini-btn" data-level="hard">Hard</button>
-            <button class="level-mini-btn" data-level="insane">Insane</button>
+            <button class="level-mini-btn" data-level="easy">${t("lvl.easy")}</button>
+            <button class="level-mini-btn" data-level="medium">${t("lvl.medium")}</button>
+            <button class="level-mini-btn" data-level="hard">${t("lvl.hard")}</button>
+            <button class="level-mini-btn" data-level="insane">${t("lvl.insane")}</button>
           </div>
         </div>
-        <a href="#" class="mobile-results-about-link" id="mobileResultsAbout">About</a>
+        <a href="#" class="mobile-results-about-link" id="mobileResultsAbout">${t("about")}</a>
+        <div class="mobile-results-lang" id="mobileResultsLang"></div>
       </div>
     `;
     el.classList.add("active");
+    try { document.getElementById("mobileResultsLang").appendChild(buildLangSwitch()); } catch (e) { /* sem seletor */ }
     document.getElementById("mobileShareBtn").addEventListener("click", () => shareResultCard());
     document.getElementById("mobilePlayAgainBtn").addEventListener("click", () => {
       el.classList.remove("active");
@@ -3555,7 +4687,7 @@
       showAboutPage();
     });
 
-    const shareUrl = "https://lobsterislobster.online";
+    const shareUrl = SHARE_URL;
     const text = buildShareText();
     document.getElementById("mobileShareWhatsapp").addEventListener("click", () => {
       openShareLink("whatsapp", `https://wa.me/?text=${encodeURIComponent(text + " " + shareUrl)}`);
@@ -3781,7 +4913,7 @@
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       captureEvent("newsletter_validation_failed", { reason: "invalid_email" });
       input.value = "";
-      input.placeholder = "that doesn't look like an email";
+      input.placeholder = t("news.invalid");
       return;
     }
 
@@ -3801,14 +4933,14 @@
       if (res.ok) {
         captureEvent("newsletter_subscription_succeeded", properties);
         input.value = "";
-        input.placeholder = "thanks! check your inbox to confirm";
+        input.placeholder = t("news.ok");
       } else {
         captureEvent("newsletter_subscription_failed", { ...properties, reason: "http_error", status_code: res.status });
-        input.placeholder = "something went wrong — try again";
+        input.placeholder = t("news.err");
       }
     } catch (e) {
       captureEvent("newsletter_subscription_failed", { ...properties, reason: "network_error" });
-      input.placeholder = "something went wrong — try again";
+      input.placeholder = t("news.err");
     } finally {
       input.disabled = false;
       btn.disabled = false;
